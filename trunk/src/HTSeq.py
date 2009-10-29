@@ -268,6 +268,24 @@ class FastaReader( FileOrSequence ):
          s = Sequence( seq, name )
          s.descr = descr
          yield s
+         
+   def get_sequence_lengths( self ):   
+      seqname = None
+      seqlengths = {}
+      for line in FileOrSequence.__iter__( self ):
+         if line.startswith( ">" ):
+            if seqname is not None:
+               seqlengths[ seqname ] = length
+               print seqname, length
+            mo = _re_fasta_header_line.match( line )
+            seqname = mo.group(1)
+            length = 0
+         else: 
+            assert seqname is not None, "FASTA file does not start with '>'."
+            length += len( line.rstrip() )
+      if seqname is not None:
+         seqlengths[ seqname ] = length
+      return seqlengths
             
 class FastqReader( FileOrSequence ):
    """A Fastq object is associated with a FASTQ self.file. When an iterator
