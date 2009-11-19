@@ -100,10 +100,14 @@ class GenomicFeature( object ):
          self.iv.chrom, self.iv.start_d, self.iv.end_d, self.iv.strand )
          
    def __eq__( self, other ):
+      if not isinstance( other, GenomicFeature ):
+         return False
       return self.name == other.name and self.type == other.type and \
          self.iv == other.iv
          
    def __neq__( self, other ):
+      if not isinstance( other, GenomicFeature ):
+         return True
       return not self.__eq__( other )
    
    def get_gff_line( self, with_equal_sign=False ):
@@ -177,6 +181,8 @@ class GFF_Reader( FileOrSequence ):
    
    def __iter__( self ):
       for line in FileOrSequence.__iter__( self ):
+         if line.startswith( '#' ):
+            continue
          ( seqname, source, feature, start, end, score, 
             strand, frame, attributeStr ) = line.split( "\t", 8 )   
          ( attr, name ) = parse_GFF_attribute_string( attributeStr, True )
