@@ -77,6 +77,14 @@ cdef class Strand:
                return self != Strand( str( other ) )
             except TypeError:
                return True
+      elif op == 0:
+         return self.se < (<Strand> other).se
+      elif op == 1:
+         return self.se <= (<Strand> other).se
+      elif op == 4:
+         return self.se > (<Strand> other).se
+      elif op == 5:
+         return self.se >= (<Strand> other).se
       else:
          raise NotImplementedError
       
@@ -584,9 +592,9 @@ cdef class SequenceWithQualities( Sequence ):
    quality scores of the  base calls.
    """
 
-   cdef readonly str qualstr
-   cdef readonly str qualscale
-   cdef readonly object qualarr
+   cdef readonly str _qualstr
+   cdef readonly str _qualscale
+   cdef readonly object _qualarr
 
    def __init__( self, str seq, str name, str qualstr, str qualscale="phred" ):
       """ Construct a SequenceWithQuality object.
@@ -598,26 +606,26 @@ cdef class SequenceWithQualities( Sequence ):
                       "phred", "solexa-old", "solexa-1.3" )
       """
       Sequence.__init__( self, seq, name )
-      self.qualstr = qualstr
-      self.qualscale = qualscale
-      self.qualarr = None
+      self._qualstr = qualstr
+      self._qualscale = qualscale
+      self._qualarr = None
       
    @property
    def qual( self ):
-      if self.qualarr is not None:
-         return self.qualarr
+      if self._qualarr is not None:
+         return self._qualarr
       else:
-         assert len( self.seq ) == len( self.qualstr )
-         if self.qualscale == "phred":
-            self.qualarr = numpy.array( [ ord( c ) - 33 for c in self.qualstr ] )
+         assert len( self.seq ) == len( self._qualstr )
+         if self._qualscale == "phred":
+            self._qualarr = numpy.array( [ ord( c ) - 33 for c in self._qualstr ] )
          else:
-            self.qualarr = numpy.array( [ ord( c ) - 64 for c in self.qualstr ], 'd' )
-            if self.qualscale == "solexa-old":
-               self.qualarr = 10 * numpy.log10(1 + 10 ** ( self.quastrl / 10.0 ) )
+            self._qualarr = numpy.array( [ ord( c ) - 64 for c in self._qualstr ], 'd' )
+            if self._qualscale == "solexa-old":
+               self._qualarr = 10 * numpy.log10(1 + 10 ** ( self._quastrl / 10.0 ) )
             else:
-               if self.qualscale != "solexa-1.3":
-                  raise ValueError, "Illegal quality scale '%s'." % self.qualscale
-         return self.qualarr
+               if self._qualscale != "solexa-1.3":
+                  raise ValueError, "Illegal quality scale '%s'." % self._qualscale
+         return self._qualarr
               
    def __repr__( self ):
       return "<%s object '%s'>" % ( self.__class__.__name__, self.name )
@@ -654,9 +662,10 @@ cdef class SequenceWithQualities( Sequence ):
       res = SequenceWithQualities(
          reverse_complement( self.seq ),
          "revcomp_of_" + self.name,
-         self.qualstr[::-1] )
-      if self.qualarr is not None:
-         res.qualarr = self.qualarr[::-1]
+         self._qualstr[::-1],
+         self._qualscale )
+      if self._qualarr is not None:
+         res._qualarr = self._qualarr[::-1]
       return res
 
 base_to_row = { 'A': 0, 'C': 1, 'G': 2, 'T': 3, 'N': 4 }
@@ -767,16 +776,20 @@ cdef class AlignmentWithSequenceReversal( Alignment ):
       self._read_as_sequenced = None
       self.iv = iv
       
-   @property
-   def read( self ):
-      if self._read_as_sequenced is None:
-         if self.iv.strand != "-":
-            self._read_as_sequenced = self.read_as_aligned
-         else:
-            self._read_as_sequenced = self.read_as_aligned.get_reverse_complement()
-            self._read_as_sequenced = self.read_as_aligned
-      return self._read_as_sequenced      
-
+   property read:
+      def __get__( self ):
+         if self._read_as_sequenced is None:
+            if self.iv.strand != "-":
+               self._read_as_sequenced = self.read_as_aligned
+            else:
+               self._read_as_sequenced = self.read_as_aligned.get_reverse_complement()
+               self._read_as_sequenced.name = self.read_as_aligned.name
+         return self._read_as_sequenced      
+      #def __set__( self, read ):
+      #   self.read_as_aligned = read
+      #   self._read_as_sequenced = None
+         
+         
 cdef class BowtieAlignment( AlignmentWithSequenceReversal ):
 
    """When reading in a Bowtie file, objects of the class BowtieAlignment
