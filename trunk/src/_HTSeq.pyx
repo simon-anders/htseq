@@ -583,8 +583,10 @@ cdef class Sequence( object ):
          fasta_file.write( ">%s %s\n" % ( self.name, self.descr ) )
       else:
          fasta_file.write( ">%s\n" % self.name )
-      for i in xrange( ( len( self.seq ) + 1 ) // 70 + 1 ):
+      i = 0
+      while i*70 < len(self.seq):
          fasta_file.write( self.seq[ i*70 : (i+1)*70 ] + "\n" )
+         i += 1
 
 cdef class SequenceWithQualities( Sequence ):
    """A Sequence with base-call quality scores.
