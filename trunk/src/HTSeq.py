@@ -465,5 +465,9 @@ class SAM_Reader( FileOrSequence ):
 
    def __iter__( self ):
       for line in FileOrSequence.__iter__( self ):
-         algnt = SAM_Alignment( line )
-         yield algnt
+         if line.startswith( "@" ):
+	    # do something with the header line
+	    pass
+	 else:
+            algnt = SAM_Alignment( line )
+            yield algnt
