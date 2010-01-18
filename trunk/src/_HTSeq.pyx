@@ -517,6 +517,7 @@ def _GenomicArray_unpickle( stranded, typecode, step_vectors ):
    return ga
    
    
+   
 ###########################
 ##   Sequences
 ###########################
@@ -747,8 +748,8 @@ cdef class Alignment( object ):
 
    An alignment object can be defined in different ways but will always
    provide these attributes:
-     read: a SequenceWithQualities object with the aligned read
-     iv:   a GenomicInterval object with the alignment position
+     read:      a SequenceWithQualities object with the aligned read
+     iv:        a GenomicInterval object with the alignment position 
    """
    
    def __init__( self ):
@@ -757,6 +758,12 @@ cdef class Alignment( object ):
    def __repr__( self ):
       return "<%s object: Read '%s' aligned to %s>" % (
          self.__class__.__name__, self.read.name, str(self.iv) )
+         
+   def aligned( self ):
+      """Returns True unless self.iv is None. The latter indicates that
+      this record decribes a read for which no alignment was found.
+      """
+      return self.iv is not None
 
 cdef class AlignmentWithSequenceReversal( Alignment ):
 
@@ -918,16 +925,20 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       if flagint & 0x0001:
          raise ValueError, "Paired-end data encountered; not yet supported."    
         
-      posint = int( pos ) - 1   # SAM if one-based, but HTSeq is zero-based!
-      flagint = int( flag )
-      if flagint & 0x0010:
-         strand = "-"
+      if rname == "*":
+         iv = None
+         self.cigar = None
       else:
-         strand = "+"
-      self.cigar = parse_cigar( cigar, posint, rname, strand )
-    
+         posint = int( pos ) - 1   # SAM if one-based, but HTSeq is zero-based!
+         flagint = int( flag )
+         if flagint & 0x0010:
+            strand = "-"
+         else:
+            strand = "+"
+         iv = GenomicInterval( rname, posint, self.cigar[-1].ref_iv.end, strand )   
+         self.cigar = parse_cigar( cigar, posint, rname, strand )
+            
       AlignmentWithSequenceReversal.__init__( self,
-         SequenceWithQualities( seq.upper(), qname, qual ),
-         GenomicInterval( rname, posint, self.cigar[-1].ref_iv.end, strand ) )
+         SequenceWithQualities( seq.upper(), qname, qual ), iv )
       
          

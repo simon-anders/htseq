@@ -368,7 +368,7 @@ def bundle_multiple_alignments( sequence_of_alignments ):
    yield ma   
    
   
-class SolexaExportRecord( Alignment ):
+class SolexaExportAlignment( Alignment ):
    """Iterating over SolexaExportReader objects will yield SoelxaExportRecord
    objects. These have four fields:
       read          - a SequenceWithQualities object 
@@ -423,7 +423,7 @@ class SolexaExportReader( FileOrSequence ):
 
    def __iter__( self ):   
       for line in FileOrSequence.__iter__( self ):
-         record = SolexaExportRecord()
+         record = SolexaExportAlignment()
          fields = SolexaExportReader.parse_line_bare( line )
          assert fields['index_string'] == "0", "Indexing not yet implemented"
          assert fields['read_nbr'] == "1", "Paired-read data not yet supported"
@@ -439,11 +439,9 @@ class SolexaExportReader( FileOrSequence ):
          else:
             raise ValueError, "Illegal 'passed filter' value in Solexa export data: '%s'." % fields['passed_filtering']
          if fields['pos'] == '':
-            record.aligned = False
             record.iv = None
             record.nomatch_code = fields['chrom']
          else:
-            record.aligned = True
             if fields['strand'] == 'F':
                strand = '+'
             elif fields['strand'] == 'R':
@@ -469,5 +467,33 @@ class SAM_Reader( FileOrSequence ):
 	    # do something with the header line
 	    pass
 	 else:
-            algnt = SAM_Alignment( line )
-            yield algnt
+       algnt = SAM_Alignment( line )
+       yield algnt
+       
+
+
+def class GenomicArrayOfSets( GenomicArray ):
+
+   """A GenomicArrayOfSets is a specialization of GenomicArray that allows to store
+   sets of objects. On construction, the step vectors are initialized with empty sets.
+   By using the 'add_value' method, objects can be added to intervals. If an object
+   is already present in the set(s) at this interval, an the new object is added to
+   the present set, and the set is split if necessary.
+   """
+
+   def __init__( self, dict chrom_lengths, bool stranded=True ):
+      GenomicArray.__init__( self, chrom_lengths, stranded, 'O' )
+      for chrom in self.step_vectors:
+         if self.stranded:
+            self.step_vectors[ chrom ][ strand ][ 0 : self.chrom_lengths[chrom] ] = set()
+         else:
+            self.step_vectors[ chrom ][ 0 : self.chrom_lengths[chrom] ] = set()
+      
+   def add_value( self, value, iv ):
+      def _f( oldset ):
+         newset = set.copy()
+         newset.add( value )
+         return newset 
+      self.apply( _f, iv )
+      
+       
