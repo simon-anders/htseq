@@ -1,0 +1,7 @@
+setup.py
+HTSeq/StepVector.py
+HTSeq/_HTSeq_internal.py
+HTSeq/__init__.py
+src/StepVector_wrap.cxx
+src/_HTSeq.c
+src/step_vector.h
