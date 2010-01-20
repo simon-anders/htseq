@@ -4,8 +4,7 @@ SWIG=swig
 all: StepVector_wrap.cxx ../HTSeq/StepVector.py _HTSeq.c
 
 clean:
-	rm -f _HTSeq.so _HTSeq.c *.pyc *.gch *_wrap.cxx StepVector.py _*.so \
-	   *.pyc *.pyo
+	rm -f StepVector_wrap.cxx ../HTSeq/StepVector.py _HTSeq.c
    
 _HTSeq.c: _HTSeq.pyx _HTSeq.pxd
 	$(CYTHON) _HTSeq.pyx
