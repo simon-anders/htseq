@@ -465,14 +465,13 @@ class SAM_Reader( FileOrSequence ):
       for line in FileOrSequence.__iter__( self ):
          if line.startswith( "@" ):
 	    # do something with the header line
-	    pass
-	 else:
-       algnt = SAM_Alignment( line )
-       yield algnt
+	    continue
+         algnt = SAM_Alignment( line )
+         yield algnt
        
 
 
-def class GenomicArrayOfSets( GenomicArray ):
+class GenomicArrayOfSets( GenomicArray ):
 
    """A GenomicArrayOfSets is a specialization of GenomicArray that allows to store
    sets of objects. On construction, the step vectors are initialized with empty sets.
@@ -481,17 +480,17 @@ def class GenomicArrayOfSets( GenomicArray ):
    the present set, and the set is split if necessary.
    """
 
-   def __init__( self, dict chrom_lengths, bool stranded=True ):
+   def __init__( self, chrom_lengths, stranded=True ):
       GenomicArray.__init__( self, chrom_lengths, stranded, 'O' )
       for chrom in self.step_vectors:
          if self.stranded:
-            self.step_vectors[ chrom ][ strand ][ 0 : self.chrom_lengths[chrom] ] = set()
+            self.step_vectors[ chrom ][ strand ][ 0 : chrom_lengths[chrom] ] = set()
          else:
-            self.step_vectors[ chrom ][ 0 : self.chrom_lengths[chrom] ] = set()
+            self.step_vectors[ chrom ][ 0 : chrom_lengths[chrom] ] = set()
       
    def add_value( self, value, iv ):
       def _f( oldset ):
-         newset = set.copy()
+         newset = oldset.copy()
          newset.add( value )
          return newset 
       self.apply( _f, iv )

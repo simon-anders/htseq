@@ -935,8 +935,8 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
             strand = "-"
          else:
             strand = "+"
-         iv = GenomicInterval( rname, posint, self.cigar[-1].ref_iv.end, strand )   
          self.cigar = parse_cigar( cigar, posint, rname, strand )
+         iv = GenomicInterval( rname, posint, self.cigar[-1].ref_iv.end, strand )   
             
       AlignmentWithSequenceReversal.__init__( self,
          SequenceWithQualities( seq.upper(), qname, qual ), iv )
