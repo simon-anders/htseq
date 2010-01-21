@@ -297,12 +297,14 @@ class FastqReader( FileOrSequence ):
    """A Fastq object is associated with a FASTQ self.file. When an iterator
    is requested from the object, the FASTQ file is read.
    
-   qual_scale is one of "phred", "solexa-old", "solexa-1.3".
+   qual_scale is one of "phred", "solexa", "solexa-old".
    """
 
    def __init__( self, file_, qual_scale = "phred" ):
       FileOrSequence.__init__( self, file_ )
       self.qual_scale = qual_scale
+      if qual_scale not in ( "phred", "solexa", "solexa-old" ):
+         raise ValueError, "Illegal quality scale."
       
    def __iter__( self ):
       fin = FileOrSequence.__iter__( self )
