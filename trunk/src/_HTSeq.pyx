@@ -606,7 +606,7 @@ cdef class SequenceWithQualities( Sequence ):
         name      - The sequence name or ID
         qualstr   - The quality string. Must have the same length as seq
         qualscale - The encoding scale of the quality string. Must be one of
-                      "phred", "solexa-old", "solexa-1.3" )
+                      "phred", "solexa", "solexa-old" )
       """
       Sequence.__init__( self, seq, name )
       self._qualstr = qualstr
@@ -626,7 +626,7 @@ cdef class SequenceWithQualities( Sequence ):
             if self._qualscale == "solexa-old":
                self._qualarr = 10 * numpy.log10(1 + 10 ** ( self._quastrl / 10.0 ) )
             else:
-               if self._qualscale != "solexa-1.3":
+               if self._qualscale != "solexa":
                   raise ValueError, "Illegal quality scale '%s'." % self._qualscale
          return self._qualarr
               
