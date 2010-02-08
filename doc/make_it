@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cat tutorial.rst | sed -e s/#doctest.*$// | rst2html >tutorial.html
