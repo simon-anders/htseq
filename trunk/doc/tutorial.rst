@@ -242,8 +242,10 @@ value 100 to the positions 10 to 20, the steps get split accordingly::
    
 If you iterate over a ``StepVector``, it behaves like a list::
 
-   >>> list( sv )
-   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 120.0, 120.0, 120.0, 220.0, 220.0, 220.0, 220.0, 220.0, 100.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+   >>> list( sv )   #doctest:+NORMALIZE_WHITESPACE
+   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 120.0, 120.0, 120.0, 220.0, 220.0, 220.0, 
+   220.0, 220.0, 100.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+   0.0, 0.0, 0.0, 0.0, 0.0]
    
 You can also take parts of a ``StepVector``, which produces a new, shorter, ``StepVector``::
 
@@ -442,8 +444,11 @@ These file are in the `GTF format`, a tightening of the `GFF format`. `HTSeq` of
 The ``feature`` variable is filled with objects of class ``GenomicFeature``. As with all Python
 objects, the ``dir`` function shows us its slots and functions::
 
-   >>> dir( feature )   
-   ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__getattribute__', '__hash__', '__init__', '__module__', '__neq__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__str__', '__weakref__', 'attr', 'frame', 'get_gff_line', 'iv', 'name', 'score', 'source', 'type']
+   >>> dir( feature )   #doctest:+NORMALIZE_WHITESPACE
+   ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__getattribute__', 
+   '__hash__', '__init__', '__module__', '__neq__', '__new__', '__reduce__', 
+   '__reduce_ex__', '__repr__', '__setattr__', '__str__', '__weakref__', 'attr', 
+   'frame', 'get_gff_line', 'iv', 'name', 'score', 'source', 'type']
 
 Ignoring the attributes starting with an underscore, we can see now how to access 
 the information stored in the GFF file. The information from the columns of the GFF
@@ -460,8 +465,9 @@ table is accessable as follows::
 
 The last column (the attributes) is parsed and presented as a `dict`::
 
-   >>> feature.attr
-   {'exon_number': '1', 'gene_id': 'R0030W', 'transcript_name': 'RAF1', 'transcript_id': 'R0030W', 'protein_id': 'R0030W', 'gene_name': 'RAF1'}
+   >>> feature.attr    #doctest:+NORMALIZE_WHITESPACE
+   {'exon_number': '1', 'gene_id': 'R0030W', 'transcript_name': 'RAF1', 
+   'transcript_id': 'R0030W', 'protein_id': 'R0030W', 'gene_name': 'RAF1'}
    
 The very first attribute in this column is usually some kind of ID, hence it is
 stored in the slot `name`:
