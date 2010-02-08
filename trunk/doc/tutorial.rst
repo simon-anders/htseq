@@ -97,7 +97,6 @@ reads::
    >>> import itertools
    >>> for read in itertools.islice( fastq_file, 10 ):
    ...    print read
-
    CTTACGTTTTCTGTATCAATACTCGATTTATCATCT
    AATTGGTTTCCCCGCCGAGACCGTACACTACCAGCC
    TTTGGACTTGATTGTTGACGCTATCAAGGCTGCTGG
@@ -122,7 +121,6 @@ a ``SequenceWithQualities``, and it also has a slot ``qual``::
    'HWI-EAS225:1:10:1284:142#0/1'
    >>> read.seq
    'ACTTTTAAAGATTGGCCAAGAATTGGGGATTGAAGA'
-   >>> read.qual
    >>> read.qual
    array([ 33.,  33.,  33.,  33.,  33.,  33.,  29.,  27.,  29.,  32.,  29.,
            30.,  30.,  21.,  22.,  25.,  25.,  25.,  23.,  28.,  24.,  24.,
@@ -153,22 +151,22 @@ counting the reads::
 The average qualities are hence::
 
    >>> qualsum / float(nreads)
-   array([ 31.56970279,  30.08384335,  29.43881755,  29.00560022,
-           28.55406216,  28.26937077,  28.46781871,  27.59194368,
-           27.34221369,  27.57438298,  27.11888476,  27.19552782,
-           26.84143366,  26.76363055,  26.450098  ,  26.7925917 ,
-           26.43025721,  26.49973999,  26.13728549,  25.95939838,
-           25.55042202,  26.20548822,  25.42457698,  25.72422897,
-           25.04280171,  24.7525101 ,  24.48661946,  24.27181087,
-           24.10840434,  23.68142726,  23.52150086,  23.49549982,
-           23.11188448,  22.55858234,  22.43665747,  22.62470499])
+   array([ 31.56838274,  30.08288332,  29.4375375 ,  29.00432017,
+           28.55290212,  28.26825073,  28.46681867,  27.59082363,
+           27.34097364,  27.57330293,  27.11784471,  27.19432777,
+           26.84023361,  26.76267051,  26.44885795,  26.79135165,
+           26.42901716,  26.49849994,  26.13604544,  25.95823833,
+           25.54922197,  26.20460818,  25.42333693,  25.72298892,
+           25.04164167,  24.75151006,  24.48561942,  24.27061082,
+           24.10720429,  23.68026721,  23.52034081,  23.49437978,
+           23.11076443,  22.5576223 ,  22.43549742,  22.62354494])
 
 If you have ``matplotlib`` installed, you can plot this::
 
-   >>> from matplotlib import pyplot
-   >>> pyplot.plot( qualsum / nreads )
-   [<matplotlib.lines.Line2D object at 0x2ea8450>]
-   >>> pyplot.show()
+   >>> from matplotlib import pyplot      
+   >>> pyplot.plot( qualsum / nreads )    #doctest:+ELLIPSIS
+   [<matplotlib.lines.Line2D object at 0x...>]
+   >>> pyplot.show()                      #doctest:+SKIP 
 
 .. image:: qualplot.png
 
@@ -179,12 +177,19 @@ quality-control techniques, see [to be filled in].
 What if you did not get the ``_sequence.txt`` file from your core facility but 
 instead the ``export.txt`` file? While the former contains only the reads and
 their quality, the latter also contains the alignment of the reads to a reference
-as found by Eland. If we are only interested in the quality values, we simply
-rewrite the commands as follows
+as found by Eland. To read it, simply use::
 
-   >>> solexa_export_file = HTSeq.SolexaExportReader( "yeast_RNASeq_excerpt_export.txt" )
+   >>> alignment_file = HTSeq.SolexaExportReader( "yeast_RNASeq_excerpt_export.txt" )  #doctest:+SKIP
+   
+`HTSeq` can also use other alignment formats, e.g., SAM:   
+   
+   >>> alignment_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
+   
+If we are only interested in the qualities, we can rewrite the commands from above
+to use the `alignment_file`.
+   
    >>> nreads = 0
-   >>> for aln in solexa_export_file:
+   >>> for aln in alignment_file:
    ...    qualsum += aln.read.qual
    ...    nreads += 1
 
@@ -238,15 +243,14 @@ value 100 to the positions 10 to 20, the steps get split accordingly::
 If you iterate over a ``StepVector``, it behaves like a list::
 
    >>> list( sv )
-   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 120.0, 120.0, 120.0, 220.0, 220.0, 220.0, 220.0, 220.0, 100.0, 100.0, 
-   100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 120.0, 120.0, 120.0, 220.0, 220.0, 220.0, 220.0, 220.0, 100.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
    
 You can also take parts of a ``StepVector``, which produces a new, shorter, ``StepVector``::
 
    >>> sv[6:12]
    <StepVector object, type 'd', index range 6:12, 3 step(s)>
-   >>> sv[6:12].get_steps()
-   <generator object at 0x2ba95a8>
+   >>> sv[6:12].get_steps()        #doctest:+ELLIPSIS
+   <generator object at 0x...>
    >>> list( sv[6:12].get_steps() )
    [(6, 7, 0.0), (7, 10, 120.0), (10, 12, 220.0)]
    >>> list( sv[6:12] )
@@ -379,20 +383,17 @@ With these tools, we can now calculate the coverage vector very easily. We just 
 through all the reads and add the value 1 at the interval to which each read was aligned
 to::
 
-   >>> sam_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
+   >>> alignment_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
    >>> cvg = HTSeq.GenomicArray( yeast_chrom_lengths, stranded=True, typecode='i' )
-   >>> for alngt in sam_file:
-   ...    if alngt.aligned():
+   >>> for alngt in alignment_file:
+   ...    if alngt.aligned:
    ...       cvg.add_value( 1, alngt.iv )
 
 We can plot an excerpt of this with::
 
-   >>> pyplot.plot( list( cvg[ HTSeq.GenomicInterval( "III", 200000, 500000, "+" ) ] ) )
+   >>> pyplot.plot( list( cvg[ HTSeq.GenomicInterval( "III", 200000, 500000, "+" ) ] ) )     #doctest:+ELLIPSIS
+   [<matplotlib.lines.Line2D object at 0x...>]
    
-BUG! This does not work. Only this works::
-
-   >>> pyplot.plot( list( cvg[ "III" ][ HTSeq.Strand("+") ][ 200000:500000 ] ) )
-
 However, a proper genome browser gives a better impression of the data. The following commands
 write two BedGraph (Wiggle) files, one for the plus and one for the minus strands::
 
@@ -400,7 +401,7 @@ write two BedGraph (Wiggle) files, one for the plus and one for the minus strand
    >>> cvg.write_bedgraph_file( "minus.wig", "-" )
    
 These two files can then be viewed in a genome browser (e.g. IGB_), alongside the 
-annotation from a GFF file.
+annotation from a GFF file (see below).
 
 .. _IGB: http://igb.bioviz.org/  
  
@@ -408,4 +409,186 @@ annotation from a GFF file.
 Counting reads by genes
 =======================
 
+As the example data is from an RNA-Seq experiment, we want to know how many reads fall into
+the exonic regions of each gene. For this purpose we first need to read in information about the
+positions of the exons. A convenient source of such information are the GTF files from 
+Ensembl_ (to be found here_).
 
+.. _Ensembl: http://www.ensembl.org/index.html
+.. _here: ftp://ftp.ensembl.org/pub/current_gtf/
+
+These file are in the `GTF format`, a tightening of the `GFF format`. `HTSeq` offers the
+`GFF_Reader` class to read in a GFF file:
+
+.. _`GTF format`: http://mblab.wustl.edu/GTF22.html
+.. _`GFF format`: http://www.sanger.ac.uk/resources/software/gff/spec.html
+
+::
+   >>> gtf_file = HTSeq.GFF_Reader( "Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz" )
+   >>> for feature in itertools.islice( gtf_file, 10 ):
+   ...    print feature
+   ... 
+   <GenomicFeature: exon 'R0010W' at 2-micron: 251 -> 1523 (strand '+')>
+   <GenomicFeature: CDS 'R0010W' at 2-micron: 251 -> 1520 (strand '+')>
+   <GenomicFeature: start_codon 'R0010W' at 2-micron: 251 -> 254 (strand '+')>
+   <GenomicFeature: stop_codon 'R0010W' at 2-micron: 1520 -> 1523 (strand '+')>
+   <GenomicFeature: exon 'R0020C' at 2-micron: 3007 -> 1887 (strand '-')>
+   <GenomicFeature: CDS 'R0020C' at 2-micron: 3007 -> 1890 (strand '-')>
+   <GenomicFeature: start_codon 'R0020C' at 2-micron: 3007 -> 3006 (strand '-')>
+   <GenomicFeature: stop_codon 'R0020C' at 2-micron: 1888 -> 1887 (strand '-')>
+   <GenomicFeature: exon 'R0030W' at 2-micron: 3270 -> 3816 (strand '+')>
+   <GenomicFeature: CDS 'R0030W' at 2-micron: 3270 -> 3813 (strand '+')>
+
+The ``feature`` variable is filled with objects of class ``GenomicFeature``. As with all Python
+objects, the ``dir`` function shows us its slots and functions::
+
+   >>> dir( feature )   
+   ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__getattribute__', '__hash__', '__init__', '__module__', '__neq__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__str__', '__weakref__', 'attr', 'frame', 'get_gff_line', 'iv', 'name', 'score', 'source', 'type']
+
+Ignoring the attributes starting with an underscore, we can see now how to access 
+the information stored in the GFF file. The information from the columns of the GFF
+table is accessable as follows::
+
+   >>> feature.iv
+   <GenomicInterval object '2-micron', [3270,3813), strand '+'>
+   >>> feature.source
+   'protein_coding'
+   >>> feature.type
+   'CDS'
+   >>> feature.score
+   '.'
+
+The last column (the attributes) is parsed and presented as a `dict`::
+
+   >>> feature.attr
+   {'exon_number': '1', 'gene_id': 'R0030W', 'transcript_name': 'RAF1', 'transcript_id': 'R0030W', 'protein_id': 'R0030W', 'gene_name': 'RAF1'}
+   
+The very first attribute in this column is usually some kind of ID, hence it is
+stored in the slot `name`:
+
+   >>> feature.name
+   'R0030W'
+
+To deal with this data, we will use a ``GenomicArray``. A ``GenomicArray`` can store 
+not only numerical data but also arbitrary Python objects (with `typecode` `'O'`).
+Hence, we can assign those features that correspond to exons, to steps in the ``GenomicArray``::
+
+   >>> exons = HTSeq.GenomicArray( yeast_chrom_lengths, stranded=False, typecode='O' )
+   >>> for feature in gtf_file:
+   ...    if feature.type == "exon":
+   ...       exons[ feature.iv ] = feature
+
+Now, we can ask what exons occur in a certain interval::
+
+   >>> iv = HTSeq.GenomicInterval( "II", 120000, 125000, "." )
+   >>> pprint.pprint( list( exons.get_steps( iv ) ) )
+   [(<GenomicInterval object 'II', [120000,121877), strand '.'>,
+     <GenomicFeature: exon 'YBL052C' at II: 121876 -> 119382 (strand '-')>),
+    (<GenomicInterval object 'II', [121877,122755), strand '.'>, None),
+    (<GenomicInterval object 'II', [122755,124762), strand '.'>,
+     <GenomicFeature: exon 'YBL051C' at II: 124761 -> 122756 (strand '-')>),
+    (<GenomicInterval object 'II', [124762,125000), strand '.'>, None)]
+
+However, our RNA-Seq experiment was not strand-specific, i.e., we do not know whether
+the reads came from the plus or the minus strand. This is why we defined the ``GenomicArray``
+as non-stranded (``stranded=False`` in the instantiation of ``exons`` above), intructing
+it to ignore all strand information. An issue with this is that we now have many overlapping
+genes and the simple assignment ``exons[ feature.iv ] = feature`` is overwriting, so that
+it is not clear which feature we set.
+
+The proper solution is to store not just single features at an interval but sets of all
+features which are present there. A specialization of ``GenomicArray``, ``GenomicArrayOfSets``
+is offered to simplify this::
+
+   >>> exons = HTSeq.GenomicArrayOfSets( yeast_chrom_lengths, stranded=False )
+
+We populate the array again with the feature data. This time, we use the ``add_value``
+method, which adds an object without overwriting what might already be there. Instead,
+it uses sets to deal with overlaps. (Also, we only store the gene name this time, as this
+will be more convenient later).
+ 
+   >>> for feature in gtf_file:
+   ...    if feature.type == "exon":
+   ...       exons.add_value( feature.name, feature.iv )
+
+Assume we have a read covering this interval::
+
+   >>> iv = HTSeq.GenomicInterval( "III", 23850, 23950, "." )
+
+Its left half covers two genes (YCL058C, YCL058W-A), but its right half only
+YCL058C because YCL058W-A end in the middle of the read::
+
+   >>> pprint.pprint( list( exons.get_steps( iv ) ) )
+   [(<GenomicInterval object 'III', [23850,23925), strand '.'>,
+     set(['YCL058C', 'YCL058W-A'])),
+    (<GenomicInterval object 'III', [23925,23950), strand '.'>, set(['YCL058C']))]
+
+Assuming the transcription boundaries in our GTF file to be correct, we may conclude
+that this read is from the gene that appears in both steps and not from the one that
+appears in only one of the steps. More generally, whenever a read overlaps multiple 
+steps (a new step starts wherever a feature starts or ends), we get a set of feature
+names for each step, and we have to find the intersection of all these. This can be
+coded as follows::
+
+   >>> intersection_set = None
+   >>> for step_set in exons.get_steps( iv, values_only=True ):
+   ...    if intersection_set is None:
+   ...       intersection_set = step_set
+   ...    else:
+   ...       intersection_set.intersection_update( step_set )
+   ... 
+   >>> print intersection_set
+   set(['YCL058C'])
+
+Here, we have used the ``values_only`` option of ``get_steps``, as we are not
+interested in the intervals, only in the sets. We also used the ``intersection_update`` 
+method Python's standard ``set`` class, which performs a set intersection in 
+place. Afterwards, we have a set with precisely one element. Getting this one 
+element is a tiny bit cumbersome; to access it, one needs to write::
+
+   >>> list(intersection_set)[0]
+   'YCL058C'
+
+In this way, we can go through all our aligned reads, calculate the intersection
+set, and, if it contains a single gene name, add a count for this gene. For the
+counters, we use a dict, which we initialize with a zero for each gene name::
+
+   >>> counts = {}
+   >>> for feature in gtf_file:
+   ...    if feature.type == "exon":
+   ...       counts[ feature.name ] = 0
+
+Now, we can finally count::
+
+   >>> sam_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
+   >>> for alnmt in sam_file:
+   ...    if alnmt.aligned:
+   ...       intersection_set = None
+   ...       for step_set in exons.get_steps( alnmt.iv, values_only=True ):
+   ...           if intersection_set is None:
+   ...              intersection_set = step_set
+   ...           else:
+   ...              intersection_set.intersection_update( step_set )
+   ...    if len( intersection_set ) == 1:
+   ...       counts[ list(intersection_set)[0] ] += 1
+
+We can now conveniently print the result with::
+
+   >>> for name in sorted( counts.keys() ):  
+   ...    print name, counts[name]   #doctest:+ELLIPSIS
+   15S_rRNA 0
+   21S_rRNA 0
+   HRA1 0
+   ...
+   YPR048W 2
+   YPR049C 3
+   YPR050C 0
+   YPR051W 1
+   YPR052C 1
+   YPR053C 11
+   YPR054W 0
+   ...
+   tY(GUA)M2 0
+   tY(GUA)O 0
+   tY(GUA)Q 0
+      

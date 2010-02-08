@@ -418,12 +418,10 @@ cdef class GenomicArray( object ):
             else:
                return self.step_vectors[ index.chrom ][ index.pos ]
          else:
-            res = GenomicArray( {}, self.stranded, self.typecode )
             if self.stranded:
-               res.step_vectors[index.chrom ] = self.step_vectors[ index.chrom ][ index.strand ][ index.start : index.end ]
+               return self.step_vectors[ index.chrom ][ index.strand ][ index.start : index.end ]
             else:
-               res.step_vectors[index.chrom ] = self.step_vectors[ index.chrom ][ index.start : index.end ]
-            return res
+               return self.step_vectors[ index.chrom ][ index.start : index.end ]
       else:
          return self.step_vectors[ index ]
 
