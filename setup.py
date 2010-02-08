@@ -13,7 +13,7 @@ numpy_include_dir = os.path.join( os.path.dirname( numpy.__file__ ), 'core', 'in
  
 
 setup( name = 'HTSeq',
-       version = '0.3',
+       version = '0.3.2',
        description = 'Processing high-throughput sequencing data',
        author = 'Simon Anders',
        author_email = 'sanders@fs.tum.de',

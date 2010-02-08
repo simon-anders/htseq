@@ -377,12 +377,35 @@ To see the effect, let's make the interval slightly longer and then look at the 
 
 With these tools, we can now calculate the coverage vector very easily. We just iterate
 through all the reads and add the value 1 at the interval to which each read was aligned
-to:
+to::
 
    >>> sam_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
    >>> cvg = HTSeq.GenomicArray( yeast_chrom_lengths, stranded=True, typecode='i' )
    >>> for alngt in sam_file:
    ...    if alngt.aligned():
    ...       cvg.add_value( 1, alngt.iv )
+
+We can plot an excerpt of this with::
+
+   >>> pyplot.plot( list( cvg[ HTSeq.GenomicInterval( "III", 200000, 500000, "+" ) ] ) )
+   
+BUG! This does not work. Only this works::
+
+   >>> pyplot.plot( list( cvg[ "III" ][ HTSeq.Strand("+") ][ 200000:500000 ] ) )
+
+However, a proper genome browser gives a better impression of the data. The following commands
+write two BedGraph (Wiggle) files, one for the plus and one for the minus strands::
+
+   >>> cvg.write_bedgraph_file( "plus.wig", "+" )
+   >>> cvg.write_bedgraph_file( "minus.wig", "-" )
+   
+These two files can then be viewed in a genome browser (e.g. IGB_), alongside the 
+annotation from a GFF file.
+
+.. _IGB: http://igb.bioviz.org/  
+ 
+ 
+Counting reads by genes
+=======================
 
 
