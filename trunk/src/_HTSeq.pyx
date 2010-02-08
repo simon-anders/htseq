@@ -548,10 +548,6 @@ cdef class Sequence( object ):
    """A Sequence, typically of DNA, with a name.
    """
    
-   cdef public str seq
-   cdef public str name
-   cdef public str descr
-   
    def __init__( self, str seq, str name="unnamed" ):
       self.seq = seq
       self.name = name
@@ -594,10 +590,6 @@ cdef class SequenceWithQualities( Sequence ):
    It now has property  'qual', an integer NumPy array of Sanger/Phred 
    quality scores of the  base calls.
    """
-
-   cdef readonly str _qualstr
-   cdef readonly str _qualscale
-   cdef readonly object _qualarr
 
    def __init__( self, str seq, str name, str qualstr, str qualscale="phred" ):
       """ Construct a SequenceWithQuality object.
@@ -748,7 +740,8 @@ cdef class Alignment( object ):
 
    An alignment object can be defined in different ways but will always
    provide these attributes:
-     read:      a SequenceWithQualities object with the aligned read
+     read:      a SequenceWithQualities object with the read
+     aligned:   whether the read is aligned
      iv:        a GenomicInterval object with the alignment position 
    """
    
@@ -756,9 +749,14 @@ cdef class Alignment( object ):
       raise NotImplemented, "Alignment is an abstract base class"
    
    def __repr__( self ):
-      return "<%s object: Read '%s' aligned to %s>" % (
-         self.__class__.__name__, self.read.name, str(self.iv) )
+      if self.aligned:
+         return "<%s object: Read '%s' aligned to %s>" % (
+            self.__class__.__name__, self.read.name, str(self.iv) )
+      else:
+         return "<%s object: Read '%s', not aligned>" % (
+            self.__class__.__name__, self.read.name )
          
+   @property
    def aligned( self ):
       """Returns True unless self.iv is None. The latter indicates that
       this record decribes a read for which no alignment was found.
@@ -776,10 +774,6 @@ cdef class AlignmentWithSequenceReversal( Alignment ):
    attribute is sequenced.
    """
 
-   cdef public SequenceWithQualities read_as_aligned
-   cdef public SequenceWithQualities _read_as_sequenced
-   cdef public GenomicInterval iv
-
    def __init__( self, SequenceWithQualities read_as_aligned, GenomicInterval iv ):
       self.read_as_aligned = read_as_aligned      
       self._read_as_sequenced = None
@@ -788,7 +782,7 @@ cdef class AlignmentWithSequenceReversal( Alignment ):
    property read:
       def __get__( self ):
          if self._read_as_sequenced is None:
-            if self.iv.strand != "-":
+            if (not self.aligned) or self.iv.strand != "-":
                self._read_as_sequenced = self.read_as_aligned
             else:
                self._read_as_sequenced = self.read_as_aligned.get_reverse_complement()
@@ -902,13 +896,13 @@ cpdef list parse_cigar( str cigar_string, int ref_left = 0, str chrom = "", str 
 cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
 
    """When reading in a SAM file, objects of the class SAM_Alignment
-   are returned. In addition to the 'read' and 'iv' fields (see Alignment
-   class), the fields [...] are provided. These 
-   contain the content of the respective columns of the SAM file.
+   are returned. In addition to the 'read', 'iv' and 'aligned' fields (see 
+   Alignment class), the following fields are provided:
+    - aQual: the alignment quality score
+    - cigar: a list of CigarOperatio objects, describing the alignment
+    - tags: the extra information tags [not yet implemented]
    """
-   
-   cdef public list cigar
-   
+     
    def __init__( self, line ):
       cdef str qname, flag, rname, pos, mapq, cigar, 
       cdef str mrnm, mpos, isize, seq, qual, tags
@@ -940,5 +934,8 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
             
       AlignmentWithSequenceReversal.__init__( self,
          SequenceWithQualities( seq.upper(), qname, qual ), iv )
+         
+      self._tags = tags
+      self.aQual = int( mapq )
       
          
