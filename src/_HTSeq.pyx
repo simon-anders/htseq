@@ -16,85 +16,9 @@ import _HTSeq_internal
 ##   GenomicInterval 
 ###########################
 
-cdef class Strand:
-
-   """The class Strand is an encapsulation of an enumeration of three possible
-   values, namely the plus strand ("+"), the minus strand ("-") and no strand
-   ("."). These values should be used when specifying a genomic interval or
-   position. Use "." when specifying a strand is inappropriate.
-   """
-
-   def __init__( Strand self, strand ):
-      """To instatiate a Strand object, pass one of the strings '+', '-', or '.'
-      to the constructor.
-      """
-      cdef char * strand_cstr
-      if isinstance( strand, Strand ):
-         self.se = (<Strand> strand).se
-      else:
-         if len( strand ) != 1:
-            raise TypeError, "Invalid strand specification"   
-         strand_cstr = <char*?> strand
-         if strand_cstr[0] == ".":
-            self.se = strand_nostrand
-         elif strand_cstr[0] == "+":
-            self.se = strand_plus
-         elif strand_cstr[0] == "-":
-            self.se = strand_minus
-         else:
-            raise TypeError, "Invalid strand specification"   
-   
-   def __str__( Strand self ):
-      if self.se == strand_nostrand:
-         return '.'
-      elif self.se == strand_plus:
-         return '+'
-      elif self.se == strand_minus:
-         return '-'
-      
-   def __repr__( Strand self ):
-      return "<%s '%s'>" % (self.__class__.__name__, str(self) )
-      
-   def __hash__( Strand self ):
-      return hash( self.se )                        
-            
-   def __richcmp__( Strand self, other, int op ):
-      """Strands can be compared with the operators "==" and "!=".
-      """
-      if op == 2:
-         if isinstance( other, Strand ):
-            return self.se == (<Strand> other).se
-         else:
-            try:
-               return self == Strand( str( other ) )
-            except TypeError:
-               return False
-      elif op == 3:
-         if isinstance( other, Strand ):
-            return self.se != (<Strand> other).se
-         else:
-            try:
-               return self != Strand( str( other ) )
-            except TypeError:
-               return True
-      elif op == 0:
-         return self.se < (<Strand> other).se
-      elif op == 1:
-         return self.se <= (<Strand> other).se
-      elif op == 4:
-         return self.se > (<Strand> other).se
-      elif op == 5:
-         return self.se >= (<Strand> other).se
-      else:
-         raise NotImplementedError
-      
-   def __reduce__( Strand self ):
-      return( Strand, ( str( self ), ) )
-
-   def __copy__( self ):
-      constr, args = self.__reduce__()
-      return constr( *args )         
-   
+cdef str strand_plus = intern( "+" )
+cdef str strand_minus = intern( "-" )
+cdef str strand_nostrand = intern( "." )
 
 cdef class GenomicInterval:
 
@@ -125,7 +49,7 @@ cdef class GenomicInterval:
    """
    
    def __init__( GenomicInterval self, str chrom, long start, long end, 
-         object strand, object genome=None ):
+         str strand, object genome=None ):
       """See the class docstring for the meaning of the slots. Note that 
       there is also a factory function, 'from_directional', to be used if
       you wish to specify start_d and length.
@@ -133,14 +57,21 @@ cdef class GenomicInterval:
       self.chrom = intern( chrom )
       self.start = start
       self.end = end
-      if isinstance( strand, Strand ):
-         self.strand = <Strand> strand
-      else:
-         self.strand = Strand( strand )
+      self.strand = strand
       self.genome = genome
       if self.start > self.end:
          raise ValueError, "start is larger than end"
             
+   property strand:
+      def __set__( self, strand ):
+         strand = intern( strand )
+         if not( intern(strand) is strand_plus or intern(strand) is strand_minus or 
+               intern(strand) is strand_nostrand ):
+            raise ValueError, "Strand must be'+', '-', or '.'."
+         self._strand = strand
+      def __get__( self ):
+         return self._strand
+
    def __reduce__( GenomicInterval self ):
       return GenomicInterval, ( self.chrom, self.start, self.end, 
          self.strand, self.genome )
@@ -161,14 +92,6 @@ cdef class GenomicInterval:
          return "%s:[%d,%d)/%s" % \
             ( self.chrom, self.start, self.end, self.strand )
 
-   property strand:
-   
-      def __get__( GenomicInterval self ):
-         return self._strand
-         
-      def __set__( GenomicInterval self, object newStrand ):
-         self._strand = Strand( newStrand )
-         
    property length:
 
       """The length is calculated as end - start. If you set the length, 
@@ -179,7 +102,7 @@ cdef class GenomicInterval:
          return self.end - self.start
 
       def __set__( GenomicInterval self, long newLength ):
-         if self._strand.se != strand_minus:
+         if self._strand is not strand_minus:
             self.end = self.start + newLength
          else:
             self.start = self.end - newLength
@@ -191,13 +114,13 @@ cdef class GenomicInterval:
       length stays unchanged."""
 
       def __get__( GenomicInterval self ):
-         if self._strand.se != strand_minus:
+         if self._strand is not strand_minus:
             return self.start
          else:
             return self.end - 1
 
       def __set__( GenomicInterval self, long newStartd ):
-         if self._strand.se != strand_minus:
+         if self._strand is not strand_minus:
             self.end = newStartd + self.length
             self.start = newStartd
          else:
@@ -207,7 +130,7 @@ cdef class GenomicInterval:
    property end_d:
    
       def __get__( GenomicInterval self ):
-         if self._strand.se != strand_minus:
+         if self._strand is not strand_minus:
             return self.end
          else:
             return self.start + 1
@@ -219,7 +142,7 @@ cdef class GenomicInterval:
          if self.genome != None and other.genome != None \
                and self.genome != other.genome:
             return False
-         return self.strand == other._get_strand() and \
+         return self._strand is other._strand and \
             self.start == other.start and self.end == other.end
       elif op == 3:  # !=
          return not ( self == other )
@@ -229,9 +152,6 @@ cdef class GenomicInterval:
    def __hash__( GenomicInterval self ):
       return hash( ( self.genome, self.chrom, self.start, self.end ) )
            
-   cdef Strand _get_strand( GenomicInterval self ):
-      return self._strand
-
    cpdef is_contained_in( GenomicInterval self, GenomicInterval iv ):
       """Returns a boolean value indicating whether the 'self' interval 
       is fully within the 'iv' interval.
@@ -251,8 +171,8 @@ cdef class GenomicInterval:
          return False 
       if self.chrom != iv.chrom:
          return False
-      if self._strand.se != strand_nostrand and iv._strand.se != strand_nostrand and \
-            self._strand.se != iv._strand.se:
+      if self._strand is not strand_nostrand and iv.strand is not strand_nostrand and \
+            self.strand is not iv._strand:
          return False 
       if self.start < iv.start or self.end > iv.end:
          return False
@@ -286,8 +206,8 @@ cdef class GenomicInterval:
          return False 
       if self.chrom != iv.chrom:
          return False
-      if self._strand.se != strand_nostrand and iv._strand.se != strand_nostrand and \
-            self._strand.se != iv._strand.se:
+      if self.strand is not strand_nostrand and iv.strand is not strand_nostrand and \
+            self.strand is not iv.strand:
          return False 
       if self.start <= iv.start:
          return self.end > iv.start
@@ -314,19 +234,19 @@ cdef class GenomicInterval:
          raise ValueError, "Cannot extend an interval to include an interval on another genome."
       if self.chrom != iv.chrom:
          raise ValueError, "Cannot extend an interval to include an interval on another chromosome."
-      if self._strand.se != strand_nostrand and iv._strand.se != strand_nostrand and \
-            self._strand.se != iv._strand.se:
+      if self.strand.se is not strand_nostrand and iv.strand is not strand_nostrand and \
+            self.strand is not iv.strand:
          raise ValueError, "Cannot extend an interval to include an interval on another strand."
       self.start = min( self.start, iv.start )
       self.end = max( self.end, iv.end )
 
 
-def GenomicInterval_from_directional( str chrom, long int start_d, long int length, object strand=".", genome=None ):
-   cdef Strand strand2 = Strand( strand )
-   if strand2.se != strand_minus:
-      return GenomicInterval( chrom, start_d, start_d+length, strand2, genome )
+def GenomicInterval_from_directional( str chrom, long int start_d, long int length, str strand=".", genome=None ):
+   strand = intern( strand )
+   if strand.se is not strand_minus:
+      return GenomicInterval( chrom, start_d, start_d+length, strand, genome )
    else:
-      return GenomicInterval( chrom, start_d-length+1, start_d+1, strand2, genome )
+      return GenomicInterval( chrom, start_d-length+1, start_d+1, strand, genome )
 
 
 cdef class GenomicPosition( GenomicInterval ):
@@ -348,7 +268,7 @@ cdef class GenomicPosition( GenomicInterval ):
    with the exposed GenomeInterval slots.
    """
 
-   def __init__( self, str chrom, long int pos, strand='.', genome=None ):
+   def __init__( self, str chrom, long int pos, str strand='.', genome=None ):
       GenomicInterval.__init__( self, chrom, pos, pos+1, strand, genome )
       
    property pos:
@@ -402,15 +322,15 @@ cdef class GenomicArray( object ):
       for chrom in chrom_lengths:
          if self.stranded:
             self.step_vectors[ chrom ] = {
-               Strand("+"): StepVector.StepVector( chrom_lengths[chrom], typecode ),
-               Strand("-"): StepVector.StepVector( chrom_lengths[chrom], typecode ) }
+               strand_plus:  StepVector.StepVector( chrom_lengths[chrom], typecode ),
+               strand_minus: StepVector.StepVector( chrom_lengths[chrom], typecode ) }
          else:   
             self.step_vectors[ chrom ] = StepVector.StepVector(
                chrom_lengths[chrom], typecode )
             
    def __getitem__( self, index ):
       if isinstance( index, GenomicInterval ):
-         if self.stranded and index.strand not in ( Strand("+"), Strand("-") ):
+         if self.stranded and index.strand not in ( strand_plus, strand_minus ):
             raise KeyError, "Non-stranded index used for stranded GenomicArray."
          if isinstance( index, GenomicPosition ):
             if self.stranded:
@@ -427,7 +347,7 @@ cdef class GenomicArray( object ):
 
    def __setitem__( self, index, value ):
       if isinstance( index, GenomicInterval ):
-         if self.stranded and index.strand not in ( Strand("+"), Strand("-") ):
+         if self.stranded and index.strand not in ( strand_plus, strand_minus ):
             raise KeyError, "Non-stranded index used for stranded GenomicArray."
          if isinstance( index, GenomicPosition ):
             if self.stranded:
@@ -480,7 +400,7 @@ cdef class GenomicArray( object ):
    def write_bedgraph_file( self, file_or_filename, strand=".", track_options="" ):
       if ( not self.stranded ) and strand != ".":
          raise ValueError, "Strand specified in unstranded GenomicArray."
-      if self.stranded and strand not in ( "+", "-" ):
+      if self.stranded and strand not in ( strand_plus, strand_minus ):
          raise ValueError, "Strand must be specified for stranded GenomicArray."
       if hasattr( file_or_filename, "write" ):
          f = file_or_filename
@@ -490,7 +410,6 @@ cdef class GenomicArray( object ):
          f.write( "track type=bedGraph\n" )
       else:
          f.write( "track type=bedGraph %s\n" % track_options )
-      strand = Strand( strand )
       for chrom in self.step_vectors:
          if self.stranded:
             sv =  self.step_vectors[ chrom ][ strand ]
@@ -834,7 +753,7 @@ cdef class CigarOperation( object ):
    def __init__( self, type_, size, rfrom, rto, qfrom, qto, chrom, strand ):
       self.type = type_
       self.size = size
-      self.ref_iv = GenomicInterval( chrom, rfrom, rto, Strand( strand ) )
+      self.ref_iv = GenomicInterval( chrom, rfrom, rto, strand )
       self.query_from = qfrom
       self.query_to = qto
       
