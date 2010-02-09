@@ -1,3 +1,4 @@
+import sys
 import re
 import csv
 import gzip
@@ -290,19 +291,22 @@ cdef class GenomicArray( object ):
    cdef readonly bool stranded
    cdef readonly str typecode
    
-   def __init__( self, dict chrom_lengths, bool stranded=True, str typecode='d' ):
+   def __init__( self, object chroms, bool stranded=True, str typecode='d' ):
       cdef str chrom
       self.step_vectors = {}
       self.stranded = stranded
       self.typecode = typecode
-      for chrom in chrom_lengths:
+      if isinstance( chroms, list ):
+         chroms = dict( [ ( c, sys.maxint ) for c in chroms ] )
+      elif not isinstance( chroms, dict ):
+         raise TypeError, "'chroms' must be a list or a dict."
+      for chrom in chroms:
          if self.stranded:
             self.step_vectors[ chrom ] = {
-               strand_plus:  StepVector.StepVector( chrom_lengths[chrom], typecode ),
-               strand_minus: StepVector.StepVector( chrom_lengths[chrom], typecode ) }
+               strand_plus:  StepVector.StepVector( chroms[chrom], typecode ),
+               strand_minus: StepVector.StepVector( chroms[chrom], typecode ) }
          else:   
-            self.step_vectors[ chrom ] = StepVector.StepVector(
-               chrom_lengths[chrom], typecode )
+            self.step_vectors[ chrom ] = StepVector.StepVector( chroms[chrom], typecode )
             
    def __getitem__( self, index ):
       if isinstance( index, GenomicInterval ):

@@ -154,6 +154,8 @@ class step_vector_for_python {
 
 %pythoncode %{
 
+import sys
+
 class StepVector( object ):
 
    """A step vector is a vector with integer indices that is able to store
@@ -176,7 +178,7 @@ class StepVector( object ):
 
    """
 
-   def __init__( self, length, typecode='d', start_index = 0 ):
+   def __init__( self, length = sys.maxint, typecode = 'd', start_index = 0 ):
       """Construct a StepVector of the given length, with indices starting
       at the given start_index and counting up to (but not including)
       start_index + length.
@@ -302,9 +304,17 @@ class StepVector( object ):
             yield value
        
    def __repr__( self ):
-      return "<%s object, type '%s', index range %d:%d, %d step(s)>" % (
-         self.__class__.__name__, self.typecode(), self.start_index(),
-         self.start_index() + len(self), self.num_steps() )
+      if self.start_index() == -sys.maxint + 1:
+         start_s = "-inf"
+      else:
+         start_s = str( self.start_index() )
+      if len(self) == sys.maxint:
+         stop_s = "inf"
+      else:
+         stop_s = str( self.start_index() + len(self) )
+      return "<%s object, type '%s', index range %s:%s, %d step(s)>" % (
+         self.__class__.__name__, self.typecode(), start_s,
+         stop_s, self.num_steps() )
        
    def typecode( self ):
       "Returns the typecode."
