@@ -187,7 +187,7 @@ class GFF_Reader( FileOrSequence ):
             strand, frame, attributeStr ) = line.split( "\t", 8 )   
          ( attr, name ) = parse_GFF_attribute_string( attributeStr, True )
          f = GenomicFeature( name, feature,
-             GenomicInterval( seqname, int(start)-1, int(end), strand, None ) )
+             GenomicInterval( seqname, int(start)-1, int(end), strand ) )
          if score != ".":
             score = int( score )
          if frame != ".":

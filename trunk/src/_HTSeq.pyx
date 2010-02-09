@@ -38,7 +38,6 @@ cdef class GenomicInterval:
          that is considered part of the sequence.
       strand: The strand, as a single character, '+' or '-'. '.' indicates
          that the strand is irrelavant. (Alternatively, pass a Strand object.)
-      genome: A Genome object, specifying the reference (may be None)
       length: The length of the interval, i.e., end - start
       start_d: The "directional start" position. This is the position of the
         first base of the interval, taking the strand into account. Hence, 
@@ -49,7 +48,7 @@ cdef class GenomicInterval:
    """
    
    def __init__( GenomicInterval self, str chrom, long start, long end, 
-         str strand, object genome=None ):
+         str strand ):
       """See the class docstring for the meaning of the slots. Note that 
       there is also a factory function, 'from_directional', to be used if
       you wish to specify start_d and length.
@@ -58,7 +57,6 @@ cdef class GenomicInterval:
       self.start = start
       self.end = end
       self.strand = strand
-      self.genome = genome
       if self.start > self.end:
          raise ValueError, "start is larger than end"
             
@@ -74,19 +72,15 @@ cdef class GenomicInterval:
 
    def __reduce__( GenomicInterval self ):
       return GenomicInterval, ( self.chrom, self.start, self.end, 
-         self.strand, self.genome )
+         self.strand )
          
    def __copy__( self ):
       constr, args = self.__reduce__()
       return constr( *args )   
    
    def __repr__( GenomicInterval self ):
-      if self.genome:
-         return "<%s on '%s' (%s genome), [%d,%d), strand '%s'>" % \
-            ( self.__class__.__name__, self.chrom, str(self.genome), self.start, self.end, self.strand )
-      else:
-         return "<%s object '%s', [%d,%d), strand '%s'>" % \
-            ( self.__class__.__name__, self.chrom, self.start, self.end, self.strand )
+      return "<%s object '%s', [%d,%d), strand '%s'>" % \
+         ( self.__class__.__name__, self.chrom, self.start, self.end, self.strand )
          
    def __str__( GenomicInterval self ):
          return "%s:[%d,%d)/%s" % \
@@ -139,9 +133,6 @@ cdef class GenomicInterval:
       if op == 2:  # ==
          if other == None:
             return False
-         if self.genome != None and other.genome != None \
-               and self.genome != other.genome:
-            return False
          return self._strand is other._strand and \
             self.start == other.start and self.end == other.end
       elif op == 3:  # !=
@@ -150,15 +141,13 @@ cdef class GenomicInterval:
          raise NotImplementedError
          
    def __hash__( GenomicInterval self ):
-      return hash( ( self.genome, self.chrom, self.start, self.end ) )
+      return hash( ( self.chrom, self.start, self.end, self.strand ) )
            
    cpdef is_contained_in( GenomicInterval self, GenomicInterval iv ):
       """Returns a boolean value indicating whether the 'self' interval 
       is fully within the 'iv' interval.
       
       This is deemed the case if
-        - both are on the same genome, or at least one of the has
-           'None' as genome field, and
         - both are on the same chromosome, and    
         - both are on the same strand, or at least one of them is
            not stranded (i.e., has strand == '.'), and
@@ -167,8 +156,6 @@ cdef class GenomicInterval:
       """
       if iv == None:
          return False
-      if self.genome != None and iv.genome != None and not (self.genome is iv.genome):
-         return False 
       if self.chrom != iv.chrom:
          return False
       if self._strand is not strand_nostrand and iv.strand is not strand_nostrand and \
@@ -193,8 +180,6 @@ cdef class GenomicInterval:
       overlaps the 'iv' interval.
       
       This is deemed the case if
-        - both are on the same genome, or at least one of the has
-           'None' as genome field, and
         - both are on the same chromosome, and    
         - both are on the same strand, or at least one of them is
            not stranded (i.e., has strand == '.'), and
@@ -202,8 +187,6 @@ cdef class GenomicInterval:
       """
       if iv == None:
          return False
-      if self.genome != None and iv.genome != None and not (self.genome is iv.genome):
-         return False 
       if self.chrom != iv.chrom:
          return False
       if self.strand is not strand_nostrand and iv.strand is not strand_nostrand and \
@@ -230,8 +213,6 @@ cdef class GenomicInterval:
       """Extend the interval such that it includes iv."""
       if iv is None:
          raise TypeError, "Cannot extend an interval to include None."
-      if self.genome != None and iv.genome != None and not (self.genome is iv.genome):
-         raise ValueError, "Cannot extend an interval to include an interval on another genome."
       if self.chrom != iv.chrom:
          raise ValueError, "Cannot extend an interval to include an interval on another chromosome."
       if self.strand.se is not strand_nostrand and iv.strand is not strand_nostrand and \
@@ -241,12 +222,12 @@ cdef class GenomicInterval:
       self.end = max( self.end, iv.end )
 
 
-def GenomicInterval_from_directional( str chrom, long int start_d, long int length, str strand=".", genome=None ):
+def GenomicInterval_from_directional( str chrom, long int start_d, long int length, str strand="." ):
    strand = intern( strand )
    if strand.se is not strand_minus:
-      return GenomicInterval( chrom, start_d, start_d+length, strand, genome )
+      return GenomicInterval( chrom, start_d, start_d+length, strand )
    else:
-      return GenomicInterval( chrom, start_d-length+1, start_d+1, strand, genome )
+      return GenomicInterval( chrom, start_d-length+1, start_d+1, strand )
 
 
 cdef class GenomicPosition( GenomicInterval ):
@@ -256,20 +237,19 @@ cdef class GenomicPosition( GenomicInterval ):
    
    It has the following slots:
       chrom: The name of a sequence (i.e., chromosome, contig, or 
-         the like). If 'genome' is given, it should know 'seqname'
+         the like). 
       pos: The position on the sequence specified by seqname.
          The position should always be given as 0-based value!
       strand: The strand, as a single character, '+' or '-'. '.' indicates
          that the strand is irrelavant.
-      genome: A Genome object, specifying the reference (may be None)
 
    The GenomicPosition class is derived from GenomicInterval. Hence,
    a GenomicPosition is always a GenomicInterval of length 1. Do not tinker
    with the exposed GenomeInterval slots.
    """
 
-   def __init__( self, str chrom, long int pos, str strand='.', genome=None ):
-      GenomicInterval.__init__( self, chrom, pos, pos+1, strand, genome )
+   def __init__( self, str chrom, long int pos, str strand='.' ):
+      GenomicInterval.__init__( self, chrom, pos, pos+1, strand )
       
    property pos:
    
@@ -294,18 +274,14 @@ cdef class GenomicPosition( GenomicInterval ):
          return 1
       
    def __repr__( self ):
-      if self.genome:
-         return "<%s on '%s':%d (%s genome), strand '%s'>" % \
-            ( self.__class__, self.chrom, self.pos, self.genome, self.strand )
-      else:
-         return "<%s object '%s':%d, strand '%s'>" % \
-            ( self.__class__.__name__, self.chrom, self.pos, self.strand )               
+      return "<%s object '%s':%d, strand '%s'>" % \
+         ( self.__class__.__name__, self.chrom, self.pos, self.strand )               
             
    def __str__( self ):
       return "%s:%d/%s" % ( self.chrom, self.pos, self.strand )            
 
    def __reduce__( GenomicPosition self ):
-      return GenomicPosition, ( self.chrom, self.pos, self.strand, self.genome )
+      return GenomicPosition, ( self.chrom, self.pos, self.strand )
    
    
 cdef class GenomicArray( object ):
