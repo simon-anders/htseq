@@ -528,7 +528,7 @@ cdef class SequenceWithQualities( Sequence ):
       else:
          new_name = self.name + "[part]"
       return SequenceWithQualities( 
-         self.seq[ item ], new_name, self._qualarr[ item ] )
+         self.seq[ item ], new_name, self._qualstr[ item ], self._qualscale )
 
    def write_to_fastq_file( self, fastq_file, bool convert_to_phred=False ):
       if convert_to_phred:
