@@ -2,7 +2,18 @@
 
 from distutils.core import setup, Extension
 
+import sys
 import os.path
+
+if sys.version_info[0] < 2 or sys.version_info < 5:
+   sys.stderr.write( "Error in setup script for HTSeq:\n" )
+   sys.stderr.write( "You need at least version 2.5 of Python to use HTSeq.\n" )
+
+if sys.version_info[0] >= 3:
+   sys.stderr.write( "Error in setup script for HTSeq:\n" )
+   sys.stderr.write( "Sorry, this package does not yet work with Python 3.\n" )
+   sys.stderr.write( "Please use Python 2.x, x>=5.\n" )
+
 try:
    import numpy
 except ImportError:
