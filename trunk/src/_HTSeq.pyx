@@ -530,9 +530,16 @@ cdef class SequenceWithQualities( Sequence ):
       return SequenceWithQualities( 
          self.seq[ item ], new_name, self._qualstr[ item ], self._qualscale )
 
-   def write_to_fastq_file( self, fastq_file, bool convert_to_phred=False ):
-      if convert_to_phred:
-         raise NotImplemented
+   @property
+   def qualstr( self ):
+      if self.qualscale == "phred":
+         return self._qualstr
+      else:
+         return ''.join( [ chr(i) for i in self.qual ] )
+	 # FIXME: This is probably too slow!
+      
+
+   def write_to_fastq_file( self, fastq_file ):
       if hasattr( self, "descr" ) and self.descr is not None:
          fastq_file.write( "@%s %s\n" % ( self.name, self.descr ) )
       else:
