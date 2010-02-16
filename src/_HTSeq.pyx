@@ -532,10 +532,10 @@ cdef class SequenceWithQualities( Sequence ):
 
    @property
    def qualstr( self ):
-      if self.qualscale == "phred":
+      if self._qualscale == "phred":
          return self._qualstr
       else:
-         return ''.join( [ chr(i) for i in self.qual ] )
+         return ''.join( [ chr(i+33) for i in self.qual ] )
 	 # FIXME: This is probably too slow!
       
 
