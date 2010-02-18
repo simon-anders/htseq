@@ -11,7 +11,6 @@ cdef class GenomicInterval:
    cpdef overlaps( self, GenomicInterval iv )
    cpdef extend_to_include( GenomicInterval self, GenomicInterval iv )
 
-
 cdef class GenomicPosition( GenomicInterval ):
    pass
 

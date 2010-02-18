@@ -486,9 +486,10 @@ class GenomicArrayOfSets( GenomicArray ):
       GenomicArray.__init__( self, chrom_lengths, stranded, 'O' )
       for chrom in self.step_vectors:
          if self.stranded:
-            self.step_vectors[ chrom ][ strand ][ 0 : chrom_lengths[chrom] ] = set()
+            self.step_vectors[ chrom ][ "+" ][ : ] = set()
+            self.step_vectors[ chrom ][ "-" ][ : ] = set()
          else:
-            self.step_vectors[ chrom ][ 0 : chrom_lengths[chrom] ] = set()
+            self.step_vectors[ chrom ][ : ] = set()
       
    def add_value( self, value, iv ):
       def _f( oldset ):

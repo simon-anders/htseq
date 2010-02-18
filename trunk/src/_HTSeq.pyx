@@ -221,6 +221,9 @@ cdef class GenomicInterval:
          raise ValueError, "Cannot extend an interval to include an interval on another strand."
       self.start = min( self.start, iv.start )
       self.end = max( self.end, iv.end )
+      
+   def copy( self ):
+      return GenomicInterval( self.chrom, self.start, self.end, self.strand )
 
 
 def GenomicInterval_from_directional( str chrom, long int start_d, long int length, str strand="." ):
@@ -283,6 +286,9 @@ cdef class GenomicPosition( GenomicInterval ):
 
    def __reduce__( GenomicPosition self ):
       return GenomicPosition, ( self.chrom, self.pos, self.strand )
+   
+   def copy( self ):
+      return GenomicPosition( self.chrom, self.pos, self.strand )
    
    
 cdef class GenomicArray( object ):
