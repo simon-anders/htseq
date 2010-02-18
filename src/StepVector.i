@@ -219,7 +219,9 @@ class StepVector( object ):
       if isinstance( index, slice ):
          if index.step is not None and index.step != 1:
              raise ValueError, "Striding slices (i.e., step != 1) are not supported"
-         self._swigobj.set_value( index.start, index.stop-1, value )
+         start = index.start if index.start is not None else self.start_index()
+         stop = index.stop if index.stop is not None else ( start + len(self) )
+         self._swigobj.set_value( start, stop-1, value )
          # Note the "-1": The C++ object uses closed intervals, but we follow
          # Python convention here and use half-open ones.
       else:
@@ -285,7 +287,7 @@ class StepVector( object ):
          if index.step is not None and index.step != 1:
              raise ValueError, "Striding slices (i.e., step != 1) are not supported"
          start = index.start if index.start is not None else self.start_index()
-         stop = index.stop if index.stop is not None else ( self.start_index() + len(self) )
+         stop = index.stop if index.stop is not None else ( start + len(self) )
          res = StepVector( stop - start, self._typecode, start )
          for stepstart, stepstop, value in self.get_steps( start, stop ):
             res[ stepstart : stepstop ] = value
