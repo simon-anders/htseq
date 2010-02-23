@@ -1,8 +1,10 @@
-HTSeq: A Python package to analyse high-throughput sequencing data
-==================================================================
+.. _tour:
 
-HTSeq is a python package that provides infrastructure to process data
-from high-throughput sequencing assays. This tutorial demonstrates the
+********************
+A tour through HTSeq
+********************
+
+This tour demonstrates the
 functionality of HTSeq by performing a number of common analysis tasks,
 such as
 
@@ -13,8 +15,9 @@ such as
 - Reading in annotation data from a GFF file.
 - Assigning aligned reads from an RNA-Seq experiments to exons and
   genes.
+
   
-This tutorial assumes that the reader is familiar with Python and with HTS
+The following description assumes that the reader is familiar with Python and with HTS
 data.
   
 Prequisites and installation
