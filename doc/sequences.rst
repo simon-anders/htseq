@@ -3,6 +3,9 @@
 *******************************
 Sequences and FASTA/FASTQ files
 *******************************
+
+.. currentmodule:: HTSeq
+
 .. doctest:: 
    :hide:
 
@@ -11,14 +14,11 @@ Sequences and FASTA/FASTQ files
 ``Sequence``
 ============
 
-.. class:: Sequence
-
 A ``Sequence`` object holds a DNA sequence. Besides the actual sequence, an object
 may also hold a name.
 
 Instantiation
-   .. function:: Sequence( self, seq, name="unnamed" )
-      :noindex:
+   .. class:: Sequence( seq, name="unnamed" )
 
    Pass the DNA sequence and, optionally, a name or ID to the constructor::
    
@@ -104,8 +104,6 @@ Extended UIPAC letters
 ``SequenceWithQuality``
 =======================   
 
-.. class:: SequenceWithQuality
-
 The sequences obtained from high-throughput sequencing devices (in the following also
 referred to as "reads") typically come with `base-call quality scores`, which indicate
 how sure the software was that the right base was called. The class ``SequenceWithQuality`` represents such reads. 
@@ -114,8 +112,7 @@ how sure the software was that the right base was called. The class ``SequenceWi
 
 Instantiation
 
-   .. function:: SequenceWithQuality( seq, name qualstr, qualscale="phred" ) 
-      :noindex:
+   .. class:: SequenceWithQuality( seq, name qualstr, qualscale="phred" ) 
 
    A ``SequenceWithQualities`` can be instantiated as a ``Sequence``, but now with
    a third argument, the quality string::
