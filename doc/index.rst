@@ -9,6 +9,7 @@ Please see the chapter :ref:`tour` first for an overview on the kind of analysis
 you can do with HTSeq and the design of the package, and the look at the reference
 documentation. 
 
+For installation instructions, see :ref:`install`.
 
 Documentation overview
 ======================
@@ -50,6 +51,7 @@ Detailed table of contents
 .. toctree::
    :maxdepth: 2
    
+   install.rst
    tour.rst
    sequences.rst
    genomic.rst
