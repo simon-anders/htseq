@@ -18,6 +18,7 @@ may also hold a name.
 
 Instantiation
    .. function:: Sequence( self, seq, name="unnamed" )
+      :noindex:
 
    Pass the DNA sequence and, optionally, a name or ID to the constructor::
    
@@ -26,9 +27,9 @@ Instantiation
    (If the name is omitted, the default ``"unnamed"`` is used.)
    
 Attributes
-   .. attribute:: seq
-                  name
-                  descr
+   .. attribute:: Sequence.seq
+                  Sequence.name
+                  Sequence.descr
    
    The information can be accessed via the attributes ``seq`` and ``name``, which are strings::   
    
@@ -70,7 +71,7 @@ Subsetting
    
 Reverse complement   
 
-   .. method:: get_reverse_complement( self )
+   .. method:: Sequence.get_reverse_complement( )
 
 ::   
 
@@ -84,7 +85,7 @@ Reverse complement
 
 Writing to FASTA file
    
-   .. method: write_to_fasta_file( self, fasta_file )
+   .. method: Sequence.write_to_fasta_file( fasta_file )
    
    To write ``Sequence`` objects into a FASTA file, open a text file for writing,
    then call ``def write_to_fasta_file`` for each sequence, providing the open
@@ -113,7 +114,8 @@ how sure the software was that the right base was called. The class ``SequenceWi
 
 Instantiation
 
-   .. function:: SequenceWithQuality( seq, name qualstr, qualscale="phred" )
+   .. function:: SequenceWithQuality( seq, name qualstr, qualscale="phred" ) 
+      :noindex:
 
    A ``SequenceWithQualities`` can be instantiated as a ``Sequence``, but now with
    a third argument, the quality string::
@@ -148,7 +150,7 @@ Attributes
    Furthermore, we now have the attributes ``qual`` and ``qualstr``, already mentioned
    above.
    
-   .. attribute:: qual
+   .. attribute:: SequenceWithQuality.qual
    
       ``qual`` is a ``numpy`` array of data type *integer*, with as many elements
       as there are bases. Each element is a `Phred score`. A Phred score *S* is
@@ -156,10 +158,11 @@ Attributes
       base call being wrong as *p* = -log10 ( *S*/10 ).
       
       Note that ``qual`` is always the probability, even if the ``solexa-old`` quality
-      string format has been used, which encodes the odds *p*(1-*p*), i.e., in that case,
+      string format has been used, which encodes the odds *p* ( 1 - *p* ), i.e., in that case,
       the odds are converted to probabilities.
       
-   ..attribute:: qualstr
+   .. attribute:: SequenceWithQuality.qualstr
+   
       The quality string according to Sanger Phred encoding. In case the quality was
       originally given in ``solexa`` or ``solexa-old`` format, it is converted::
       
@@ -171,7 +174,7 @@ Attributes
      
 Writing to FASTQ file
    
-   .. method:: write_to_fastq_file( self, fasta_file )
+   .. method:: SequenceWithQuality.write_to_fastq_file( fasta_file )
    
    To write ``SequenceWithQualities`` objects into a FASTQ file, open a text file for writing,
    then call ``write_to_fastq_file`` for each sequence, providing the open
