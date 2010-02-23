@@ -1,0 +1,5 @@
+.. _alignments:
+
+***************
+Read alignments
+***************
