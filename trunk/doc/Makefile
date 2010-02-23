@@ -22,6 +22,7 @@ help:
 	@echo "  latex     to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
 	@echo "  changes   to make an overview over all changed/added/deprecated items"
 	@echo "  linkcheck to check all external links for integrity"
+	@echo "  doctest   to run doctest"
 
 clean:
 	-rm -rf _build/*
@@ -73,3 +74,10 @@ linkcheck:
 	@echo
 	@echo "Link check complete; look for any errors in the above output " \
 	      "or in _build/linkcheck/output.txt."
+	      
+doctest:
+	mkdir -p _build/doctest _build/doctrees
+	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) _build/doctest
+	@echo
+	@echo "Doctest; look for any errors in the above output " \
+	      "or in _build/doctest/output.txt."	      

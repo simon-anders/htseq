@@ -503,6 +503,8 @@ cdef class SequenceWithQualities( Sequence ):
         qualscale - The encoding scale of the quality string. Must be one of
                       "phred", "solexa", "solexa-old" )
       """
+      if len( seq ) != len( qualstr ):
+         raise ValueError, "'seq' and 'qualstr' do not have the same length."
       Sequence.__init__( self, seq, name )
       self._qualstr = qualstr
       self._qualscale = qualscale

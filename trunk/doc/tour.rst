@@ -5,8 +5,7 @@ A tour through HTSeq
 ********************
 
 This tour demonstrates the
-functionality of HTSeq by performing a number of common analysis tasks,
-such as
+functionality of HTSeq by performing a number of common analysis tasks:
 
 - Getting statistical summaries about the base-call quality scores to
   study the data quality.
@@ -77,6 +76,7 @@ In the example data, a FASTQ file is provided with example reads from a yeast RN
 experiment. The file ``yeast_RNASeq_excerpt_sequence.txt`` is an excerpt of the
 ``_sequence.txt`` file produced by the SolexaPipeline software. We can access it from
 HTSeq with
+
 ::
 
    >>> import HTSeq
@@ -95,7 +95,9 @@ The variable ``fastq_file`` now refers to the file::
   
 When used in a ``for`` loop, it generates an iterator of objects representing the
 reads. Here, we use the ``islice`` function from ``itertools`` to cut after 10
-reads::
+reads.
+
+::
 
    >>> import itertools
    >>> for read in itertools.islice( fastq_file, 10 ):
@@ -164,7 +166,9 @@ The average qualities are hence::
            24.10720429,  23.68026721,  23.52034081,  23.49437978,
            23.11076443,  22.5576223 ,  22.43549742,  22.62354494])
 
-If you have ``matplotlib`` installed, you can plot this::
+If you have ``matplotlib`` installed, you can plot this.
+
+.. doctest::
 
    >>> from matplotlib import pyplot      
    >>> pyplot.plot( qualsum / nreads )    #doctest:+ELLIPSIS
@@ -180,17 +184,19 @@ quality-control techniques, see [to be filled in].
 What if you did not get the ``_sequence.txt`` file from your core facility but 
 instead the ``export.txt`` file? While the former contains only the reads and
 their quality, the latter also contains the alignment of the reads to a reference
-as found by Eland. To read it, simply use::
+as found by Eland. To read it, simply use
+
+.. doctest::
 
    >>> alignment_file = HTSeq.SolexaExportReader( "yeast_RNASeq_excerpt_export.txt" )  #doctest:+SKIP
    
-`HTSeq` can also use other alignment formats, e.g., SAM:   
+`HTSeq` can also use other alignment formats, e.g., SAM::   
    
    >>> alignment_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
    
 If we are only interested in the qualities, we can rewrite the commands from above
-to use the `alignment_file`.
-   
+to use the `alignment_file`::
+
    >>> nreads = 0
    >>> for aln in alignment_file:
    ...    qualsum += aln.read.qual
@@ -245,17 +251,21 @@ value 100 to the positions 10 to 20, the steps get split accordingly::
    
 If you iterate over a ``StepVector``, it behaves like a list::
 
+.. doctest::
+
    >>> list( sv )   #doctest:+NORMALIZE_WHITESPACE
    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 120.0, 120.0, 120.0, 220.0, 220.0, 220.0, 
    220.0, 220.0, 100.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
    0.0, 0.0, 0.0, 0.0, 0.0]
    
-You can also take parts of a ``StepVector``, which produces a new, shorter, ``StepVector``::
+You can also take parts of a ``StepVector``, which produces a new, shorter, ``StepVector``.
 
-   >>> sv[6:12]
+.. doctest::
+
+   >>> sv[6:12]   # doctest: +ELLIPSIS
    <StepVector object, type 'd', index range 6:12, 3 step(s)>
    >>> sv[6:12].get_steps()        #doctest:+ELLIPSIS
-   <generator object at 0x...>
+   <generator object get_steps at 0x...>
    >>> list( sv[6:12].get_steps() )
    [(6, 7, 0.0), (7, 10, 120.0), (10, 12, 220.0)]
    >>> list( sv[6:12] )
@@ -367,11 +377,11 @@ chromosome, all holding integer values (``typecode='i'``):
             '-': <StepVector object, type 'i', index range 0:948062, 1 step(s)>}}
 
 The integer values are all initialized to 0. We may put them to a value, say 100,
-at the genomic interval ``iv`` defined above:
+at the genomic interval ``iv`` defined above::
 
-    >>> cvg[ iv ] = 100
+   >>> cvg[ iv ] = 100
  
-If we want to add a value, we use
+If we want to add a value, we use::
 
    >>> cvg.add_value( 50, iv )
    
@@ -395,6 +405,8 @@ to::
    ...       cvg.add_value( 1, alngt.iv )
 
 We can plot an excerpt of this with::
+
+.. doctest::
 
    >>> pyplot.plot( list( cvg[ HTSeq.GenomicInterval( "III", 200000, 500000, "+" ) ] ) )     #doctest:+ELLIPSIS
    [<matplotlib.lines.Line2D object at 0x...>]
@@ -428,7 +440,6 @@ These file are in the `GTF format`, a tightening of the `GFF format`. `HTSeq` of
 .. _`GTF format`: http://mblab.wustl.edu/GTF22.html
 .. _`GFF format`: http://www.sanger.ac.uk/resources/software/gff/spec.html
 
-::
    >>> gtf_file = HTSeq.GFF_Reader( "Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz" )
    >>> for feature in itertools.islice( gtf_file, 10 ):
    ...    print feature
@@ -447,12 +458,15 @@ These file are in the `GTF format`, a tightening of the `GFF format`. `HTSeq` of
 The ``feature`` variable is filled with objects of class ``GenomicFeature``. As with all Python
 objects, the ``dir`` function shows us its slots and functions::
 
-   >>> dir( feature )   #doctest:+NORMALIZE_WHITESPACE
-   ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__getattribute__', 
-   '__hash__', '__init__', '__module__', '__neq__', '__new__', '__reduce__', 
-   '__reduce_ex__', '__repr__', '__setattr__', '__str__', '__weakref__', 'attr', 
-   'frame', 'get_gff_line', 'iv', 'name', 'score', 'source', 'type']
+.. doctest::
 
+   >>> dir( feature )   #doctest:+NORMALIZE_WHITESPACE
+   ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', 
+    '__getattribute__', '__hash__', '__init__', '__module__', '__neq__', 
+    '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', 
+    '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'attr', 
+    'frame', 'get_gff_line', 'iv', 'name', 'score', 'source', 'type']
+   
 Ignoring the attributes starting with an underscore, we can see now how to access 
 the information stored in the GFF file. The information from the columns of the GFF
 table is accessable as follows::
@@ -467,6 +481,8 @@ table is accessable as follows::
    '.'
 
 The last column (the attributes) is parsed and presented as a `dict`::
+
+.. doctest::
 
    >>> feature.attr    #doctest:+NORMALIZE_WHITESPACE
    {'exon_number': '1', 'gene_id': 'R0030W', 'transcript_name': 'RAF1', 
@@ -582,6 +598,9 @@ Now, we can finally count::
    ...       counts[ list(intersection_set)[0] ] += 1
 
 We can now conveniently print the result with::
+
+
+.. doctest::
 
    >>> for name in sorted( counts.keys() ):  
    ...    print name, counts[name]   #doctest:+ELLIPSIS
