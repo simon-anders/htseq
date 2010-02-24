@@ -204,7 +204,7 @@ cdef class GenomicInterval:
       """
       return _HTSeq_internal.GenomicInterval_xrange( self, step )
 
-   def xranged( GenomicInterval self, long int step = 1 ):
+   def xrange_d( GenomicInterval self, long int step = 1 ):
       """Generate an iterator over the GenomicPositions covered by the interval.
       running from start_d to end_d.
       """

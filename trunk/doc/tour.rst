@@ -182,7 +182,7 @@ which we call steps. A ``StepVector`` is a data structure defined for this purpo
 
 It works as follows: Let's define a ``Stepvector`` of length 30::
 
-   >>> sv = HTSeq.StepVector.StepVector( 30 )
+   >>> sv = HTSeq.StepVector( 30 )
    
 Initially, it has value 0 everywhere. We set the positions 7 to 15 to the value 120::
 
@@ -216,7 +216,7 @@ You can also take parts of a ``StepVector``, which produces a new, shorter, ``St
    >>> sv[6:12]   # doctest: +ELLIPSIS
    <StepVector object, type 'd', index range 6:12, 3 step(s)>
    >>> sv[6:12].get_steps()        #doctest:+ELLIPSIS
-   <generator object get_steps at 0x...>
+   <generator object ...>
    >>> list( sv[6:12].get_steps() )
    [(6, 7, 0.0), (7, 10, 120.0), (10, 12, 220.0)]
    >>> list( sv[6:12] )
@@ -411,12 +411,9 @@ objects, the ``dir`` function shows us its slots and functions::
 
 .. doctest::
 
-   >>> dir( feature )   #doctest:+NORMALIZE_WHITESPACE
-   ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', 
-    '__getattribute__', '__hash__', '__init__', '__module__', '__neq__', 
-    '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', 
-    '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'attr', 
-    'frame', 'get_gff_line', 'iv', 'name', 'score', 'source', 'type']
+   >>> dir( feature )   #doctest:+NORMALIZE_WHITESPACE,+ELLIPSIS
+   ['__class__', ..., '__weakref__', 'attr', 'frame', 'get_gff_line', 
+   'iv', 'name', 'score', 'source', 'type']
    
 Ignoring the attributes starting with an underscore, we can see now how to access 
 the information stored in the GFF file. The information from the columns of the GFF
