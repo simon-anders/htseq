@@ -182,7 +182,7 @@ which we call steps. A ``StepVector`` is a data structure defined for this purpo
 
 It works as follows: Let's define a ``Stepvector`` of length 30::
 
-   >>> sv = HTSeq.StepVector( 30 )
+   >>> sv = HTSeq.StepVector.StepVector( 30 )
    
 Initially, it has value 0 everywhere. We set the positions 7 to 15 to the value 120::
 
