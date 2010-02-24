@@ -45,6 +45,14 @@ Documentation overview
     the classes described here are used, to represent output files and alignments,
     i.e., reads with their alignment information.
 
+  * :ref:`features`
+  
+    The classes ``GenomicFeature`` and ``GFF_File`` help to deal with genomic
+    annotation data.
+    
+  * :ref:`misc`
+  
+   
 Detailed table of contents
 ==========================
 
@@ -56,6 +64,8 @@ Detailed table of contents
    sequences.rst
    genomic.rst
    alignments.rst
+   features.rst
+   misc.rst
 
 Indices and tables
 ==================

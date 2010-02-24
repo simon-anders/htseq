@@ -7,7 +7,7 @@
 
 import itertools, warnings
 
-import StepVector
+from StepVector import StepVector
 from _HTSeq import *
 
 from _HTSeq_internal import peek

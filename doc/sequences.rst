@@ -39,7 +39,7 @@ Attributes
       'my_sequence'
 
    There is a third attribute, called ``descr``, which is by default ``None`` but may contain 
-   a "description". See class ``FastaReader`` for more information.
+   a "description". See class :class:`FastaReader` for more information.
    
 Representation and string conversion
    
@@ -95,7 +95,7 @@ Writing to FASTA file
       >>> myseq.write_to_fasta_file( my_fasta_file )
       >>> my_fasta_file.close()
    
-   To read from a FASTA file, see class ``FastaReader``.
+   To read from a FASTA file, see class :class:`FastaReader`.
    
 Extended UIPAC letters
    These are not (yet) supported. A sequence should only contain A, C, G, and T.   
@@ -108,7 +108,7 @@ The sequences obtained from high-throughput sequencing devices (in the following
 referred to as "reads") typically come with `base-call quality scores`, which indicate
 how sure the software was that the right base was called. The class ``SequenceWithQuality`` represents such reads. 
 
-``SequenceWithQualities`` is a daughter class of ``Sequence`` and inherits all its features.
+``SequenceWithQualities`` is a daughter class of :class:`Sequence` and inherits all its features.
 
 Instantiation
 
@@ -183,13 +183,49 @@ Writing to FASTQ file
    
    Note that the reads will always be written with quality strings in Sanger encoding.
    
-   To read from a FASTQ file, see class ``FastqReader``.
+   To read from a FASTQ file, see class :class:`FastqReader`.
    
 
-``FastaReader`` and ``FastqReader``
-===========================
+``FastaReader``
+===============
 
-.. class:: FastaReader
+The FastaReader class allows to read and parse a FASTA file. It can generates an
+iterator of ``Sequence`` objects.
 
+.. class:: HTSeq.FastaReader( filename_or_sequence )
+
+   As daughter class of ``FileOrSequence``, ``FastaReader`` can be instantiated
+   with either a filename, or with a sequence. See :class:`FileOrSequence` for details.
    
+Example 1
+   The typical use for FastaReader is to gr through a FASTA file and do something with
+   each sequence, e.g.::
+   
+      >>> for s in HTSeq.FastaReader( "fastaEx.fa" ):
+      ...     print "Sequence '%s' has length %d." % ( s.name, len(s) )
+      Sequence 'sequence1' has length 72.
+      Sequence 'sequence2' has length 70.
+      
+Example 2
+   Often, one might to read a whole Fasta file into memory to access it as a dict.
+   This is a good idiom for this purpose::
+   
+      >>> sequences = dict( (s.name, s) for s in HTSeq.FastaReader("fastaEx.fa") )
+      >>> sequences["sequence1"].seq
+      'AGTACGTAGTCGCTGCTGCTACGGGCGCTAGCTAGTACGTCACGACGTAGATGCTAGCTGACTAAACGATGC'
 
+
+``FastqReader``
+===============
+
+The ``FastqReader`` class works similar to ``FastaReader``. It reads a Fastq file
+and generates an iterator over ``SequenceWithQualities`` objects.
+
+.. class:: HTSeq.FastaReader( filename_or_sequence, qual_scale="phred" )
+
+   As daughter class of ``FileOrSequence``, ``FastaReader`` can be instantiated
+   with either a filename, or with a sequence. See :class:`FileOrSequence` for details.
+   
+   By default, the quality strings are assumed to be encoded according to the
+   Sanger/Phred standard. You may alternatively specify ``"solexa"`` or ``"solexa-old"``
+   (see :class:`SequenceWithQuality`).
