@@ -306,7 +306,7 @@ class StepVector( object ):
             yield value
        
    def __repr__( self ):
-      if self.start_index() == -sys.maxint + 1:
+      if self.start_index() == -sys.maxint - 1:
          start_s = "-inf"
       else:
          start_s = str( self.start_index() )
