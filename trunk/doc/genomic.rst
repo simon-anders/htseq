@@ -361,10 +361,169 @@ Special methods
   other has to steps, one from 10 to 15, and the other from 15 to 20, but
   both with the value 5.
    
+Limitations
+
+- ``StepVector`` does not realize if two adjacent steps have the same value and
+  could be merged to save space.
+- If many steps are very narrow, a ``StepVector`` object may be less effective
+  than an ordinary ``array``.
+
 
 ``GenomicArray``
 ================
 
+A ``GenomicArray`` is a collection of :class:StepVector objects, typically either one or two 
+for each chromosome of a genome. It allows to access the data in these ``StepVector``s 
+transparently via :class:GenomicInterval objects.
+
+Instantiation
+   .. class:: HTSeq.GenomicArray( chroms, stranded=True, typecode='d' )
+
+   Creates a ``GenomicArray``. 
+   
+   If ``chroms`` is a list of chromosome names,  two (or one, see below) ``StepVector`` 
+   objects for each chromosome are created, with start index 0 and indefinite
+   length. If ``chrom`` is a ``dict``, the keys are used for the chromosome names
+   and the values should be the lengths of the chromosome, i.e., the ``StepVector``s
+   index ranges are then from 0 to these lengths. (Note that the term chromosome
+   is used only for convenience. Of course, you can as well specify contig IDs
+   or the like.)
+   
+   If ``stranded`` is ``True``, two ``StepVector``s are created for each chromosome,
+   one for the '+' and one for the '-' strand. For ``stranded == False`, only one
+   ``StepVector`` per chromosome is used. In that case, the strand argument of
+   all ``GenomicInterval`` objects that are used later to specify regions in the
+   ``GenomicArray`` are ignored.
+   
+   The ``typecode`` is as described in :class:StepVector.
+   
+Attributes
+   .. attribute: GenomicArray.stranded
+                 GenomicArray.typecode
+                 
+      see above
+      
+   .. attribute: GenomicArray.step_vectors   
+   
+      a dict of (or a dict of dicts of) ``StepVector`` objects, using the chromosome
+      names, and for stranded ``GenomicArray``s also ``'+'`` and ``'-'``, as keys::
+      
+      .. doctest::
+      
+         >>> ga = HTSeq.GenomicArray( [ "chr1", "chr2" ], stranded=False )
+         >>> ga.step_vectors #doctest:+NORMALIZE_WHITESPACE
+         {'chr2': <StepVector object, type 'd', index range 0:inf, 1 step(s)>,
+          'chr1': <StepVector object, type 'd', index range 0:inf, 1 step(s)>}
+         >>> ga = HTSeq.GenomicArray( [ "chr1", "chr2" ], stranded=True )
+         >>> ga.step_vectors #doctest:+NORMALIZE_WHITESPACE
+         {'chr2': {'+': <StepVector object, type 'd', index range 0:inf, 1 step(s)>,
+                   '-': <StepVector object, type 'd', index range 0:inf, 1 step(s)>},
+          'chr1': {'+': <StepVector object, type 'd', index range 0:inf, 1 step(s)>,
+                   '-': <StepVector object, type 'd', index range 0:inf, 1 step(s)>}}
+                   
+Data access
+   One way to access your data is to access the ``step_vectors`` field directly.
+   The more elegant way, however, is to use :class:GenomicInterval objects.
+   
+   To set an single position or an interval, use::
+   
+      >>> ga[ HTSeq.GenomicPosition( "chr1", 100, "+" ) ] = 7
+      >>> ga[ HTSeq.GenomicInterval( "chr1", 250, 400, "+" ) ] = 20
+      
+   To read a single position::
+   
+      >>> ga[ HTSeq.GenomicPosition( "chr1", 300, "+" ) ]
+      20.0
+      
+   To read an interval, use a ``GenomicInterval`` object as index, and
+   obtain a ``StepVector`` with a sub-view::
+   
+      >>> sv = ga[ HTSeq.GenomicInterval( "chr1", 250, 450, "+" ) ]
+      >>> sv
+      <StepVector object, type 'd', index range 250:450, 2 step(s)>
+      >>> list( sv.get_steps() )
+      [(250, 400, 20.0), (400, 450, 0.0)]
+      
+   .. method:: GenomicArray.get_steps( iv = None, values_only = False )
+      
+   To get the steps, a method ``get_steps``, similar to :method:StepVector.get_steps,
+   is supplied. It takes a ``GenomicInterval`` and returns an iterator generator of
+   pairs. Each pair describes one step, first the range as ``GenomicInterval``,
+   then the value::
+   
+      >>> list( ga.get_steps( HTSeq.GenomicInterval( "chr1", 0, 300, "+" ) ) ) #doctest:+NORMALIZE_WHITESPACE
+      [(<GenomicInterval object 'chr1', [0,100), strand '+'>, 0.0),
+       (<GenomicInterval object 'chr1', [100,101), strand '+'>, 7.0),
+       (<GenomicInterval object 'chr1', [101,250), strand '+'>, 0.0),
+       (<GenomicInterval object 'chr1', [250,300), strand '+'>, 20.0)]
+         
+   If ``iv`` is not specified, all steps are returned:
+   
+   .. doctest::
+   
+      >>> list( ga.get_steps(  ) )  #doctest:+ELLIPSIS,+NORMALIZE_WHITESPACE
+      [..., [0,100), strand '+'>, 0.0), ..., 
+       (<GenomicInterval object 'chr1', [0,9223372036854775807), strand '-'>, 0.0)]
+
+   (Note that the long number here is ``sys.maxint``. This is because we have not
+   specified an array length.)
+
+   As in :class:StepVector.get_steps, setting ``values_only = True`` causes only the values being returned
+         
+Modifying values
+   The two methods ``add_value`` and ``apply`` work as in :class:StepVector:
+   
+   .. method:: GenomicArray.add_value( value, iv )
+   
+      Add ``value`` to the elements specified by the ``GenomicInterval`` (or
+      ``GenomicPosition``) object ``iv``. This only works for data type, for
+      which the ``+`` operation is defined, i.e., numerical data.
+      
+      ::
+      
+         >>> ga.add_value( 10, HTSeq.GenomicInterval( "chr1", 300, 400, "+" ) )
+   
+   .. method:: GenomicArray.apply( func, iv )
+   
+      This method works the same way as :method:StepVector.apply, only now the range
+      is specified as a ``GenomicInterval`` object. See :method:StepVector.apply for
+      caveats.
+   
 
 ``GenomicArrayOfSets``
 ======================
+
+A ``GenomicArrayOfSets`` is a sub-class of :class:GenomicArray that deal with the common
+special case of overlapping features. This is best explained by an example: Let's say, we
+have two features, ``"geneA"`` and ``"geneB"``, that are at overlapping positions::
+
+   >>> ivA = HTSeq.GenomicInterval( "chr1", 100, 300, "." )
+   >>> ivB = HTSeq.GenomicInterval( "chr1", 200, 400, "." )
+   
+In a ``GenomicArrayOfSets``, the value of each step is a ``set`` and so can hold more than
+one object:
+
+.. doctest::
+
+   >>> gas = HTSeq.GenomicArrayOfSets( ["chr1", "chr2"], stranded=False )
+   >>> gas.add_value( "gene A", ivA )
+   >>> gas.add_value( "gene B", ivB )
+   >>> list( gas.get_steps( HTSeq.GenomicInterval( "chr1", 0, 500, "." ) ) ) #doctest:+NORMALIZE_WHITESPACE
+   [(<GenomicInterval object 'chr1', [0,100), strand '.'>, set([])),
+    (<GenomicInterval object 'chr1', [100,200), strand '.'>, set(['gene A'])),
+    (<GenomicInterval object 'chr1', [200,300), strand '.'>, set(['gene A', 'gene B'])),
+    (<GenomicInterval object 'chr1', [300,400), strand '.'>, set(['gene B'])),
+    (<GenomicInterval object 'chr1', [400,500), strand '.'>, set([]))]
+
+
+..class:: HTSeq.GenomicArrayOfSets( chroms, stranded = True )
+
+   Instantiation is as in :class:HTSeq.GenomicArray, only that ``datatype`` is always ``'O'``.
+   
+.. method:: GenomicArray.add_value( value, iv )
+
+   The ``add_value`` method is changed to now add the value to the set of the step, performing
+   proper copying, if necessary.
+   
+
+

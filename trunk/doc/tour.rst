@@ -78,10 +78,9 @@ a ``SequenceWithQualities``, and it also has a slot ``qual``::
    >>> read.seq
    'ACTTTTAAAGATTGGCCAAGAATTGGGGATTGAAGA'
    >>> read.qual
-   array([ 33.,  33.,  33.,  33.,  33.,  33.,  29.,  27.,  29.,  32.,  29.,
-           30.,  30.,  21.,  22.,  25.,  25.,  25.,  23.,  28.,  24.,  24.,
-           29.,  29.,  29.,  25.,  28.,  24.,  24.,  26.,  25.,  25.,  24.,
-           24.,  24.,  24.])
+   array([33, 33, 33, 33, 33, 33, 29, 27, 29, 32, 29, 30, 30, 21, 22, 25, 25,
+          25, 23, 28, 24, 24, 29, 29, 29, 25, 28, 24, 24, 26, 25, 25, 24, 24,
+          24, 24])
 
 The values in the quality array are, for each base in the sequence, the Phred
 score for the correctness of the base.
@@ -257,75 +256,59 @@ A ``GenomicInterval`` has some more features, e.g., to calculate overlaps etc. S
 
 
 In order to calculate the coverage vectors for our yeast RNA-Seq data, we first need
-to knwo the lengths of the chromosomes. One might take them from the lengths of
-the reference FASTA files, but we simply specify the values here::
+a list of all the chromosomes in yeast::
 
-   >>> yeast_chrom_lengths = {
-   ...    "2-micron": 6318,
-   ...    "MT":    85779,
-   ...    "I":    230208,
-   ...    "II":   813178,
-   ...    "III":  316617,
-   ...    "IV":  1531918,
-   ...    "V":    576869,
-   ...    "VI":   270148,
-   ...    "VII": 1090946,
-   ...    "VIII": 562643,
-   ...    "IX":   439885,
-   ...    "X":    745745,
-   ...    "XI":   666454,
-   ...    "XII": 1078175,
-   ...    "XIII": 924429,
-   ...    "XIV":  784333,
-   ...    "XV":  1091289,
-   ...    "XVI":  948062
-   ... }
+   >>> yeast_chroms = [ "2-micron", "MT", "I", "II", "III", "IV", "V", "VI", "VII",
+   ...    "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI" ]
 
 Now, we define a ``GenomicArray``:
 
-   >>> cvg = HTSeq.GenomicArray( yeast_chrom_lengths, stranded=True, typecode='i' )
+   >>> cvg = HTSeq.GenomicArray( yeast_chroms, stranded=True, typecode='i' )
    
 As we specified ``stranded=True``, there are now two ``StepVector``s for each
-chromosome, all holding integer values (``typecode='i'``):
+chromosome, all holding integer values (``typecode='i'``). They all have an
+"infinte" length as we did not specify teh actual lengths of the chromosomes.
+
+.. doctest::
 
    >>> import pprint
-   >>> pprint.pprint( cvg.step_vectors )
-   {'2-micron': {'+': <StepVector object, type 'i', index range 0:6318, 1 step(s)>,
-                 '-': <StepVector object, type 'i', index range 0:6318, 1 step(s)>},
-    'I': {'+': <StepVector object, type 'i', index range 0:230208, 1 step(s)>,
-          '-': <StepVector object, type 'i', index range 0:230208, 1 step(s)>},
-    'II': {'+': <StepVector object, type 'i', index range 0:813178, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:813178, 1 step(s)>},
-    'III': {'+': <StepVector object, type 'i', index range 0:316617, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:316617, 1 step(s)>},
-    'IV': {'+': <StepVector object, type 'i', index range 0:1531918, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:1531918, 1 step(s)>},
-    'IX': {'+': <StepVector object, type 'i', index range 0:439885, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:439885, 1 step(s)>},
-    'MT': {'+': <StepVector object, type 'i', index range 0:85779, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:85779, 1 step(s)>},
-    'V': {'+': <StepVector object, type 'i', index range 0:576869, 1 step(s)>,
-          '-': <StepVector object, type 'i', index range 0:576869, 1 step(s)>},
-    'VI': {'+': <StepVector object, type 'i', index range 0:270148, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:270148, 1 step(s)>},
-    'VII': {'+': <StepVector object, type 'i', index range 0:1090946, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:1090946, 1 step(s)>},
-    'VIII': {'+': <StepVector object, type 'i', index range 0:562643, 1 step(s)>,
-             '-': <StepVector object, type 'i', index range 0:562643, 1 step(s)>},
-    'X': {'+': <StepVector object, type 'i', index range 0:745745, 1 step(s)>,
-          '-': <StepVector object, type 'i', index range 0:745745, 1 step(s)>},
-    'XI': {'+': <StepVector object, type 'i', index range 0:666454, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:666454, 1 step(s)>},
-    'XII': {'+': <StepVector object, type 'i', index range 0:1078175, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:1078175, 1 step(s)>},
-    'XIII': {'+': <StepVector object, type 'i', index range 0:924429, 1 step(s)>,
-             '-': <StepVector object, type 'i', index range 0:924429, 1 step(s)>},
-    'XIV': {'+': <StepVector object, type 'i', index range 0:784333, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:784333, 1 step(s)>},
-    'XV': {'+': <StepVector object, type 'i', index range 0:1091289, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:1091289, 1 step(s)>},
-    'XVI': {'+': <StepVector object, type 'i', index range 0:948062, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:948062, 1 step(s)>}}
+   >>> pprint.pprint( cvg.step_vectors )  #doctest:+NORMALIZE_WHITESPACE
+    {'2-micron': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+                  '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'I': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+           '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'II': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'III': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'IV': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'IX': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'MT': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'V': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+           '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'VI': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'VII': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'VIII': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+              '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'X': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+           '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'XI': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'XII': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'XIII': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+              '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'XIV': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'XV': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
+     'XVI': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
+             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>}}
 
 The integer values are all initialized to 0. We may put them to a value, say 100,
 at the genomic interval ``iv`` defined above::
@@ -350,7 +333,7 @@ through all the reads and add the value 1 at the interval to which each read was
 to::
 
    >>> alignment_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
-   >>> cvg = HTSeq.GenomicArray( yeast_chrom_lengths, stranded=True, typecode='i' )
+   >>> cvg = HTSeq.GenomicArray( yeast_chroms, stranded=True, typecode='i' )
    >>> for alngt in alignment_file:
    ...    if alngt.aligned:
    ...       cvg.add_value( 1, alngt.iv )
@@ -446,7 +429,7 @@ To deal with this data, we will use a ``GenomicArray``. A ``GenomicArray`` can s
 not only numerical data but also arbitrary Python objects (with `typecode` `'O'`).
 Hence, we can assign those features that correspond to exons, to steps in the ``GenomicArray``::
 
-   >>> exons = HTSeq.GenomicArray( yeast_chrom_lengths, stranded=False, typecode='O' )
+   >>> exons = HTSeq.GenomicArray( yeast_chroms, stranded=False, typecode='O' )
    >>> for feature in gtf_file:
    ...    if feature.type == "exon":
    ...       exons[ feature.iv ] = feature
@@ -473,7 +456,7 @@ The proper solution is to store not just single features at an interval but sets
 features which are present there. A specialization of ``GenomicArray``, ``GenomicArrayOfSets``
 is offered to simplify this::
 
-   >>> exons = HTSeq.GenomicArrayOfSets( yeast_chrom_lengths, stranded=False )
+   >>> exons = HTSeq.GenomicArrayOfSets( yeast_chroms, stranded=False )
 
 We populate the array again with the feature data. This time, we use the ``add_value``
 method, which adds an object without overwriting what might already be there. Instead,

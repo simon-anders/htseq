@@ -165,7 +165,7 @@ Attributes
       
          >>> read2 = HTSeq.SequenceWithQualities( "ACGACTGACC", "my_read", "hhgddaZVFF", "solexa" )
          >>> read2.qual
-         array([ 40.,  40.,  39.,  36.,  36.,  33.,  26.,  22.,   6.,   6.])
+         array([40, 40, 39, 36, 36, 33, 26, 22,  6,  6])
          >>> read2.qualstr
          "IIHEEB;7''"
      

@@ -519,7 +519,7 @@ cdef class SequenceWithQualities( Sequence ):
          if self._qualscale == "phred":
             self._qualarr = numpy.array( [ ord( c ) - 33 for c in self._qualstr ] )
          else:
-            self._qualarr = numpy.array( [ ord( c ) - 64 for c in self._qualstr ], 'd' )
+            self._qualarr = numpy.array( [ ord( c ) - 64 for c in self._qualstr ] )
             if self._qualscale == "solexa-old":
                self._qualarr = 10 * numpy.log10(1 + 10 ** ( self._quastrl / 10.0 ) )
             else:
@@ -543,7 +543,7 @@ cdef class SequenceWithQualities( Sequence ):
       if self._qualscale == "phred":
          return self._qualstr
       else:
-         return ''.join( [ chr(i+33) for i in self.qual ] )
+         return ''.join( [ chr(int(i)+33) for i in self.qual ] )
 	 # FIXME: This is probably too slow!
       
 

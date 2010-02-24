@@ -481,8 +481,8 @@ class GenomicArrayOfSets( GenomicArray ):
    the present set, and the set is split if necessary.
    """
 
-   def __init__( self, chrom_lengths, stranded=True ):
-      GenomicArray.__init__( self, chrom_lengths, stranded, 'O' )
+   def __init__( self, chroms, stranded=True ):
+      GenomicArray.__init__( self, chroms, stranded, 'O' )
       for chrom in self.step_vectors:
          if self.stranded:
             self.step_vectors[ chrom ][ "+" ][ : ] = set()
