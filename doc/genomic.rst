@@ -372,9 +372,9 @@ Limitations
 ``GenomicArray``
 ================
 
-A ``GenomicArray`` is a collection of :class:StepVector objects, typically either one or two 
-for each chromosome of a genome. It allows to access the data in these ``StepVector``s 
-transparently via :class:GenomicInterval objects.
+A ``GenomicArray`` is a collection of :class:`StepVector` objects, typically either one or two 
+for each chromosome of a genome. It allows to access the data in these StepVectors 
+transparently via :class:`GenomicInterval` objects.
 
 Instantiation
    .. class:: HTSeq.GenomicArray( chroms, stranded=True, typecode='d' )
@@ -384,7 +384,7 @@ Instantiation
    If ``chroms`` is a list of chromosome names,  two (or one, see below) ``StepVector`` 
    objects for each chromosome are created, with start index 0 and indefinite
    length. If ``chrom`` is a ``dict``, the keys are used for the chromosome names
-   and the values should be the lengths of the chromosome, i.e., the ``StepVector``s
+   and the values should be the lengths of the chromosome, i.e., the StepVectors
    index ranges are then from 0 to these lengths. (Note that the term chromosome
    is used only for convenience. Of course, you can as well specify contig IDs
    or the like.)
@@ -489,6 +489,23 @@ Modifying values
       is specified as a ``GenomicInterval`` object. See :method:StepVector.apply for
       caveats.
    
+Writing to a file
+   .. method:: GenomicArray.write_bedgraph_file( file_or_filename, strand=".", track_options="" )
+   
+      Write out the data in the GenomicArray as a BedGraph_ track. This is a subtype of the Wiggle_ format
+      (i.e., the file extension is usually ".wig") and such files can be conveniently viewed in
+      a genome browser, e.g., with IGB_. 
+      
+      This works only for numerical data, i.e., ``datatype`` ``'i'`` or ``'d'``. As a bedgraph track
+      cannot store strand information, you have to specify either ``'+'`` or ``'-'`` as the
+      strand argument if your ``GenomicArray`` is stranded (``stranded==True``). Typically, you
+      will write two wiggle files, one for each strand, and display them together.
+      
+.. _BedGraph: http://genome.ucsc.edu/goldenPath/help/bedgraph.html
+.. _Wiggle: http://genome.ucsc.edu/goldenPath/help/wiggle.html
+.. _IGB: http://igb.bioviz.org/
+   
+
 
 ``GenomicArrayOfSets``
 ======================
@@ -516,9 +533,9 @@ one object:
     (<GenomicInterval object 'chr1', [400,500), strand '.'>, set([]))]
 
 
-..class:: HTSeq.GenomicArrayOfSets( chroms, stranded = True )
+.. class:: HTSeq.GenomicArrayOfSets( chroms, stranded = True )
 
-   Instantiation is as in :class:HTSeq.GenomicArray, only that ``datatype`` is always ``'O'``.
+   Instantiation is as in :class:GenomicArray, only that ``datatype`` is always ``'O'``.
    
 .. method:: GenomicArray.add_value( value, iv )
 

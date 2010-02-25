@@ -14,6 +14,8 @@ For installation instructions, see :ref:`install`.
 Documentation overview
 ======================
 
+* :ref:`install`
+
 * :ref:`tour`
 
   The Tour shows you how to get started. It explains how to install HTSeq, and then
