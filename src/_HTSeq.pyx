@@ -1,4 +1,5 @@
 import sys
+import math
 import re
 import csv
 import gzip
@@ -541,18 +542,27 @@ cdef class SequenceWithQualities( Sequence ):
       self._qualstr = qualstr
       self._qualscale = qualscale
       self._qualarr = None
+      self._qualstr_phred = ''
 
    cdef _fill_qual_arr( SequenceWithQualities self ):
-      assert len( self.seq ) == len( self._qualstr )
+      cdef int seq_len = len( self.seq )
+      if seq_len != len( self._qualstr ):
+         raise ValueError, "Quality string has not the same length as sequence."
+      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qualarr = numpy.empty( ( seq_len, ), numpy.int )
+      cdef int i
+      cdef char * qualstr = self._qualstr
       if self._qualscale == "phred":
-         self._qualarr = numpy.array( [ ord( c ) - 33 for c in self._qualstr ], numpy.int )
+         for i in xrange( seq_len ):
+            qualarr[i] = qualstr[i] - 33
+      elif self._qualscale == "solexa":
+         for i in xrange( seq_len ):
+            qualarr[i] = qualstr[i] - 64
+      elif self._qualscale == "solexa-old":
+         for i in xrange( seq_len ):
+            qualarr[i] = 10 * math.log10( 1 + 10 ** ( qualstr[i] - 64 ) / 10.0 )
       else:
-         self._qualarr = numpy.array( [ ord( c ) - 64 for c in self._qualstr ], numpy.int )
-         if self._qualscale == "solexa-old":
-            self._qualarr = 10 * numpy.log10(1 + 10 ** ( self._quastrl / 10.0 ) )
-         else:
-            if self._qualscale != "solexa":
-               raise ValueError, "Illegal quality scale '%s'." % self._qualscale
+         raise ValueError, "Illegal quality scale '%s'." % self._qualscale
+      self._qualarr = qualarr
 
    @property
    def qual( self ):
@@ -573,11 +583,23 @@ cdef class SequenceWithQualities( Sequence ):
 
    @property
    def qualstr( self ):
-      if self._qualscale == "phred":
-         return self._qualstr
-      else:
-         return ''.join( [ chr(int(i)+33) for i in self.qual ] )
-	 # FIXME: This is probably too slow!
+      cdef int seqlen
+      cdef char * qualstr_phred_cstr = self._qualstr_phred
+      cdef int i
+      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array
+      if qualstr_phred_cstr[0] == 0:
+         if self._qualscale == "phred":
+            self._qualstr_phred = self._qualstr
+         else:
+            seqlen = len( self._qualstr )
+            self._qualstr_phred = ' ' * seqlen
+            qualstr_phred_cstr = self._qualstr_phred
+            if self._qualarr is None:
+               self._fill_qual_arr()
+            qual_array = self._qualarr               
+            for i in xrange( seqlen ):
+               qualstr_phred_cstr[i] = 33 + qual_array[i]            
+      return self._qualstr_phred
       
 
    def write_to_fastq_file( self, fastq_file ):

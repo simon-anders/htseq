@@ -26,6 +26,7 @@ cdef class Sequence( object ):
 
 cdef class SequenceWithQualities( Sequence ):
    cdef readonly str _qualstr
+   cdef readonly str _qualstr_phred
    cdef readonly str _qualscale
    cdef readonly object _qualarr
    cdef _fill_qual_arr( SequenceWithQualities self )
