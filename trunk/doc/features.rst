@@ -4,6 +4,14 @@
 Features
 ********
 
+
+.. currentmodule:: HTSeq
+
+.. doctest:: 
+   :hide:
+
+   >>> import HTSeq
+
 The easiest way to work with annotation is to use :class:GenomicArray with ``typecode=='O'``
 or :class:GenomicArrayOfSets. If you have your annotation in a flat file, with each
 line describing a feature and giving its coordinates, you can read in the file line for line,
@@ -13,9 +21,11 @@ in the genomic array at the place indicated by the genomic interval.
 
 For example, if you have data in a tab-separated file as follows::
 
-   >>> for line in open( "feature_list.txt" ):
+..doctest::
+
+   >>> for line in open( "feature_list.txt" ):  #doctest:+NORMALIZE_WHITESPACE
    ...     print line,
-   chr2	100	300	+	"gene A"
+   chr2  100	300	+	"gene A"
    chr2	200	400	-	"gene B"
    chr3	150	270	+	"gene C"
 
