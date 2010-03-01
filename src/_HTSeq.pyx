@@ -446,7 +446,7 @@ cpdef str reverse_complement( str seq ):
 
    return seq[ ::-1 ].translate( _translation_table_for_complementation )
 
-base_to_row = { 'A': 0, 'C': 1, 'G': 2, 'T': 3, 'N': 4 }
+base_to_column = { 'A': 0, 'C': 1, 'G': 2, 'T': 3, 'N': 4 }
 
 cdef class Sequence( object ):
    """A Sequence, typically of DNA, with a name.
@@ -489,8 +489,7 @@ cdef class Sequence( object ):
          fasta_file.write( self.seq[ i*70 : (i+1)*70 ] + "\n" )
          i += 1
          
-   cpdef numpy.ndarray add_bases_to_count_array( Sequence self,
-         numpy.ndarray count_array_ ):
+   cpdef object add_bases_to_count_array( Sequence self, numpy.ndarray count_array_ ):
       
       cdef numpy.ndarray[ numpy.int_t, ndim=2 ] count_array = count_array_
       cdef int seq_length = len( self.seq )
@@ -518,7 +517,7 @@ cdef class Sequence( object ):
          else:
             raise ValueError, "Illegal base letter encountered."
          
-      return count_array
+      return None
 
 
 cdef class SequenceWithQualities( Sequence ):
@@ -608,7 +607,7 @@ cdef class SequenceWithQualities( Sequence ):
          res._qualarr = self._qualarr[::-1]
       return res
       
-   cpdef numpy.ndarray add_qual_to_count_array( SequenceWithQualities self,
+   cpdef object add_qual_to_count_array( SequenceWithQualities self,
          numpy.ndarray count_array_ ):
       
       cdef numpy.ndarray[ numpy.int_t, ndim=2 ] count_array = count_array_
@@ -630,7 +629,7 @@ cdef class SequenceWithQualities( Sequence ):
             raise ValueError, "Too large quality value encountered."
          count_array[ i, q ] += 1
          
-      return count_array
+      return None
    
    
 ###########################
