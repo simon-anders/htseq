@@ -100,6 +100,54 @@ Writing to FASTA file
 Extended UIPAC letters
    These are not (yet) supported. A sequence should only contain A, C, G, and T.   
    
+Counting bases
+
+   .. method: Sequence.add_bases_to_count_array( count_array )
+   
+   For read quality assessment, it is often helpful to count the proportions
+   of called bases, stratified by position in the read. To obtain such counts,
+   the following idiom is helpful:
+   
+   .. doctest::
+   
+      >>> import numpy
+      >>> reads = HTSeq.FastqReader( "yeast_RNASeq_excerpt_sequence.txt" )  
+      >>> counts = numpy.zeros( ( 36, 5 ), numpy.int )
+      >>> for read in reads:
+      ...     read.add_bases_to_count_array( counts )
+      >>> counts        #doctest:+NORMALIZE_WHITESPACE,+ELLIPSIS
+      array([[16194,  2048,  4017,  2683,    57],
+             [10716,  3321,  4933,  6029,     0],
+             [ 7816,  5024,  5946,  6213,     0],
+             ...
+             [ 8526,  4812,  5460,  6197,     4],
+             [ 8088,  4915,  5531,  6464,     1]])      
+   
+   Here, a two-dimensional ``numpy`` array of integer zeroes is defined and then
+   passed to the ``add_bases_to_count_array`` method of each ``Sequence`` object obtained
+   from the Fastq file. The method ``add_bases_to_count_array`` adds, for each base,
+   a one to one of the array elements such that, in the end, the 36 rows of the array
+   correspond to the positions in the reads (all of length 36 bp in this example), and
+   the 5 columns correspond to the base letters 'A', 'C', 'G', 'T', and 'N', as given by
+   the constant ``base_to_columns``
+   
+   .. data:: HTSeq.base_to_column = { 'A': 0, 'C': 1, 'G': 2, 'T': 3, 'N': 4 }
+   
+   Hence, we can get the proportion of 'C's in each position as follows:
+   
+   .. doctest::
+   
+      >>> counts = numpy.array( counts, numpy.float ) #doctest:+ELLIPSIS,+NORMALIZE_WHITESPACE
+      >>> #counts[ : , HTSeq.base_to_column['C'] ] / counts.sum(1)
+      array([ 0.08192328,  0.13284531,  0.20096804,  0.16872675,  0.21200848,
+              ...
+              0.18560742,  0.19236769,  0.19088764,  0.17872715,  0.1924877 ,
+              0.19660786])
+   
+   (Here, we first convert the count array to type ``float`` to allow to proper
+   division, and then divide the second column (``HTSeq.base_to_column['C']``) by
+   the row-wise sums (``counts.sum(1)``; the ``1`` requests summing along rows).)
+
 
 ``SequenceWithQuality``
 =======================   
@@ -184,6 +232,35 @@ Writing to FASTQ file
    Note that the reads will always be written with quality strings in Sanger encoding.
    
    To read from a FASTQ file, see class :class:`FastqReader`.
+
+Counting quality values
+
+   .. method: Sequence.add_qual_to_count_array( count_array )
+   
+   Similar to :method:`Sequence.add_bases_to_count_array`, this method counts the
+   occuring quality values stratified by position. This then allows to calculate
+   average qualities as well as histograms.
+   
+   Here is a usage example:
+   
+   .. doctest::
+   
+      >>> import numpy       #doctest:+NORMALIZE_WHITESPACE,+ELLIPSIS
+      >>> reads = HTSeq.FastqReader( "yeast_RNASeq_excerpt_sequence.txt", "solexa" )
+      >>> counts = numpy.zeros( ( 36, 41 ), numpy.int )
+      >>> for read in reads:
+      ...    read.add_qual_to_count_array( counts )
+      >>> #counts
+      array([[   0,    0,   64, ...,    0,    0,    0],
+             [   0,    0,   93, ...,    0,    0,    0],
+             ..., 
+             [   0,    0, 2445, ...,    0,    0,    0],
+             [   0,    0, 2920, ...,    0,    0,    0]])
+
+   The value ``counts[i,j]`` is then the number of reads for which the base at
+   position ``i`` hat the  quality scores ``j``. According to the Fastq standard,
+   quality scores range from 0 to 40; hence, the array is initialized to have 
+   41 columns.
    
 
 ``FastaReader``
@@ -198,7 +275,7 @@ iterator of ``Sequence`` objects.
    with either a filename, or with a sequence. See :class:`FileOrSequence` for details.
    
 Example 1
-   The typical use for FastaReader is to gr through a FASTA file and do something with
+   The typical use for FastaReader is to go through a FASTA file and do something with
    each sequence, e.g.::
    
       >>> for s in HTSeq.FastaReader( "fastaEx.fa" ):

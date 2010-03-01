@@ -21,8 +21,7 @@ cdef class Sequence( object ):
    cdef public str name
    cdef public str descr
    cpdef Sequence get_reverse_complement( self )      
-   cpdef numpy.ndarray add_bases_to_count_array( Sequence self,
-      numpy.ndarray count_array_ )
+   cpdef object add_bases_to_count_array( Sequence self, numpy.ndarray count_array_ )
    
 
 cdef class SequenceWithQualities( Sequence ):
@@ -30,8 +29,7 @@ cdef class SequenceWithQualities( Sequence ):
    cdef readonly str _qualscale
    cdef readonly object _qualarr
    cdef _fill_qual_arr( SequenceWithQualities self )
-   cpdef numpy.ndarray add_qual_to_count_array( SequenceWithQualities self,
-      numpy.ndarray count_array_ )
+   cpdef object add_qual_to_count_array( SequenceWithQualities self, numpy.ndarray count_array_ )
 
       
 cdef class Alignment( object ):
