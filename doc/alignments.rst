@@ -4,6 +4,13 @@
 Read alignments
 ***************
 
+.. currentmodule:: HTSeq
+
+.. doctest:: 
+   :hide:
+
+   >>> import HTSeq
+
 Concepts
 ========
 
@@ -19,10 +26,12 @@ and generates an iterator over the individual alignment records. These are repre
 objects of a sub-class of :class:`Alignment` and hence all offer a common interface.
 
 So, you can easily write code that should work for all aligner formats. As a simple example,
-consider this function that counts the number of reads falling on each chromosome::
+consider this function that counts the number of reads falling on each chromosome:
+
+.. doctest::
 
    >>> import collections
-   ... def count_in_chroms( alignments ):
+   >>> def count_in_chroms( alignments ):
    ...     counts = collections.defaultdict( lambda: 0 )
    ...     for almnt in alignments:
    ...         if almnt.aligned:
@@ -31,8 +40,10 @@ consider this function that counts the number of reads falling on each chromosom
 
 If you have a SAM file (e.g., from BWA or BowTie), you can call it with::
 
-   >>> count_in_chroms( HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" ) )
-   defaultdict( ..., {'XVI': 1509, 'V': 999, ..., 'XV': 2133})
+.. doctest::
+
+   >>> count_in_chroms( HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" ) ) #doctest:+ELLIPSIS
+   defaultdict(..., {'XVI': 1509, 'V': 999, ..., 'XV': 2133})
 
 If, however, you have done your alignment with Eland from the SolexaPipeline, which
 uses the "Solexa export" format, you can use the same function, only using :class:`SolexaExportReader` 
@@ -40,7 +51,7 @@ instead of :class:`SAM_Reader`:
 
 .. doctest::
 
-   >>> count_in_chroms( HTSeq.SolexaExportReader( "mydata_export.txt" ) ) #doctest:skip
+   >>> count_in_chroms( HTSeq.SolexaExportReader( "mydata_export.txt" ) ) #doctest:+SKIP
 
 Both class generate iterators of similar objects. On the other hand, some formats contain more information
 and then the ``Alignment`` objects from these contain additional fields.
@@ -207,9 +218,11 @@ When reading in SAM files, the CIGAR string is parsed and stored as a list of
 ``CigarOperation`` objects. For example, assume, a 36 bp read has been aligned
 to the '+' strand of chromosome 'chr3', extending to the right from position
 1000, with the CIGAR string ``"20M6I10M"``. The function :function:parse_cigar
-spells out what this means::
+spells out what this means:
 
-   >>> HTSeq.parse_cigar( "20M6I10M", 1000, "chr2", "+" )
+.. doctest::
+
+   >>> HTSeq.parse_cigar( "20M6I10M", 1000, "chr2", "+" )  #doctest:+NORMALIZE_WHITESPACE
    [< CigarOperation: 20 base(s) matched on ref iv chr2:[1000,1020)/+, query iv [0,20) >,
     < CigarOperation: 6 base(s) inserted on ref iv chr2:[1020,1020)/+, query iv [20,26) >,
     < CigarOperation: 10 base(s) matched on ref iv chr2:[1020,1030)/+, query iv [26,36) >]
@@ -229,10 +242,12 @@ objects in the list.
       The type of the operation. One of the letters M, I, D, N, S, H, or P. Use
       the dict :variable: to transform this to names::
       
-          >>> HTSeq.cigar_operation_names
+      .. doctest::
+      
+          >>> HTSeq.cigar_operation_names    #doctest:+NORMALIZE_WHITESPACE
           {'D': 'deleted',
-           'H': 'hard-clipped',
            'I': 'inserted',
+           'H': 'hard-clipped',
            'M': 'matched',
            'N': 'skipped',
            'P': 'padded',

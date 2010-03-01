@@ -105,7 +105,7 @@ cdef class GenomicInterval:
    property start_d:
       """See the class docstring for the meaning of the 'directional start'.
       Note that if you set 'start_d', both the start and the end are changed, 
-      such teh interval gets the requested new directional start and its
+      such the interval gets the requested new directional start and its
       length stays unchanged."""
 
       def __get__( GenomicInterval self ):
@@ -446,6 +446,7 @@ cpdef str reverse_complement( str seq ):
 
    return seq[ ::-1 ].translate( _translation_table_for_complementation )
 
+base_to_row = { 'A': 0, 'C': 1, 'G': 2, 'T': 3, 'N': 4 }
 
 cdef class Sequence( object ):
    """A Sequence, typically of DNA, with a name.
@@ -487,6 +488,38 @@ cdef class Sequence( object ):
       while i*70 < len(self.seq):
          fasta_file.write( self.seq[ i*70 : (i+1)*70 ] + "\n" )
          i += 1
+         
+   cpdef numpy.ndarray add_bases_to_count_array( Sequence self,
+         numpy.ndarray count_array_ ):
+      
+      cdef numpy.ndarray[ numpy.int_t, ndim=2 ] count_array = count_array_
+      cdef int seq_length = len( self.seq )
+
+      if numpy.PyArray_DIMS( count_array )[0] < seq_length:
+         raise ValueError, "'count_array' too small for sequence."
+      if numpy.PyArray_DIMS( count_array )[1] < 5:
+         raise ValueError, "'count_array' has too few columns."
+      
+      cdef numpy.npy_intp i
+      cdef char b
+      cdef char* seq_cstr = self.seq
+      for i in xrange( seq_length ):
+         b = seq_cstr[i]
+         if b == 'A' or b == 'a':
+            count_array[ i, 0 ] += 1
+         elif b == 'C' or b == 'c':
+            count_array[ i, 1 ] += 1
+         elif b == 'G' or b == 'g':
+            count_array[ i, 2 ] += 1
+         elif b == 'T' or b == 't':
+            count_array[ i, 3 ] += 1
+         elif b == 'N' or b == 'n':
+            count_array[ i, 4 ] += 1
+         else:
+            raise ValueError, "Illegal base letter encountered."
+         
+      return count_array
+
 
 cdef class SequenceWithQualities( Sequence ):
    """A Sequence with base-call quality scores.
@@ -509,23 +542,24 @@ cdef class SequenceWithQualities( Sequence ):
       self._qualstr = qualstr
       self._qualscale = qualscale
       self._qualarr = None
-      
+
+   cdef _fill_qual_arr( SequenceWithQualities self ):
+      assert len( self.seq ) == len( self._qualstr )
+      if self._qualscale == "phred":
+         self._qualarr = numpy.array( [ ord( c ) - 33 for c in self._qualstr ], numpy.int )
+      else:
+         self._qualarr = numpy.array( [ ord( c ) - 64 for c in self._qualstr ], numpy.int )
+         if self._qualscale == "solexa-old":
+            self._qualarr = 10 * numpy.log10(1 + 10 ** ( self._quastrl / 10.0 ) )
+         else:
+            if self._qualscale != "solexa":
+               raise ValueError, "Illegal quality scale '%s'." % self._qualscale
+
    @property
    def qual( self ):
-      if self._qualarr is not None:
-         return self._qualarr
-      else:
-         assert len( self.seq ) == len( self._qualstr )
-         if self._qualscale == "phred":
-            self._qualarr = numpy.array( [ ord( c ) - 33 for c in self._qualstr ] )
-         else:
-            self._qualarr = numpy.array( [ ord( c ) - 64 for c in self._qualstr ] )
-            if self._qualscale == "solexa-old":
-               self._qualarr = 10 * numpy.log10(1 + 10 ** ( self._quastrl / 10.0 ) )
-            else:
-               if self._qualscale != "solexa":
-                  raise ValueError, "Illegal quality scale '%s'." % self._qualscale
-         return self._qualarr
+      if self._qualarr is None:
+         self._fill_qual_arr()
+      return self._qualarr
               
    def __repr__( self ):
       return "<%s object '%s'>" % ( self.__class__.__name__, self.name )
@@ -573,74 +607,32 @@ cdef class SequenceWithQualities( Sequence ):
       if self._qualarr is not None:
          res._qualarr = self._qualarr[::-1]
       return res
+      
+   cpdef numpy.ndarray add_qual_to_count_array( SequenceWithQualities self,
+         numpy.ndarray count_array_ ):
+      
+      cdef numpy.ndarray[ numpy.int_t, ndim=2 ] count_array = count_array_
+      if self._qualarr is None:
+         self._fill_qual_arr()   
+      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array = self._qualarr
 
-base_to_row = { 'A': 0, 'C': 1, 'G': 2, 'T': 3, 'N': 4 }
+      cdef numpy.npy_intp seq_length = numpy.PyArray_DIMS( qual_array  )[0]
+      cdef numpy.npy_intp qual_size  = numpy.PyArray_DIMS( count_array )[1]
 
-def base_counts_by_position( sequences, seq_length=None ):
-   """This function takes an iterable of Sequence objects and counts for each 
-   position in the sequence the number of 'A's, 'C's, 'T's, 'G's and 'N's. It
-   returns a two-dimensional integer numpy array with 'seq_length' rows and
-   5 columns. The 5 columns correspond to the letters A, C, G, T, N, in this
-   order. The 'base_to_row' dictionary allows to address the columns
-   conveniently.
-   
-   If 'seq_length' is not provided, the length of the first sequence is used.
-   If your sequences do not all have the same length, you should provide
-   'seq_length'.
-   
-   
-   Example:
-   
-   >>> reads = HTSeq.FastqReader( fastq_file )
-   >>> counts = HTSeq.base_counts_by_position( reads )
-   >>> print "There are", counts[ 17, 1 ], "reads with a 'C' at position 17."
-   
-   Instead of 'counts[ 17, 1 ]', you can write, more verbosely,
-   'counts[ 17, HTSeq.base_to_row["C"] ]'.
+      if seq_length > numpy.PyArray_DIMS( count_array )[0]:
+         raise ValueError, "'count_array' too small for sequence."
+      
+      cdef numpy.npy_intp i
+      cdef numpy.npy_int q
+      for i in xrange( seq_length ):
+         q = qual_array[i]
+         if( q >= qual_size ):
+            raise ValueError, "Too large quality value encountered."
+         count_array[ i, q ] += 1
+         
+      return count_array
    
    
-   Notes:    
-   
-   - Make sure that all elements of the iterable are of the type Sequence
-   (or a sub-class, e.g., SequenceWithQualities). For efficiency reasons, only
-   the type of the first object in the sequence is checked, and a wrong type of
-   a later object may crash the program.
-   
-   - Small letters are counted as well but letters other than A, C, G, T, N,
-   a, c, g, t, n cause a ValueError.
-   """
-   cdef int seq_length_int
-   cdef Sequence seq
-   cdef numpy.ndarray[ numpy.int_t, ndim=2 ] counts
-   first_seq, sequences = _HTSeq_internal.peek( sequences )
-   if not isinstance( first_seq, Sequence ):
-      raise TypeError, "First argument must be an iterable providing Sequence objects."
-   if seq_length is None:
-      seq_length_int = len( first_seq )
-   else:
-      seq_length_int = seq_length
-   counts = numpy.zeros( ( seq_length_int, 5 ), dtype=numpy.int )
-   for seq in sequences:
-      if len( seq ) > seq_length_int:
-         raise ValueError, "Sequence %s is longer than %d (the specified length)" % ( 
-            str(seq), seq_length_int )
-      for i in xrange( len( seq ) ):
-         if seq.seq[i] == 'A' or seq.seq[i] == 'a':
-            counts[ i, 0 ] += 1
-         elif seq.seq[i] == 'C' or seq.seq[i] == 'c':
-            counts[ i, 1 ] += 1
-         elif seq.seq[i] == 'G' or seq.seq[i] == 'g':
-            counts[ i, 2 ] += 1
-         elif seq.seq[i] == 'T' or seq.seq[i] == 't':
-            counts[ i, 3 ] += 1
-         elif seq.seq[i] == 'N' or seq.seq[i] == 'n':
-            counts[ i, 4 ] += 1
-         else:
-            raise ValueError, "Illegal letter in sequence " + str( seq )
-   return counts
-   
-
-
 ###########################
 ##   Alignment
 ###########################
