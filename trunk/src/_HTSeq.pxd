@@ -33,7 +33,9 @@ cdef class SequenceWithQualities( Sequence ):
    cdef readonly object _qualarr
    cdef _fill_qual_arr( SequenceWithQualities self )
    cpdef object add_qual_to_count_array( SequenceWithQualities self, numpy.ndarray count_array_ )
-   cpdef SequenceWithQualities trim_right_end_with_qual( SequenceWithQualities self, 
+   cpdef SequenceWithQualities trim_left_end_with_quals( SequenceWithQualities self, 
+      Sequence pattern, float max_mm_qual_per_base = ? )
+   cpdef SequenceWithQualities trim_right_end_with_quals( SequenceWithQualities self, 
       Sequence pattern, float max_mm_qual_per_base = ? )
 
       
