@@ -519,6 +519,54 @@ cdef class Sequence( object ):
             raise ValueError, "Illegal base letter encountered."
          
       return None
+      
+   cpdef Sequence trim_left_end( Sequence self, Sequence pattern, float mismatch_prop = 0. ):
+      cdef int seqlen = len( self.seq )
+      cdef int patlen = len( pattern.seq )
+      cdef int minlen
+      if seqlen < patlen:
+         minlen = seqlen
+      else: 
+         minlen = patlen
+      cdef char * seq_cstr = self.seq
+      cdef char * pat_cstr = pattern.seq
+      cdef int match = 0
+      cdef int i, j
+      cdef int num_mismatches
+      for i in xrange( 1, minlen ):
+         num_mismatches = 0
+         for j in xrange( i ):
+            if seq_cstr[ j ] != pat_cstr[ patlen - i + j ]:
+               num_mismatches += 1
+               if num_mismatches > mismatch_prop * i:
+                  break
+         else:
+            match = i
+      return self[ match : seqlen ]
+
+   cpdef Sequence trim_right_end( Sequence self, Sequence pattern, float mismatch_prop = 0. ):
+      cdef int seqlen = len( self.seq )
+      cdef int patlen = len( pattern.seq )
+      cdef int minlen
+      if seqlen < patlen:
+         minlen = seqlen
+      else: 
+         minlen = patlen
+      cdef char * seq_cstr = self.seq
+      cdef char * pat_cstr = pattern.seq
+      cdef int match = 0
+      cdef int i, j
+      cdef int num_mismatches
+      for i in xrange( 1, minlen ):
+         num_mismatches = 0
+         for j in xrange( i ):
+            if seq_cstr[ seqlen - i + j ] != pat_cstr[ j ]:
+               num_mismatches += 1
+               if num_mismatches > mismatch_prop * i:
+                  break
+         else:
+            match = i
+      return self[ 0 : seqlen-match ]
 
 
 cdef class SequenceWithQualities( Sequence ):
@@ -653,6 +701,36 @@ cdef class SequenceWithQualities( Sequence ):
          
       return None
    
+   cpdef SequenceWithQualities trim_right_end_with_qual( SequenceWithQualities self, 
+         Sequence pattern, float max_mm_qual_per_base = 0. ):
+      raise NotImplemented, "buggy"
+      cdef int seqlen = len( self.seq )
+      cdef int patlen = len( pattern.seq )
+      cdef int minlen
+      if seqlen < patlen:
+         minlen = seqlen
+      else: 
+         minlen = patlen
+      cdef char * seq_cstr = self.seq
+      cdef char * pat_cstr = pattern.seq
+      cdef int match = 0
+      cdef int i, j
+      cdef int sum_mm_qual
+      if self._qualarr is None:
+         self._fill_qual_arr()   
+      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array = self._qualarr
+      for i in xrange( 1, minlen ):
+         sum_mm_qual = 0
+         for j in xrange( i ):
+            if seq_cstr[ seqlen - 1 - i + j ] != pat_cstr[ j ]:
+               sum_mm_qual += qual_array[ seqlen - 1 - i + j ]
+               if sum_mm_qual > max_mm_qual_per_base * i:
+                  break
+         else:
+            match = i+1
+      return self[ : seqlen-match ]
+
+
    
 ###########################
 ##   Alignment
