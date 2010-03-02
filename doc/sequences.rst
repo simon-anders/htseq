@@ -148,6 +148,44 @@ Counting bases
    division, and then divide the second column (``HTSeq.base_to_column['C']``) by
    the row-wise sums (``counts.sum(1)``; the ``1`` requests summing along rows).)
 
+Trimming reads
+
+   .. method:: Sequence.trim_left_end( pattern, mismatch_prop = 0. )
+               Sequence.trim_right_end( pattern, mismatch_prop = 0. )
+               
+   In high-throughput sequencing, reads are sometimes contaminated with adapters
+   or sequencing primers. These function take a pattern and attempt to match either
+   the right end of the pattern to the left end of the sequence (``trim_left_end``)
+   or the left end of the pattern to the right end of the sequence (``trim_right_end``).
+   The match is the trimmed off.
+   
+   Here is an example::
+   
+      >>> seq2 = HTSeq.Sequence( "ACGTAAAGCGGTACGGGGGG" )
+      >>> left_seq = HTSeq.Sequence( "CCCACG" )
+      >>> print seq2.trim_left_end( left_seq )
+      TAAAGCGGTACGGGGGG
+      
+   The right end of the pattern ("ACG") matched the left end of the sequence, and
+   has hence been trimmed off.
+   
+   The optional argument ``mismatch_prop`` is the number of allowed mismatches as
+   proportion of the length of the match::
+
+      >>> right_seq = HTSeq.Sequence( "GGGTGGG" )
+      >>> print seq2.trim_right_end( right_seq )
+      ACGTAAAGCGGTACGGG
+      >>> print seq2.trim_right_end( right_seq, 1/6. )
+      ACGTAAAGCGGTAC
+      >>> print seq2.trim_right_end( right_seq, 1/7. )
+      ACGTAAAGCGGTACGGG
+      
+   Here, if we allow at least one mismatch per six bases, the whole pattern gets cut off.
+   
+   If you have quality information, you can use this, too, to specify the allowed amount
+   of mismatch. See :method:`SequenceWithQualities.trim_left_end_with_quals` and 
+   :method:`SequenceWithQualities.trim_left_end_with_quals`.
+
 
 ``SequenceWithQuality``
 =======================   
@@ -262,6 +300,18 @@ Counting quality values
    quality scores range from 0 to 40; hence, the array is initialized to have 
    41 columns.
    
+Trimming reads
+
+   .. method:: SequenceWithQualities.trim_left_end_with_quals( pattern, max_mm_qual_per_base = 5. )
+               SequenceWithQualities.trim_right_end_with_quals( pattern, max_mm_qual_per_base = 5. )
+               
+   These methods work as :method:`Sequence.trim_left_end` and :method:`Sequence.trim_right_end`
+   (which are, of course, avilable for ``SequenceWithQualities`` objects, too). The difference
+   is, that for the ``_with_quals`` trimming methods, the maximum amount of allowed mismatch is
+   specified as the maximum value that the sum of the quality scores of the mismatched bases,
+   divided by the length of the match, may take.
+   
+   *TODO*: Add example
 
 ``FastaReader``
 ===============

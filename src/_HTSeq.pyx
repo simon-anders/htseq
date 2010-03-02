@@ -701,9 +701,36 @@ cdef class SequenceWithQualities( Sequence ):
          
       return None
    
-   cpdef SequenceWithQualities trim_right_end_with_qual( SequenceWithQualities self, 
-         Sequence pattern, float max_mm_qual_per_base = 0. ):
-      raise NotImplemented, "buggy"
+   cpdef SequenceWithQualities trim_left_end_with_quals( SequenceWithQualities self, 
+         Sequence pattern, float max_mm_qual_per_base = 5. ):
+      cdef int seqlen = len( self.seq )
+      cdef int patlen = len( pattern.seq )
+      cdef int minlen
+      if seqlen < patlen:
+         minlen = seqlen
+      else: 
+         minlen = patlen
+      cdef char * seq_cstr = self.seq
+      cdef char * pat_cstr = pattern.seq
+      cdef int match = 0
+      cdef int i, j
+      cdef int sum_mm_qual
+      if self._qualarr is None:
+         self._fill_qual_arr()   
+      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array = self._qualarr
+      for i in xrange( 1, minlen ):
+         num_mismatches = 0
+         for j in xrange( i ):
+            if seq_cstr[ j ] != pat_cstr[ patlen - i + j ]:
+               sum_mm_qual += qual_array[ seqlen - 1 - i + j ]
+               if sum_mm_qual > max_mm_qual_per_base * i:
+                  break
+         else:
+            match = i
+      return self[ match : seqlen ]
+
+   cpdef SequenceWithQualities trim_right_end_with_quals( SequenceWithQualities self, 
+          Sequence pattern, float max_mm_qual_per_base = 5. ):
       cdef int seqlen = len( self.seq )
       cdef int patlen = len( pattern.seq )
       cdef int minlen
@@ -722,14 +749,13 @@ cdef class SequenceWithQualities( Sequence ):
       for i in xrange( 1, minlen ):
          sum_mm_qual = 0
          for j in xrange( i ):
-            if seq_cstr[ seqlen - 1 - i + j ] != pat_cstr[ j ]:
+            if seq_cstr[ seqlen - i + j ] != pat_cstr[ j ]:
                sum_mm_qual += qual_array[ seqlen - 1 - i + j ]
                if sum_mm_qual > max_mm_qual_per_base * i:
                   break
          else:
-            match = i+1
-      return self[ : seqlen-match ]
-
+            match = i
+      return self[ 0 : seqlen-match ]
 
    
 ###########################
