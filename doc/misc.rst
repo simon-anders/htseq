@@ -4,8 +4,20 @@
 Miscellaneous
 *************
 
+.. currentmodule:: HTSeq
+
+.. doctest:: 
+   :hide:
+
+   >>> import HTSeq
+
+
 ``FileOrSequence``
 ==================
 
-   *FIXME: documentation to be written!*
+.. class:: HTseq.FileOrSequence( filename_or_sequence )
+
+   *to be written*
+
+
 
