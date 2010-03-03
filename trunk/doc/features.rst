@@ -62,7 +62,7 @@ As usual, there is a parser class, called ``GFF_Reader``, that can generate an
 iterator of objects describing the features. These objects are of type ``GenomicFeature``
 and each describes one line of a GFF file. See Section :ref:tour for an example.
 
-.. class:: HTSeq.GFF_Reader( filename_or_sequence )
+.. class:: GFF_Reader( filename_or_sequence )
 
    As a subclass of :class:FileOrSequence, ``GFF_Reader`` can be initialized either
    with a file name or with an open file or another sequence of lines.
@@ -70,7 +70,7 @@ and each describes one line of a GFF file. See Section :ref:tour for an example.
    When requesting an iterator, it generates objects of type ``GenomicFeature``.
    
    
-.. class:: HTSeq.GenomicFeature( name, type_, interval )
+.. class:: GenomicFeature( name, type_, interval )
 
    A GenomicFeature object always contains the following attributes:
    
@@ -127,7 +127,7 @@ and each describes one line of a GFF file. See Section :ref:tour for an example.
       attributes given above are missing. Call this for each of your ``GenomicFeature`` objects
       and write the lines into a file to get a GFF file.
       
-.. function:: HTSeq.parse_GFF_attribute_string( attrStr, extra_return_first_value=False )      
+.. function:: parse_GFF_attribute_string( attrStr, extra_return_first_value=False )      
 
    This is the function that :class:`GFF_Reader` uses to parse the attribute column. (See ``GenomicFeature.attr``.)
    It returns a dict, or, if requested, a pair of the dict and the first value.

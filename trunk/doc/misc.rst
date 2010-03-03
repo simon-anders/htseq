@@ -15,7 +15,7 @@ Miscellaneous
 ``FileOrSequence``
 ==================
 
-.. class:: HTseq.FileOrSequence( filename_or_sequence )
+.. class:: FileOrSequence( filename_or_sequence )
 
    *to be written*
 
