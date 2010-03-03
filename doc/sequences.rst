@@ -131,7 +131,7 @@ Counting bases
    the 5 columns correspond to the base letters 'A', 'C', 'G', 'T', and 'N', as given by
    the constant ``base_to_columns``
    
-   .. data:: HTSeq.base_to_column = { 'A': 0, 'C': 1, 'G': 2, 'T': 3, 'N': 4 }
+   .. data:: base_to_column = { 'A': 0, 'C': 1, 'G': 2, 'T': 3, 'N': 4 }
    
    Hence, we can get the proportion of 'C's in each position as follows:
    
@@ -319,7 +319,7 @@ Trimming reads
 The FastaReader class allows to read and parse a FASTA file. It can generates an
 iterator of ``Sequence`` objects.
 
-.. class:: HTSeq.FastaReader( filename_or_sequence )
+.. class:: FastaReader( filename_or_sequence )
 
    As daughter class of ``FileOrSequence``, ``FastaReader`` can be instantiated
    with either a filename, or with a sequence. See :class:`FileOrSequence` for details.
@@ -348,7 +348,7 @@ Example 2
 The ``FastqReader`` class works similar to ``FastaReader``. It reads a Fastq file
 and generates an iterator over ``SequenceWithQualities`` objects.
 
-.. class:: HTSeq.FastaReader( filename_or_sequence, qual_scale="phred" )
+.. class:: FastqReader( filename_or_sequence, qual_scale="phred" )
 
    As daughter class of ``FileOrSequence``, ``FastaReader`` can be instantiated
    with either a filename, or with a sequence. See :class:`FileOrSequence` for details.

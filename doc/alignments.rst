@@ -62,9 +62,9 @@ Parser classes
 
 Depending on the format of your alignment file, choose from the following parsers:
 
-.. class:: HTSeq.BowtieReader( filename_or_sequence )
-           HTSeq.SAM_Reader( filename_or_sequence )
-           HTSeq.SolexaExportReader( filename_or_sequence )
+.. class:: BowtieReader( filename_or_sequence )
+           SAM_Reader( filename_or_sequence )
+           SolexaExportReader( filename_or_sequence )
           
    All of these are derived from :class:`FileOrSequence`. When asked for an iterator,
    they yield ``Alignment`` objects of types :class:`BowtieAlignment`, :class:`SAM_Alignment`,
@@ -84,7 +84,7 @@ Depending on the format of your alignment file, choose from the following parser
 ``Alignment`` and ``AlignmentWithSequenceReversal``
 ===================================================
 
-.. class:: HTSeq.Alignment( )
+.. class:: Alignment( )
 
    This is the abstract abse class of all Alignment classes. Any class derived 
    from ``Alignment`` has at least the following attributes:
@@ -202,7 +202,7 @@ object you typically never call the constructor yourself.
 Multiple alignments
 ===================
 
-.. function:: HTSeq.bundle_multiple_alignments( sequence_of_alignments )
+.. function:: bundle_multiple_alignments( sequence_of_alignments )
 
 Some alignment programs, e.g., Bowtie, can output multiple alignments,
 i.e., the same read is reported consecutively with different alignments.
@@ -233,7 +233,7 @@ to 1030 on the reference (i.e., the chromosome) but only from 0 to 36 on the que
 We can convenient access to the parsed data by looking at the attributes of the three ``CigarOperation``
 objects in the list.
 
-.. class:: HTSeq.CigarOperation( ... )
+.. class:: CigarOperation( ... )
 
    The available attributes are:
    

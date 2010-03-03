@@ -19,7 +19,7 @@ A genomic interval is a consecutive stretch on a genomic sequence such as a chro
 It is represented by a ``GenomicInterval`` object.
 
 Instantiation
-   .. class:: HTSeq.GenomicInterval( chrom, start, end, strand )
+   .. class:: GenomicInterval( chrom, start, end, strand )
 
       ``chrom`` (string)
          The name of a sequence (i.e., chromosome, contig, or the like). 
@@ -85,7 +85,7 @@ Attributes
       unless the strand is ``-``, in which case ``start`` is changed.
 
 Directional instantiation   
-   .. function:: HTSeq.GenomicInterval_from_directional( chrom, start_d, length, strand="." )
+   .. function:: GenomicInterval_from_directional( chrom, start_d, length, strand="." )
    
       This function allows to create a new ``GenomicInterval`` object specifying
       directional start and length instead of start and end. 
@@ -169,7 +169,7 @@ positions 7 to 15 to the value 120.
    [(0, 7, 0.0), (7, 15, 120.0), (15, 30, 0.0)]
 
 Instantiation
-   .. class:: HTSeq.StepVector.StepVector( length = sys.maxint, typecode = 'd', start_index = 0 )
+   .. class:: StepVector.StepVector( length = sys.maxint, typecode = 'd', start_index = 0 )
 
       Create a ``StepVector`` of the given ``length``, with indices starting
       at the given ``start_index`` and counting up to (but not including)
@@ -377,7 +377,7 @@ for each chromosome of a genome. It allows to access the data in these StepVecto
 transparently via :class:`GenomicInterval` objects.
 
 Instantiation
-   .. class:: HTSeq.GenomicArray( chroms, stranded=True, typecode='d' )
+   .. class:: GenomicArray( chroms, stranded=True, typecode='d' )
 
    Creates a ``GenomicArray``. 
    
@@ -533,7 +533,7 @@ one object:
     (<GenomicInterval object 'chr1', [400,500), strand '.'>, set([]))]
 
 
-.. class:: HTSeq.GenomicArrayOfSets( chroms, stranded = True )
+.. class:: GenomicArrayOfSets( chroms, stranded = True )
 
    Instantiation is as in :class:GenomicArray, only that ``datatype`` is always ``'O'``.
    
