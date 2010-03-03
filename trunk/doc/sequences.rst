@@ -183,8 +183,8 @@ Trimming reads
    Here, if we allow at least one mismatch per six bases, the whole pattern gets cut off.
    
    If you have quality information, you can use this, too, to specify the allowed amount
-   of mismatch. See :method:`SequenceWithQualities.trim_left_end_with_quals` and 
-   :method:`SequenceWithQualities.trim_left_end_with_quals`.
+   of mismatch. See :meth:`SequenceWithQualities.trim_left_end_with_quals` and 
+   :meth:`SequenceWithQualities.trim_left_end_with_quals`.
 
 
 ``SequenceWithQuality``
@@ -275,7 +275,7 @@ Counting quality values
 
    .. method: Sequence.add_qual_to_count_array( count_array )
    
-   Similar to :method:`Sequence.add_bases_to_count_array`, this method counts the
+   Similar to :meth:`Sequence.add_bases_to_count_array`, this method counts the
    occuring quality values stratified by position. This then allows to calculate
    average qualities as well as histograms.
    
@@ -305,7 +305,7 @@ Trimming reads
    .. method:: SequenceWithQualities.trim_left_end_with_quals( pattern, max_mm_qual_per_base = 5. )
                SequenceWithQualities.trim_right_end_with_quals( pattern, max_mm_qual_per_base = 5. )
                
-   These methods work as :method:`Sequence.trim_left_end` and :method:`Sequence.trim_right_end`
+   These methods work as :meth:`Sequence.trim_left_end` and :meth:`Sequence.trim_right_end`
    (which are, of course, avilable for ``SequenceWithQualities`` objects, too). The difference
    is, that for the ``_with_quals`` trimming methods, the maximum amount of allowed mismatch is
    specified as the maximum value that the sum of the quality scores of the mismatched bases,
