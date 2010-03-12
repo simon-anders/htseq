@@ -5,18 +5,22 @@ HTSeq: Analysing high-throughput sequencing data with Python
 ************************************************************
 
 HTSeq is a Python package that provides infrastructure to process data
-from high-throughput sequencing assays. 
+from high-throughput sequencing assays.
 
-Please see the chapter :ref:`tour` first for an overview on the kind of analysis 
-you can do with HTSeq and the design of the package, and the look at the reference
-documentation. 
+* Please see the chapter :ref:`tour` first for an overview on the kind of analysis 
+  you can do with HTSeq and the design of the package, and then look at the reference
+  documentation. 
 
-For installation instructions, see :ref:`install`.
+..
+
+* For downloads and installation instructions, see :ref:`install`.
 
 Documentation overview
 ======================
 
 * :ref:`install`
+
+  Download links and installation instructions can be found here
 
 * :ref:`tour`
 
@@ -56,9 +60,23 @@ Documentation overview
     
   * :ref:`misc`
 
+  * :ref:`Table of Contents<tableofcontents>`
+
   * :ref:`genindex`
+
 
 ..
    * :ref:`modindex`
    * :ref:`search`
 
+
+Author
+======
+
+HTSeq is developped by `Simon Anders`_ at `EMBL Heidelberg`_ (`Genome Biology
+Unit`_). Please do not hesitate to contact me (anders *at* embl *dot* de) if you
+have any comments or questions.
+
+.. _`Simon Anders`: http://www.embl.de/research/units/genome_biology/huber/members/index.php?s_personId=6001
+.. _`EMBL Heidelberg`: http://www.embl.de/
+.. _`Genome Biology Unit`: http://www.embl.de/research/units/genome_biology/index.html

@@ -1,3 +1,5 @@
+.. _tableofcontents:
+
 ************************************************************
 HTSeq: Analysing high-throughput sequencing data with Python
 ************************************************************
