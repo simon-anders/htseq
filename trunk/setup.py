@@ -25,10 +25,21 @@ numpy_include_dir = os.path.join( os.path.dirname( numpy.__file__ ), 'core', 'in
 
 setup( name = 'HTSeq',
        version = file("VERSION").readline().rstrip(),
-       description = 'Processing high-throughput sequencing data',
        author = 'Simon Anders',
        author_email = 'sanders@fs.tum.de',
-       url = 'http://htseq.sf.net',
+       url = 'http://www-huber.embl.de/users/anders/HTSeq/',
+       description = "A framework to process and analyze data from " +
+          "high-throughput sequencing (HTS) assays",
+       classifiers = [
+          'Development Status :: 3 - Alpha',
+	  'Topic :: Scientific/Engineering :: Bio-Informatics'
+	  'Intended Audience :: Developers',
+          'Intended Audience :: Science/Research',
+	  'License :: OSI Approved :: GNU General Public License (GPL)',
+	  'Operating System :: POSIX',
+	  'Programming Language :: Python'
+       ],	
+       requires = [ 'numpy', 'python (>=2.5, <3.0)' ],
        
        py_modules = [ 
           'HTSeq._HTSeq_internal', 
