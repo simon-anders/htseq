@@ -196,3 +196,4 @@ html_theme_options = {
     "sidebarlinkcolor": "#FFFEFF",
     "sidebartextcolor": "white"
 }
+
