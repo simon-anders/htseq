@@ -34,9 +34,9 @@ cdef class SequenceWithQualities( Sequence ):
    cdef _fill_qual_arr( SequenceWithQualities self )
    cpdef object add_qual_to_count_array( SequenceWithQualities self, numpy.ndarray count_array_ )
    cpdef SequenceWithQualities trim_left_end_with_quals( SequenceWithQualities self, 
-      Sequence pattern, float max_mm_qual_per_base = ? )
+         Sequence pattern, int max_mm_qual = ? )
    cpdef SequenceWithQualities trim_right_end_with_quals( SequenceWithQualities self, 
-      Sequence pattern, float max_mm_qual_per_base = ? )
+         Sequence pattern, int max_mm_qual = ? )
 
       
 cdef class Alignment( object ):

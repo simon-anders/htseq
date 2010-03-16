@@ -702,7 +702,7 @@ cdef class SequenceWithQualities( Sequence ):
       return None
    
    cpdef SequenceWithQualities trim_left_end_with_quals( SequenceWithQualities self, 
-         Sequence pattern, float max_mm_qual_per_base = 5. ):
+         Sequence pattern, int max_mm_qual = 5 ):
       cdef int seqlen = len( self.seq )
       cdef int patlen = len( pattern.seq )
       cdef int minlen
@@ -723,14 +723,14 @@ cdef class SequenceWithQualities( Sequence ):
          for j in xrange( i ):
             if seq_cstr[ j ] != pat_cstr[ patlen - i + j ]:
                sum_mm_qual += qual_array[ seqlen - 1 - i + j ]
-               if sum_mm_qual > max_mm_qual_per_base * i:
+               if sum_mm_qual > max_mm_qual:
                   break
          else:
             match = i
       return self[ match : seqlen ]
 
    cpdef SequenceWithQualities trim_right_end_with_quals( SequenceWithQualities self, 
-          Sequence pattern, float max_mm_qual_per_base = 5. ):
+          Sequence pattern, int max_mm_qual = 5 ):
       cdef int seqlen = len( self.seq )
       cdef int patlen = len( pattern.seq )
       cdef int minlen
@@ -751,7 +751,7 @@ cdef class SequenceWithQualities( Sequence ):
          for j in xrange( i ):
             if seq_cstr[ seqlen - i + j ] != pat_cstr[ j ]:
                sum_mm_qual += qual_array[ seqlen - 1 - i + j ]
-               if sum_mm_qual > max_mm_qual_per_base * i:
+               if sum_mm_qual > max_mm_qual:
                   break
          else:
             match = i

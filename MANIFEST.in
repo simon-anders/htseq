@@ -1,1 +1,2 @@
 include src/step_vector.h
+include VERSION
