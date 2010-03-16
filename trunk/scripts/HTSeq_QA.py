@@ -30,13 +30,13 @@ producing plots showing the distribution of called bases and
 base-call quality scores by position within the reads. The
 plots are output as a PDF file.""",
    epilog = 
-"""(c) Simon Anders (sanders@fs.tum.de), European Molecular Biology Laboratory, 2010.
-Released under the GNU General Public License v3. Part of the 'HTSeq'
-framework."""    )
+"""Written by Simon Anders (sanders@fs.tum.de), European Molecular Biology " +
+" Laboratory (EMBL). (c) 2010. Released under the terms of the GNU General " +
+" Public License v3. Part of the 'HTSeq' framework."""    )
 optParser.add_option( "-t", "--type", type="choice", dest="type",
    choices = ("sam", "solexa-export", "fastq", "solexa-fastq"),
    default = "sam", help="type of read_file (one of: sam [default], " +
-      "solexa-export, fastq, solexa-fastq" )
+      "solexa-export, fastq, solexa-fastq)" )
 optParser.add_option( "-o", "--outfile", type="string", dest="outfile",
    help="output filename (default is <read_file>.pdf)" )
 optParser.add_option( "-r", "--readlength", type="int", dest="readlen",
