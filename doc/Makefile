@@ -32,6 +32,7 @@ html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
+	python add_counter.py
 
 pickle:
 	mkdir -p _build/pickle _build/doctrees
