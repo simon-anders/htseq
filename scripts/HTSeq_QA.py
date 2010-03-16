@@ -28,7 +28,11 @@ optParser = optparse.OptionParser( usage = "%prog [options] read_file",
 _sequence.txt) and performs a simply quality assessment by 
 producing plots showing the distribution of called bases and 
 base-call quality scores by position within the reads. The
-plots are output as a PDF file.""" )
+plots are output as a PDF file.""",
+   epilog = 
+"""(c) Simon Anders (sanders@fs.tum.de), European Molecular Biology Laboratory, 2010.
+Released under the GNU General Public License v3. Part of the 'HTSeq'
+framework."""    )
 optParser.add_option( "-t", "--type", type="choice", dest="type",
    choices = ("sam", "solexa-export", "fastq", "solexa-fastq"),
    default = "sam", help="type of read_file (one of: sam [default], " +
@@ -42,6 +46,10 @@ optParser.add_option( "-g", "--gamma", type="float", dest="gamma",
    help="the gamma factor for the contrast adjustment of the quality score plot" )
 optParser.add_option( "-n", "--nosplit", action="store_true", dest="nosplit",
    help="do not split reads in unaligned and aligned ones" )
+
+if len( sys.argv ) == 1:
+   optParser.print_help()
+   sys.exit(1)
 
 (opts, args) = optParser.parse_args()
 
