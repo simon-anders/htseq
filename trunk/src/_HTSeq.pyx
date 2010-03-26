@@ -612,11 +612,20 @@ cdef class SequenceWithQualities( Sequence ):
          raise ValueError, "Illegal quality scale '%s'." % self._qualscale
       self._qualarr = qualarr
 
-   @property
-   def qual( self ):
-      if self._qualarr is None:
-         self._fill_qual_arr()
-      return self._qualarr
+   property qual:
+      def __get__( self ):
+         if self._qualarr is None:
+            self._fill_qual_arr()
+         return self._qualarr
+      def __set__( self, newvalue ):
+         if not ( isinstance( newvalue, numpy.ndarray ) and newvalue.dtype == numpy.int ) :
+            raise TypeError, "qual can only be assigned a numpy array of type numpy.int"
+         if not ( newvalue.shape == ( len(self.seq), ) ) :
+            raise TypeError, "assignment to qual with illegal shape"
+         self._qualarr = newvalue
+         self._qualstr = ""
+         self._qualscale = "none"
+         self._qualstr_phred = ""
               
    def __repr__( self ):
       return "<%s object '%s'>" % ( self.__class__.__name__, self.name )
@@ -627,7 +636,7 @@ cdef class SequenceWithQualities( Sequence ):
       else:
          new_name = self.name + "[part]"
       return SequenceWithQualities( 
-         self.seq[ item ], new_name, self._qualstr[ item ], self._qualscale )
+         self.seq[ item ], new_name, self.qualstr[ item ] )
 
    @property
    def qualstr( self ):
@@ -639,7 +648,7 @@ cdef class SequenceWithQualities( Sequence ):
          if self._qualscale == "phred":
             self._qualstr_phred = self._qualstr
          else:
-            seqlen = len( self._qualstr )
+            seqlen = len( self.seq )
             self._qualstr_phred = ' ' * seqlen
             qualstr_phred_cstr = self._qualstr_phred
             if self._qualarr is None:
