@@ -501,6 +501,12 @@ Writing to a file
       strand argument if your ``GenomicArray`` is stranded (``stranded==True``). Typically, you
       will write two wiggle files, one for each strand, and display them together.
       
+Adding a chromosome
+   .. method:: GenomicArray.add_chrom( chrom, length=sys.maxint, start_index=0 )
+   
+      Adds step vector(s) for a further chromosome. This is useful if you do not have a full
+      list of chromosome names yet when instantiating the ``GenomicArray``.
+      
 .. _BedGraph: http://genome.ucsc.edu/goldenPath/help/bedgraph.html
 .. _Wiggle: http://genome.ucsc.edu/goldenPath/help/wiggle.html
 .. _IGB: http://igb.bioviz.org/
