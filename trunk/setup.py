@@ -43,7 +43,8 @@ setup( name = 'HTSeq',
        
        py_modules = [ 
           'HTSeq._HTSeq_internal', 
-          'HTSeq.StepVector' 
+          'HTSeq.StepVector',
+	  'HTSeq._version'
        ],
        ext_modules = [ 
           Extension( 'HTSeq._HTSeq', 

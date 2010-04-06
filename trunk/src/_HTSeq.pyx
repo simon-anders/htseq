@@ -308,12 +308,7 @@ cdef class GenomicArray( object ):
       elif not isinstance( chroms, dict ):
          raise TypeError, "'chroms' must be a list or a dict."
       for chrom in chroms:
-         if self.stranded:
-            self.step_vectors[ chrom ] = {
-               strand_plus:  StepVector.StepVector( chroms[chrom], typecode ),
-               strand_minus: StepVector.StepVector( chroms[chrom], typecode ) }
-         else:   
-            self.step_vectors[ chrom ] = StepVector.StepVector( chroms[chrom], typecode )
+         self.add_chrom( chrom, chroms[chrom] )
             
    def __getitem__( self, index ):
       if isinstance( index, GenomicInterval ):
@@ -359,6 +354,15 @@ cdef class GenomicArray( object ):
             self.stranded != other.stranded or self.step_vectors != other.step_vectors
       else:
          raise NotImplemented
+   
+   def add_chrom( self, chrom, length = sys.maxint, start_index = 0 ):
+      if self.stranded:
+         self.step_vectors[ chrom ] = {
+            strand_plus:  StepVector.StepVector( length, self.typecode, start_index ),
+            strand_minus: StepVector.StepVector( length, self.typecode, start_index ) }
+      else:   
+         self.step_vectors[ chrom ] = StepVector.StepVector( length, self.typecode, start_index )
+   
    
    def add_value( self, value, iv ):
       if self.stranded:

@@ -11,6 +11,9 @@ from _HTSeq import *
 
 from _HTSeq_internal import peek
 
+from _version import __version__
+
+
 #########################
 ## Utils
 #########################
@@ -483,12 +486,14 @@ class GenomicArrayOfSets( GenomicArray ):
 
    def __init__( self, chroms, stranded=True ):
       GenomicArray.__init__( self, chroms, stranded, 'O' )
-      for chrom in self.step_vectors:
-         if self.stranded:
-            self.step_vectors[ chrom ][ "+" ][ : ] = set()
-            self.step_vectors[ chrom ][ "-" ][ : ] = set()
-         else:
-            self.step_vectors[ chrom ][ : ] = set()
+
+   def add_chrom( self, chrom, length = sys.maxint, start_index = 0 ):
+      GenomicArray.add_chrom( self, chrom, length, start_index )
+      if self.stranded:
+         self.step_vectors[ chrom ][ "+" ][ : ] = set()
+         self.step_vectors[ chrom ][ "-" ][ : ] = set()
+      else:
+         self.step_vectors[ chrom ][ : ] = set()
       
    def add_value( self, value, iv ):
       def _f( oldset ):
