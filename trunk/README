@@ -1,31 +1,3 @@
-Preliminary installation instructions:
+For instructions, see:
 
-If you have a source tarball (i.e., a tgz file containing a directory called 'src'),
-unpack it, 'cd' into it and run 'python setup.py build'.
-
-This should work, provided you have the following installed on your system:
-- Python, at least version 2.5, including development files. 
-- NumPy (a numerics package for Python)
-- the GNU development toolchain, i.e., GCC etc.
-
-If you have write permissions for Python's library directory, you can then
-install HTSeq with 'python setup.py install'. If you don't, have a look into
-the directory 'build' that 'setup.py build' has created. It contains a directory
-'lib.<your_OS_name>', which in turn contains 'HTSeq'. Set the environment variable
-'PYTHONPATH' to point to the full path of the 'lib.<your_os_name>' directory, so that
-Python can find the HTSeq directory.
-
-Hints for Mac Users:
-- MacOS X Snow Leopard has Python and NumPy pre-installed. Leopard as well, I suppose,
-but I haven't checked yet.
-- For GCC etc, simply install Xcode. (Download it from the Apple web site of look at
-the second of your two Mac OS X installation CDs.)
-
-Hint for Ubuntu users:
-- For Python, use the package manager to install package 'python2.6-dev' 
-  (or python2.5-dev).
-- For Numpy, install package 'python-numpy'.
-- For GCC etc., install package 'build-essential'.
-
-Hints for Windows users:
-None. Sorry, I haven't tried to compile this for Windows yet.
+   http://www-huber.embl.de/users/anders/HTSeq/
