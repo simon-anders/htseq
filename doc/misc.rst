@@ -19,5 +19,7 @@ Miscellaneous
 
    *to be written*
 
+.. attribute:: __version__
 
+   a string containing the current version
 

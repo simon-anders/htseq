@@ -79,7 +79,8 @@ Documentation overview
   
   * :ref:`count`
   
-    Foo 
+    Given a SAM file with alignments and a GFF file with genomic features, this script
+    counts how many reads map to each feature. 
 
 
 * Front and back matters
