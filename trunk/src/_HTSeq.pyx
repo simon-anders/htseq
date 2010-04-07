@@ -149,7 +149,7 @@ cdef class GenomicInterval:
       """Returns a boolean value indicating whether the 'self' interval 
       is fully within the 'iv' interval.
       
-      This is deemed the case if
+      This is deemed the case if
         - both are on the same chromosome, and    
         - both are on the same strand, or at least one of them is
            not stranded (i.e., has strand == '.'), and
@@ -407,6 +407,8 @@ cdef class GenomicArray( object ):
          else:
             sv =  self.step_vectors[ chrom ]
          for start, stop, value in sv.get_steps():
+            if start == -sys.maxint-1 or stop == sys.maxint:
+               continue
             f.write( "%s\t%d\t%d\t%f\n" % (chrom, start, stop, value) )    
       if not hasattr( file_or_filename, "write" ):
          f.close()

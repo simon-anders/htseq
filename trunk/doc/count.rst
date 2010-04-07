@@ -1,5 +1,8 @@
 .. _count:
 
+.. program:: htseq-count
+
+
 ***********************************************
 Counting reads in features with ``htseq-count``
 ***********************************************

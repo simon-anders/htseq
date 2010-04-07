@@ -72,8 +72,8 @@ def main():
       description=
          "This script takes an alignment file in SAM format and a " +
 	 "feature file in GFF format and calculates for each feature " +
-	 "the number of reads mapping to it. See http://... " +
-	 "for details.",
+	 "the number of reads mapping to it. See " +
+	 "http://www-huber.embl.de/users/anders/HTSeq/doc/count.html for details.",
 	 
       epilog = 
 	 "Written by Simon Anders (sanders@fs.tum.de), European Molecular Biology " +
