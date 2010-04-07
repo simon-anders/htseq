@@ -8,17 +8,20 @@ import os.path
 if sys.version_info[0] < 2 or sys.version_info < 5:
    sys.stderr.write( "Error in setup script for HTSeq:\n" )
    sys.stderr.write( "You need at least version 2.5 of Python to use HTSeq.\n" )
+   sys.exit( 1 )
 
 if sys.version_info[0] >= 3:
    sys.stderr.write( "Error in setup script for HTSeq:\n" )
    sys.stderr.write( "Sorry, this package does not yet work with Python 3.\n" )
    sys.stderr.write( "Please use Python 2.x, x>=5.\n" )
+   sys.exit( 1 )
 
 try:
    import numpy
 except ImportError:
    sys.stderr.write( "Setup script for HTSeq: Failed to import 'numpy'.\n" )
    sys.stderr.write( "Please install numpy and then try again to install HTSeq.\n" )
+   sys.exit( 1 )
    
 numpy_include_dir = os.path.join( os.path.dirname( numpy.__file__ ), 'core', 'include' )
  
@@ -32,21 +35,21 @@ setup( name = 'HTSeq',
           "high-throughput sequencing (HTS) assays",
        classifiers = [
           'Development Status :: 3 - Alpha',
-	  'Topic :: Scientific/Engineering :: Bio-Informatics',
-	  'Intended Audience :: Developers',
+          'Topic :: Scientific/Engineering :: Bio-Informatics',
+          'Intended Audience :: Developers',
           'Intended Audience :: Science/Research',
-	  'License :: OSI Approved :: GNU General Public License (GPL)',
-	  'Operating System :: POSIX',
-	  'Programming Language :: Python'
-       ],	
+          'License :: OSI Approved :: GNU General Public License (GPL)',
+          'Operating System :: POSIX',
+          'Programming Language :: Python'
+       ],
        requires = [ 'numpy', 'python (>=2.5, <3.0)' ],
        
        py_modules = [ 
           'HTSeq._HTSeq_internal', 
           'HTSeq.StepVector',
-	  'HTSeq._version',
-	  'HTSeq.scripts.qa',
-	  'HTSeq.scripts.count'
+          'HTSeq._version',
+          'HTSeq.scripts.qa',
+          'HTSeq.scripts.count'
        ],
        ext_modules = [ 
           Extension( 'HTSeq._HTSeq', 
@@ -56,7 +59,7 @@ setup( name = 'HTSeq',
        ],
        scripts = [
           'scripts/htseq-qa',
-	      'scripts/htseq-count',
+          'scripts/htseq-count',
        ]
      )
 
