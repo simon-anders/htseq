@@ -12,7 +12,8 @@ together with NumPy_,
 a commonly used Python package for numerical calculations. Mac and Linux users 
 will find that this is often pre-installed. (To check whether you have a working
 NumPy installation, start Python and simply type ``import numpy``. If you do not
-get an error, NumPy is available.) 
+get an error, NumPy is available. Users of Debian and Ubuntu Linux should install
+the package ``python-numpy``.) 
 
 .. _Python: http://www.python.org/
 .. _NumPy: http://numpy.scipy.org/
@@ -79,11 +80,11 @@ Installing a source package
 
 If you have a source package (containing a subdirectory called ``src``), you need to 
 first build the package before installing it. For this, make sure you have the
-GNU tool chain installed:
+GNU tool chain (and teh Python header files) installed:
 
 * On a Mac, you need to install XCode (available from the Apple web site).
 
-* On Ubuntu or Debian Linux, install the ``build-essential`` package. For other
+* On Ubuntu or Debian Linux, install the ``build-essential`` and the ``python-dev`` package. For other
   Linux distributions, similar packages are available.
 
 * On MS Windows, MinGW_ is a commonly used build environment. Using it may be
