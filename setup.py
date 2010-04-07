@@ -44,7 +44,9 @@ setup( name = 'HTSeq',
        py_modules = [ 
           'HTSeq._HTSeq_internal', 
           'HTSeq.StepVector',
-	  'HTSeq._version'
+	  'HTSeq._version',
+	  'HTSeq.scripts.qa',
+	  'HTSeq.scripts.count'
        ],
        ext_modules = [ 
           Extension( 'HTSeq._HTSeq', 
@@ -53,7 +55,8 @@ setup( name = 'HTSeq',
              ['src/StepVector_wrap.cxx'], extra_objects=['src/step_vector.h'], extra_compile_args=['-w'] ),
        ],
        scripts = [
-          'scripts/htseq-qa.py'
+          'scripts/htseq-qa.py',
+	  'scripts/htseq-count.py',
        ]
      )
 
