@@ -25,16 +25,16 @@ def main():
 
    optParser = optparse.OptionParser( usage = "%prog [options] read_file",
       description=
-   """This script take a file with high-throughput sequencing reads
-   (supported formats: SAM, Solexa _export.txt, FASTQ, Solexa 
-   _sequence.txt) and performs a simply quality assessment by 
-   producing plots showing the distribution of called bases and 
-   base-call quality scores by position within the reads. The
-   plots are output as a PDF file.""",
+	 "This script take a file with high-throughput sequencing reads " +
+	 "(supported formats: SAM, Solexa _export.txt, FASTQ, Solexa " +
+	 "_sequence.txt) and performs a simply quality assessment by " +
+	 "producing plots showing the distribution of called bases and " +
+	 "base-call quality scores by position within the reads. The " +
+	 "plots are output as a PDF file.",
       epilog = 
-   """Written by Simon Anders (sanders@fs.tum.de), European Molecular Biology " +
-   " Laboratory (EMBL). (c) 2010. Released under the terms of the GNU General " +
-   " Public License v3. Part of the 'HTSeq' framework."""    )
+	 "Written by Simon Anders (sanders@fs.tum.de), European Molecular Biology " +
+	 " Laboratory (EMBL). (c) 2010. Released under the terms of the GNU General " +
+	 " Public License v3. Part of the 'HTSeq' framework."    )
    optParser.add_option( "-t", "--type", type="choice", dest="type",
       choices = ("sam", "solexa-export", "fastq", "solexa-fastq"),
       default = "sam", help="type of read_file (one of: sam [default], " +

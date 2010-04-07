@@ -83,7 +83,7 @@ def main():
    optParser.add_option( "-m", "--mode", type="choice", dest="mode",
       choices = ( "union", "intersection-strict", "intersection-nonempty" ), 
       default = "union", help = "mode to handle reads overlapping more than one feature" +
-         "(default: union)" )
+         "(choices: union, intersection-strict, intersection-nonempty; default: union)" )
 	 
    optParser.add_option( "-t", "--type", type="string", dest="featuretype",
       default = "exon", help = "feature type (3rd column in GFF file) to be used, " +
