@@ -66,7 +66,8 @@ directory, you can install it locally in your home directory by typing
    python setup.py install --user
 
 
-To test your installation, simply start Python and type ``import HTSeq``. No error 
+To test your installation, simply start Python (*not* in the directory
+with ``setup.py``) and type ``import HTSeq``. No error 
 message should appear.
 
 If you have problems with the installation, please do not hesitate to contact me

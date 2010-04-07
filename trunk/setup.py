@@ -32,7 +32,7 @@ setup( name = 'HTSeq',
           "high-throughput sequencing (HTS) assays",
        classifiers = [
           'Development Status :: 3 - Alpha',
-	  'Topic :: Scientific/Engineering :: Bio-Informatics'
+	  'Topic :: Scientific/Engineering :: Bio-Informatics',
 	  'Intended Audience :: Developers',
           'Intended Audience :: Science/Research',
 	  'License :: OSI Approved :: GNU General Public License (GPL)',
