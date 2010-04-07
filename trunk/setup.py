@@ -55,8 +55,8 @@ setup( name = 'HTSeq',
              ['src/StepVector_wrap.cxx'], extra_objects=['src/step_vector.h'], extra_compile_args=['-w'] ),
        ],
        scripts = [
-          'scripts/htseq-qa.py',
-	  'scripts/htseq-count.py',
+          'scripts/htseq-qa',
+	      'scripts/htseq-count',
        ]
      )
 

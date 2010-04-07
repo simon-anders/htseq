@@ -15,6 +15,8 @@ HTSeq: Analysing high-throughput sequencing data with Python
    alignments
    features
    misc
+   qa
+   count   
    
 * :ref:`genindex`
 

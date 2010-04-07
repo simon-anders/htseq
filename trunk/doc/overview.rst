@@ -13,6 +13,13 @@ from high-throughput sequencing assays.
 
 ..
 
+* While the main purpose of HTSeq is to allow you to write your own analysis scripts,
+  customized to your needs, there are also a couple of stand-alone scripts for
+  common tasks that can be used without any Python knowledge. See the overview 
+  below for what is available.
+
+..
+
 * For downloads and installation instructions, see :ref:`install`.
 
 Documentation overview
@@ -60,7 +67,27 @@ Documentation overview
     
   * :ref:`misc`
 
+* Scripts
+
+  The following scripts can be used without any Python knowledge.
+  
+  * :ref:`qa`
+  
+    Given a FASTQ or SAM file, this script produces a PDF file with plots depicting
+    the base calls and base-call qualities by position in the read. This is useful to
+    assess the technical quality of a sequencing run.
+  
+  * :ref:`count`
+  
+    Foo 
+
+
+* Front and back matters
+
+
   * :ref:`Table of Contents<tableofcontents>`
+
+..
 
   * :ref:`genindex`
 
@@ -73,10 +100,26 @@ Documentation overview
 Author
 ======
 
-HTSeq is developped by `Simon Anders`_ at `EMBL Heidelberg`_ (`Genome Biology
+HTSeq is developed by `Simon Anders`_ at `EMBL Heidelberg`_ (`Genome Biology
 Unit`_). Please do not hesitate to contact me (anders *at* embl *dot* de) if you
 have any comments or questions.
 
 .. _`Simon Anders`: http://www.embl.de/research/units/genome_biology/huber/members/index.php?s_personId=6001
 .. _`EMBL Heidelberg`: http://www.embl.de/
 .. _`Genome Biology Unit`: http://www.embl.de/research/units/genome_biology/index.html
+
+License
+=======
+
+HTSeq is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+The full text of the GNU General Public License, version 3, can be found
+here: http://www.gnu.org/licenses/gpl-3.0-standalone.html
