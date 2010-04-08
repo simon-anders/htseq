@@ -38,7 +38,7 @@ in the set `S`, which is (with `i` running through all position within the read)
 
 The following figure illustrates the effect of these rules:
 
-*TO DO: Draw figure*
+.. image:: count_modes.png
 
 
 Usage
