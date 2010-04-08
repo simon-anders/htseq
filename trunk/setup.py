@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 import sys
 import os.path
@@ -34,7 +34,7 @@ setup( name = 'HTSeq',
        description = "A framework to process and analyze data from " +
           "high-throughput sequencing (HTS) assays",
        classifiers = [
-          'Development Status :: 3 - Alpha',
+          'Development Status :: 4 - Beta',
           'Topic :: Scientific/Engineering :: Bio-Informatics',
           'Intended Audience :: Developers',
           'Intended Audience :: Science/Research',
