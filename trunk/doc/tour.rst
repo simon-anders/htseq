@@ -163,7 +163,7 @@ to change is the name of the reader class in the first line.
 
 The other fields that all ``Alignment`` objects contain, is a Boolean called ``aligned``
 that tells us whether the read has been aligned at all, and a field called ``iv``
-(for "interval") that shows where teh read was aligned to. We use this information in
+(for "interval") that shows where the read was aligned to. We use this information in
 the next section.
 
 
