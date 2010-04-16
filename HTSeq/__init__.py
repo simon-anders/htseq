@@ -429,7 +429,7 @@ class SolexaExportReader( FileOrSequence ):
       for line in FileOrSequence.__iter__( self ):
          record = SolexaExportAlignment()
          fields = SolexaExportReader.parse_line_bare( line )
-         assert fields['index_string'] == "0", "Indexing not yet implemented"
+         assert fields['index_string'] in ( "0", "" ), "Indexing not yet implemented"
          assert fields['read_nbr'] == "1", "Paired-read data not yet supported"
          record.read = SequenceWithQualities( 
             fields['read_seq'], 
