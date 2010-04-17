@@ -22,9 +22,9 @@ The following description assumes that the reader is familiar with Python and wi
 data.
   
 If you want to try out the examples on your own system, you can download the 
-used example files here_.
+used example files here: `HTSeq_example_data.tgz`_
 
-.. _here: http://www-huber.embl.de/users/anders/HTSeq/HTSeq_example_data.tgz
+.. _HTSeq_example_data.tgz: http://www-huber.embl.de/users/anders/HTSeq/HTSeq_example_data.tgz
 
 Reading in reads
 ================

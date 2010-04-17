@@ -47,7 +47,7 @@ Usage
 After you have installed HTSeq (see :ref:`install`), you can run ``htseq-count`` from
 the command line::
 
-   htseq-count [options] read_file
+   htseq-count [options] <sam_file> <gff_file>
    
 If the file ``htseq-qa`` is not in your path, you can, alternatively, call the script with
 
