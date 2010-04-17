@@ -11,10 +11,10 @@ Sequences and FASTA/FASTQ files
 
    >>> import HTSeq
 
-``Sequence``
+**Sequence**
 ============
 
-A ``Sequence`` object holds a DNA sequence. Besides the actual sequence, an object
+A **Sequence** object holds a DNA sequence. Besides the actual sequence, an object
 may also hold a name.
 
 Instantiation
@@ -31,24 +31,24 @@ Attributes
                   Sequence.name
                   Sequence.descr
    
-   The information can be accessed via the attributes ``seq`` and ``name``, which are strings::   
+   The information can be accessed via the attributes **seq** and **name**, which are strings::   
    
       >>> myseq.seq
       'ACCGTTAC'
       >>> myseq.name
       'my_sequence'
 
-   There is a third attribute, called ``descr``, which is by default ``None`` but may contain 
+   There is a third attribute, called **descr**, which is by default ``None`` but may contain 
    a "description". See class :class:`FastaReader` for more information.
    
 Representation and string conversion
    
-   The ``__repr__`` method gives name and length::
+   The **__repr__** method gives name and length::
    
       >>> myseq
       <_HTSeq.Sequence object 'my_sequence' (length 8)>
 
-   The ``__str__`` method returns just the sequence:
+   The **__str__** method returns just the sequence:
 
       >>> print myseq
       ACCGTTAC
@@ -87,8 +87,8 @@ Writing to FASTA file
    
    .. method: Sequence.write_to_fasta_file( fasta_file )
    
-   To write ``Sequence`` objects into a FASTA file, open a text file for writing,
-   then call ``def write_to_fasta_file`` for each sequence, providing the open
+   To write **Sequence** objects into a FASTA file, open a text file for writing,
+   then call **write_to_fasta_file** for each sequence, providing the open
    file handle as only argument, and close the file::
    
       >>> my_fasta_file = open( "test.fa", "w" )
@@ -98,7 +98,8 @@ Writing to FASTA file
    To read from a FASTA file, see class :class:`FastaReader`.
    
 Extended UIPAC letters
-   These are not (yet) supported. A sequence should only contain A, C, G, and T.   
+   These are not (yet) supported. A sequence should only contain A, C, G, T
+   and N.    
    
 Counting bases
 
@@ -123,13 +124,13 @@ Counting bases
              [ 8526,  4812,  5460,  6197,     4],
              [ 8088,  4915,  5531,  6464,     1]])      
    
-   Here, a two-dimensional ``numpy`` array of integer zeroes is defined and then
-   passed to the ``add_bases_to_count_array`` method of each ``Sequence`` object obtained
-   from the Fastq file. The method ``add_bases_to_count_array`` adds, for each base,
+   Here, a two-dimensional numpy array of integer zeroes is defined and then
+   passed to the **add_bases_to_count_array** method of each Sequence object obtained
+   from the Fastq file. The method *add_bases_to_count_array* adds, for each base,
    a one to one of the array elements such that, in the end, the 36 rows of the array
    correspond to the positions in the reads (all of length 36 bp in this example), and
    the 5 columns correspond to the base letters 'A', 'C', 'G', 'T', and 'N', as given by
-   the constant ``base_to_columns``
+   the constant **base_to_columns**
    
    .. data:: base_to_column = { 'A': 0, 'C': 1, 'G': 2, 'T': 3, 'N': 4 }
    
@@ -187,18 +188,18 @@ Trimming reads
    :meth:`SequenceWithQualities.trim_left_end_with_quals`.
 
 
-``SequenceWithQuality``
+``SequenceWithQualities``
 =======================   
 
 The sequences obtained from high-throughput sequencing devices (in the following also
 referred to as "reads") typically come with `base-call quality scores`, which indicate
-how sure the software was that the right base was called. The class ``SequenceWithQuality`` represents such reads. 
+how sure the software was that the right base was called. The class ``SequenceWithQualities`` represents such reads. 
 
 ``SequenceWithQualities`` is a daughter class of :class:`Sequence` and inherits all its features.
 
 Instantiation
 
-   .. class:: SequenceWithQuality( seq, name qualstr, qualscale="phred" ) 
+   .. class:: SequenceWithQualities( seq, name qualstr, qualscale="phred" ) 
 
    A ``SequenceWithQualities`` can be instantiated as a ``Sequence``, but now with
    a third argument, the quality string::
@@ -345,8 +346,8 @@ Example 2
 ``FastqReader``
 ===============
 
-The ``FastqReader`` class works similar to ``FastaReader``. It reads a Fastq file
-and generates an iterator over ``SequenceWithQualities`` objects.
+The **FastqReader** class works similar to :class:`FastaReader`. It reads a Fastq file
+and generates an iterator over :class:`SequenceWithQualities` objects.
 
 .. class:: FastqReader( filename_or_sequence, qual_scale="phred" )
 

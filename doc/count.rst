@@ -7,7 +7,7 @@
 Counting reads in features with ``htseq-count``
 ***********************************************
 
-Given a file with aligned seqeuncing reads and a list of genomic
+Given a file with aligned sequencing reads and a list of genomic
 features, a common task is to count how many reads map to each feature.
 
 A feature is here an interval (i.e., a range of positions) on a chromosome
@@ -15,7 +15,7 @@ or a union of such intervals.
 
 In the case of RNA-Seq, the features are typically genes, where each gene
 is considered here as the union of all its exons. One may also consider
-each exon as a feature, e.g., in order to check for alterantive splicing.
+each exon as a feature, e.g., in order to check for alternative splicing.
 For comparative ChIP-Seq, the features might be binding region from a 
 pre-determined list.
 

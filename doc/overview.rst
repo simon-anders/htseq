@@ -1,5 +1,7 @@
 .. _overview:
 
+.. currentmodule:: HTSeq
+
 ************************************************************
 HTSeq: Analysing high-throughput sequencing data with Python
 ************************************************************
@@ -15,8 +17,8 @@ from high-throughput sequencing assays.
 
 * While the main purpose of HTSeq is to allow you to write your own analysis scripts,
   customized to your needs, there are also a couple of stand-alone scripts for
-  common tasks that can be used without any Python knowledge. See the overview 
-  below for what is available.
+  common tasks that can be used without any Python knowledge. See the *Scripts* 
+  section in the overview below for what is available.
 
 ..
 
@@ -32,7 +34,7 @@ Documentation overview
 * :ref:`tour`
 
   The Tour shows you how to get started. It explains how to install HTSeq, and then
-  demonstrates typical analysis steps with explicite examples. Read this first, and 
+  demonstrates typical analysis steps with explicit examples. Read this first, and 
   then see the Reference for details.
   
 * Reference documentation
@@ -42,16 +44,16 @@ Documentation overview
   * :ref:`sequences` 
   
     In order to represent sequences and reads (i.e., sequences with base-call quality 
-    information), the classes ``Sequence`` and ``SequenceWithQualities`` are used.
-    The classes ``FastaReader`` and ``FastqReader`` allow to parse FASTA and FASTQ
+    information), the classes :class:`Sequence` and :class:`SequenceWithQualities` are used.
+    The classes :class:`FastaReader` and :class:`FastqReader` allow to parse FASTA and FASTQ
     files.
   
   * :ref:`genomic`
   
-    The classes ``GenomicInterval`` and ``GenomicPosition`` represent intervals and
-    positions in a genome. The class `GenomicArray` is an all-purpose container
-    with easy access vcia a genomic interval or position, and ``GenomicArrayOfSets``
-    is a special case useful to deal with genomi features (such as genes, exons,
+    The classes :class:`GenomicInterval` and :class:`GenomicPosition` represent intervals and
+    positions in a genome. The class :class:`GenomicArray` is an all-purpose container
+    with easy access via a genomic interval or position, and :class:`GenomicArrayOfSets`
+    is a special case useful to deal with genomic features (such as genes, exons,
     etc.)
     
   * :ref:`alignments`
@@ -62,10 +64,11 @@ Documentation overview
 
   * :ref:`features`
   
-    The classes ``GenomicFeature`` and ``GFF_File`` help to deal with genomic
+    The classes :class:`GenomicFeature` and :class:`GFF_File` help to deal with genomic
     annotation data.
     
   * :ref:`misc`
+
 
 * Scripts
 

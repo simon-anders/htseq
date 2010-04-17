@@ -141,9 +141,10 @@ an interval of length 1, and hence, the class is a subclass of :class:GenomicInt
 Attributes
 
    .. attribute:: pos
-      ``pos`` is an alias for ``start_d``.
+   
+      **pos** is an alias for :attr:`GenomicInterval.start_d`.
       
-   All other attributes of ``GenomicInterval`` are still exposed. Refrain from 
+   All other attributes of :class:`GenomicInterval` are still exposed. Refrain from 
    using them, unless you want to use the object as an interval, not as a position.
    Some of them are now read-only to prevent the length to be changed.
    
@@ -176,7 +177,7 @@ Instantiation
       ``start_index + length``.
       
       Note that the ``StepVector`` class resides in its own sub-module called 
-      ``Stepvector`` as well. Hence, the class's full name is ``HTSeq.StepVector.StepVector``.
+      ``StepVector`` as well. Hence, the class's full name is ``HTSeq.StepVector.StepVector``.
       
       If no length is given, the ``StepVector`` extends indefinitely to the right,
       all the way to the largest representable `int` value (i.e., ``sys.maxint``).
@@ -355,7 +356,7 @@ Special methods
 - ``StepVector`` supports the protocols for copying and pickling.
 - The length of a ``StepVector``, as reported by the ``len`` function, is 
   ``end - start``.
-- ``StepVector``s can be compared for equality and inequality. The test checks
+- ``StepVector`` objects can be compared for equality and inequality. The test checks
   whether the elements are logically equal, i.e., it will not get confused
   if, say, one ``StepVector`` has a step from 10 to 20 with value 5, and the
   other has to steps, one from 10 to 15, and the other from 15 to 20, but
@@ -389,13 +390,13 @@ Instantiation
    is used only for convenience. Of course, you can as well specify contig IDs
    or the like.)
    
-   If ``stranded`` is ``True``, two ``StepVector``s are created for each chromosome,
-   one for the '+' and one for the '-' strand. For ``stranded == False`, only one
+   If ``stranded`` is ``True``, two ``StepVector`` objects are created for each chromosome,
+   one for the '+' and one for the '-' strand. For ``stranded == False``, only one
    ``StepVector`` per chromosome is used. In that case, the strand argument of
    all ``GenomicInterval`` objects that are used later to specify regions in the
    ``GenomicArray`` are ignored.
    
-   The ``typecode`` is as described in :class:StepVector.
+   The ``typecode`` is as described in :class:`StepVector`.
    
 Attributes
    .. attribute: GenomicArray.stranded
@@ -516,7 +517,7 @@ Adding a chromosome
 ``GenomicArrayOfSets``
 ======================
 
-A ``GenomicArrayOfSets`` is a sub-class of :class:GenomicArray that deal with the common
+A ``GenomicArrayOfSets`` is a sub-class of :class:`GenomicArray` that deal with the common
 special case of overlapping features. This is best explained by an example: Let's say, we
 have two features, ``"geneA"`` and ``"geneB"``, that are at overlapping positions::
 
@@ -541,7 +542,7 @@ one object:
 
 .. class:: GenomicArrayOfSets( chroms, stranded = True )
 
-   Instantiation is as in :class:GenomicArray, only that ``datatype`` is always ``'O'``.
+   Instantiation is as in :class:`GenomicArray`, only that ``datatype`` is always ``'O'``.
    
 .. method:: GenomicArray.add_value( value, iv )
 

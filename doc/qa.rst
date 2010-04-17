@@ -26,14 +26,14 @@ reads.
 The upper row shows how often which base was called for each position in the 
 read. In this sample, the non-alignable reads have a clear excess in A. The
 aligned reads have a balance between complementing reads: A and C (reddish colours)
-have eual levels, and so do C and G (greenish colours). The sequences seem to be AT
+have equal levels, and so do C and G (greenish colours). The sequences seem to be AT
 rich. Furthermore, nearly all aligned reads start with a T, followed by an A, and then,
-a C in 70% and an A in 30% of the reads. Such an imbalance would be reaon for concern
+a C in 70% and an A in 30% of the reads. Such an imbalance would be reason for concern
 if it has no good explanation. Here, the reason is that the fragmentation of the sample
 was done by enzyme digestion.
    
 The lower half shows the abundance of base-call quality scores at the different positions
-in the read. Nearly all aligned reads have a quality of 34 over their whol length, while 
+in the read. Nearly all aligned reads have a quality of 34 over their whole length, while 
 for the non-aligned reads, some reads have lower quality scores towards their ends.
    
 Usage
