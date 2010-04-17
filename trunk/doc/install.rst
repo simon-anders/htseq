@@ -58,16 +58,35 @@ unpack it, open a terminal and type, in the unpacked directory,
 ::
 
    python setup.py install
-   
+  
 If you do not have write permission for Python's ``site-package``
-directory, you can install it locally in your home directory by typing
+directory, you can install it locally in your home directory as follows: 
 
-::
+   *Python 2.6* users simply type
 
-   python setup.py install --user
+   ::
+
+      python setup.py install --user
+
+   to get it installed in a place in your home directory (typically ``~/.local``) 
+   where Python will find it.
+
+   For a local installation with *Python 2.5*, you have to specify a 
+   place where to install it to:
+
+   ::
+
+      python setup.py install --home <some_path>
+      
+   and then tell Python (every time before using HTSeq) where to look for it by setting
+   the environment variable ``PYTHONPATH``:
+
+   ::
+
+     export PYTHONPATH=$PYTHONPATH:<some_path>/lib/python   
 
 
-To test your installation, simply start Python (*not* in the directory
+To test your installation, simply start Python (**not** in the directory
 with ``setup.py``) and type ``import HTSeq``. No error 
 message should appear.
 
@@ -80,12 +99,13 @@ Installing a source package
 
 If you have a source package (containing a subdirectory called ``src``), you need to 
 first build the package before installing it. For this, make sure you have the
-GNU tool chain (and teh Python header files) installed:
+GNU tool chain and the Python header files installed:
 
-* On a Mac, you need to install XCode (available from the Apple web site).
+* On a Mac, you need to install XCode (available from the Apple web site or from
+  your second Mac OS X install CD).
 
-* On Ubuntu or Debian Linux, install the ``build-essential`` and the ``python-dev`` package. For other
-  Linux distributions, similar packages are available.
+* On Ubuntu or Debian Linux, install the ``build-essential`` and the 
+  ``python-dev`` package. For other Linux distributions, similar packages are available.
 
 * On MS Windows, MinGW_ is a commonly used build environment. Using it may be
   a bit tricky, so use a binary package if possible.

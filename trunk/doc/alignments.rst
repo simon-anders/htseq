@@ -38,7 +38,7 @@ consider this function that counts the number of reads falling on each chromosom
    ...             counts[ almnt.iv.chrom ] += 1
    ...     return counts
 
-If you have a SAM file (e.g., from BWA or BowTie), you can call it with::
+If you have a SAM file (e.g., from BWA or BowTie), you can call it with:
 
 .. doctest::
 
@@ -89,26 +89,28 @@ Depending on the format of your alignment file, choose from the following parser
    This is the abstract abse class of all Alignment classes. Any class derived 
    from ``Alignment`` has at least the following attributes:
    
-   .. attribute:: read  (:class:`SequenceWithQuality`)
+   .. attribute:: read  
    
-      The read. See :class:`SequenceWithQuality` for the sub-attributes.
+      The read. An object of type :class:`SequenceWithQuality`. See there for the sub-attributes.
       
       Note that some aligners store the reverse complement of the read if it was
       aligned to the '-' strand. In this case, the parser revers-complements the read
       again, so that you can be sure that the read is always presented as it was sequenced
       (see also :class:`AlignmentWithSequenceReversal`).
    
-   .. attribute:: aligned  (boolean)
+   .. attribute:: aligned
    
-      Some formats (e.g., those of Maq and Bowtie) contain only aligned
+      A boolean. Some formats (e.g., those of Maq and Bowtie) contain only aligned
       reads (and the aligner collects the 
       unaligned reads in a seperate FASTQ file if requested). For these formats, ``aligned``
       is always ``True``. Other formats (e.g., SAM and Solexa Export) list all reads, including those which could
       not be aligned. In that case, check ``aligned`` to see whether the read has an
       alignment.
       
-   .. attribute:: iv   (:class:`GenomicInterval` or ``None``)
+   .. attribute:: iv 
    
+      An object of class :class:`GenomicInterval` or ``None``.
+      
       The genomic interval to which the read was aligned (or ``None`` if ``aligned=False``).
       See :class:`GenomicInterval` for the sub-attributes. Note that different formats
       have different conventions for genomic coordinates. The parser class takes care
@@ -131,11 +133,12 @@ Depending on the format of your alignment file, choose from the following parser
       
       .. attribute:: AlignmentWithSequenceReversal.read_as_aligned
       
-         The read as it was found in the file.
+         A :class:`SequenceWithQualities` object. The read as it was found in the file.
          
-      .. attribute:: AlignmentWithSequenceReversal.read_as_sequences
+      .. attribute:: AlignmentWithSequenceReversal.read_as_sequenced
       
-         The read as it was sequences, i.e., an alias for ``read``.
+         A :class:`SequenceWithQualities` object. The read as it was sequenced, 
+         i.e., an alias for :attr:`Alignment.read`.
       
 
 
@@ -149,51 +152,51 @@ object you typically never call the constructor yourself.
 
 .. class:: BowtieAlignment( bowtie_line )
 
-   ``BowtieAlignment`` objects contain all the attributes from :class:Alignment and 
-   :class:AlignmentWithSequenceReversal, and, in addition, these:
+   ``BowtieAlignment`` objects contain all the attributes from :class:`Alignment` and 
+   :class:`AlignmentWithSequenceReversal`, and, in addition, these:
    
    .. attribute:: BowtieAlignment.reserved
    
-      The ``reserved`` field from the Bowtie output file as a string. See the Bowtie manual for its meaning.
+      A string. The ``reserved`` field from the Bowtie output file. See the Bowtie manual for its meaning.
 
-   .. attribute:: BowtieAlignment.substitutions  (string)
+   .. attribute:: BowtieAlignment.substitutions
    
-      The substitutions string that describes mismatches in the format ``22:A>C, 25:C>T``
+      A string. The substitutions string that describes mismatches in the format ``22:A>C, 25:C>T``
       to indicate a change from A to C in position 22 and from C to T in position 25.
       No further parsing for this is offered yet.
       
 .. class:: SAM_Alignment( line )
 
-   ``BowtieAlignment`` objects contain all the attributes from :class:Alignment and 
-   :class:AlignmentWithSequenceReversal, and, in addition, these:
+   ``BowtieAlignment`` objects contain all the attributes from :class:`Alignment` and 
+   :class:`AlignmentWithSequenceReversal`, and, in addition, these:
    
    .. attribute:: SAM_Alignment.aQual
    
-      The alignment quality score (an int) in Phread style encoding.
+      An int. The alignment quality score in Phread style encoding.
 
    .. attribute:: SAM_Alignment.cigar
    
-      A list of :class:CigarOperation objects, as parsed from the extended CIGAR string. See
-      :class:CigarOperation for details.
+      A list of :class:`CigarOperation` objects, as parsed from the extended CIGAR string. See
+      :class:`CigarOperation` for details.
       
    .. attribute:: SAM_Alignment._tags
    
-      At the moment, the extra tags are just put into this string field. A parser will
+      A string. At the moment, the extra tags are just put into this string field. A parser will
       be added soon.
       
 .. class:: SolexaExportAlignment( line )
 
-   ``BowtieAlignment`` objects contain all the attributes from :class:Alignment and 
-   :class:AlignmentWithSequenceReversal, and, in addition, these:
+   ``SolexaExportAlignment`` objects contain all the attributes from :class:`Alignment` and 
+   :class:`AlignmentWithSequenceReversal`, and, in addition, these:
    
    .. attribute:: SolexaExportAlignment.passed_filter
    
-      Whether the read passed the chastity filter. If ``passed_filter==False``, the
+      A boolean. Whether the read passed the chastity filter. If ``passed_filter==False``, then
       ``aligned==False``.
 
    .. attribute:: SolexaExportAlignment.nomatch_code
    
-      For ``aligned==False``, a code indicating why no match could be found. See the 
+      A string. For ``aligned==False``, a code indicating why no match could be found. See the 
       description of the 11th column of the Solexa Export format in the SolexaPipeline
       manual for the meaning of the codes. For ``aligned==True``, ``nomatch_code==None``.
          
@@ -240,7 +243,7 @@ objects in the list.
    .. attribute:: CigarOperation.type
    
       The type of the operation. One of the letters M, I, D, N, S, H, or P. Use
-      the dict :variable: to transform this to names::
+      the dict **cigar_operation_names** to transform this to names:
       
       .. doctest::
       

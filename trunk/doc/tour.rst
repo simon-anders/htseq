@@ -4,6 +4,8 @@
 A tour through HTSeq
 ********************
 
+.. currentmodule:: HTSeq
+
 This tour demonstrates the
 functionality of HTSeq by performing a number of common analysis tasks:
 
@@ -19,6 +21,8 @@ functionality of HTSeq by performing a number of common analysis tasks:
 The following description assumes that the reader is familiar with Python and with HTS
 data.
   
+If you want to try out the examples on your own system, you can download the 
+used example files here. ###############
 
 Reading in reads
 ================
@@ -39,7 +43,8 @@ the default "phred" is assumed, which means the encoding originally suggested
 by the Sanger Institute. (A third option is "solexa_old", for data from the SolexaPipeline
 prior to version 1.3.)
 
-The variable ``fastq_file`` now refers to the file::
+The variable ``fastq_file`` is now an object of class :class:`FastqReader`, which
+refers to the file::
 
    >>> fastq_file
    <FastqReader object, connected to file name 'yeast_RNASeq_excerpt_sequence.txt'>
@@ -70,8 +75,9 @@ contains the tenth read, and we may examine it::
    >>> read
    <SequenceWithQualities object 'HWI-EAS225:1:10:1284:142#0/1'>
 
-A ``Sequence`` object has two slots, called ``seq`` and ``name``. This here is
-a ``SequenceWithQualities``, and it also has a slot ``qual``::
+A :class:`Sequence` object has two slots, called :attr:`seq <Sequence.seq>` and 
+:attr:`name <Sequence.name>`. This here is a :class:`SequenceWithQualities`, 
+and it also has a slot :attr:`qual <SequenceWithQualities.qual>`::
 
    >>> read.name
    'HWI-EAS225:1:10:1284:142#0/1'
@@ -116,7 +122,9 @@ The average qualities are hence::
            24.10720429,  23.68026721,  23.52034081,  23.49437978,
            23.11076443,  22.5576223 ,  22.43549742,  22.62354494])
 
-If you have ``matplotlib`` installed, you can plot this.
+If you have `matplotlib`_ installed, you can plot this.
+
+.. _matplotlib: http://matplotlib.sourceforge.net/
 
 .. doctest::
 
@@ -128,7 +136,7 @@ If you have ``matplotlib`` installed, you can plot this.
 .. image:: qualplot.png
 
 This is a very simple way of looking at the quality scores. For more sophisticated 
-quality-control techniques, see [to be filled in].
+quality-control techniques, see the Chapter :ref:`qa`.
 
 
 What if you did not get the ``_sequence.txt`` file from your core facility but 
@@ -140,29 +148,30 @@ as found by Eland. To read it, simply use
 
    >>> alignment_file = HTSeq.SolexaExportReader( "yeast_RNASeq_excerpt_export.txt" )  #doctest:+SKIP
    
-`HTSeq` can also use other alignment formats, e.g., SAM::   
+``HTSeq`` can also use other alignment formats, e.g., SAM::   
    
    >>> alignment_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
    
 If we are only interested in the qualities, we can rewrite the commands from above
-to use the `alignment_file`::
+to use the ``alignment_file``::
 
    >>> nreads = 0
    >>> for aln in alignment_file:
    ...    qualsum += aln.read.qual
    ...    nreads += 1
 
-We have simple replaced the ``FastqReader`` with a ``SolexaExportReader``, which 
-iterates, when used in a ``for`` loop, over ``SolexaAlignment``objects. Each of
-these contain a field ``read`` that contains the ``SequenceWithQualities``, as
-before. There are more parses, for example the ``SAM_Parser`` that can read SAM
-files, and generates ``SAM_Alignment`` objects. As all ``Alignment`` object
-contain a ``read`` slot with the ``SequenceWithQualities``, we can use the same
-code with any alignment filw for which a parser has been provided, and all we have
+We have simple replaced the :class:`FastqReader` with a :class:`SolexaExportReader`, which 
+iterates, when used in a ``for`` loop, over :class:`SolexaExportAlignment` objects. Each of
+these contain a field :attr:`read <Alignment.read>` that contains the :class:`SequenceWithQualities`
+object, as before. There are more parses, for example the :class:`SAM_Reader` that can read SAM
+files, and generates :class:`SAM_Alignment` objects. As all :class:`Alignment` objects
+contain a :attr:`read <Alignment.read>` slot with the :class:`SequenceWithQualities`, we can use the same
+code with any alignment file for which a parser has been provided, and all we have
 to change is the name of the reader class in the first line.
 
-The other fields that all ``Alignment`` objects contain, is a Boolean called ``aligned``
-that tells us whether the read has been aligned at all, and a field called ``iv``
+The other fields that all :class:`Alignment` objects contain, is a Boolean called 
+:attr:`aligned <Alignment.aligned>` that tells us whether the read has been aligned 
+at all, and a field called :attr:`iv <Alignment.iv>`
 (for "interval") that shows where the read was aligned to. We use this information in
 the next section.
 
@@ -172,14 +181,15 @@ Calculating coverage vectors
 ============================
 
 By a "coverage vector", we mean a vector (one-dimensional array) of the length of
-a chromosome, where each element counts how many reads cover the correspoding
+a chromosome, where each element counts how many reads cover the corresponding
 base pair in their alignment. As chromosomes can be very long, it would be very 
 inefficient to hold a coverage vector in memory by reserving space for each base
 pair. Rather, we take advantage of the fact that the value of the coverage vector
 usually stays constant (often it is just zero) over stretches of varying length,
-which we call steps. A ``StepVector`` is a data structure defined for this purpose.
+which we call steps. A :class:`StepVector <StepVector.StepVector>` is 
+a data structure defined for this purpose.
 
-It works as follows: Let's define a ``Stepvector`` of length 30::
+It works as follows: Let's define a :class:`StepVector <StepVector.StepVector>` of length 30::
 
    >>> sv = HTSeq.StepVector.StepVector( 30 )
    
@@ -199,7 +209,7 @@ value 100 to the positions 10 to 20, the steps get split accordingly::
    >>> list( sv.get_steps() )
    [(0, 7, 0.0), (7, 10, 120.0), (10, 15, 220.0), (15, 20, 100.0), (20, 30, 0.0)]
    
-If you iterate over a ``StepVector``, it behaves like a list::
+If you iterate over a **StepVector** object, it behaves like a list:
 
 .. doctest::
 
@@ -208,7 +218,8 @@ If you iterate over a ``StepVector``, it behaves like a list::
    220.0, 220.0, 100.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
    0.0, 0.0, 0.0, 0.0, 0.0]
    
-You can also take parts of a ``StepVector``, which produces a new, shorter, ``StepVector``.
+You can also take parts of a :class:`StepVector`, which produces a new, 
+shorter, :class:`StepVector`.
 
 .. doctest::
 
@@ -220,14 +231,12 @@ You can also take parts of a ``StepVector``, which produces a new, shorter, ``St
    [(6, 7, 0.0), (7, 10, 120.0), (10, 12, 220.0)]
    >>> list( sv[6:12] )
    [0.0, 120.0, 120.0, 120.0, 220.0, 220.0]
-
-
    
-In practice, you will not work with ``StepVector``s directly, but rather with objects
-of class ``GenomicArray``. These hold several step vectors, either one for each chromosome   
+In practice, you will not work with **StepVector** objects directly, but rather with objects
+of class :class:`GenomicArray`. These hold several step vectors, either one for each chromosome   
 ("non-stranded genomic array") or one for each strand, i.e., two per chromosome
-("stranded genomic array"). To specify the locations of steps on a ``GenomicArray``, objects
-of class ``GenomicInterval`` are used, which are instantiated by specifying chromsome
+("stranded genomic array"). To specify the locations of steps on a :class:`GenomicArray`, objects
+of class :class:`GenomicInterval` are used, which are instantiated by specifying chromosome
 name, start, end, and position::
 
    >>> iv = HTSeq.GenomicInterval( "II", 100234, 100789, "+" )
@@ -236,7 +245,7 @@ name, start, end, and position::
    >>> print iv
    II:[100234,100789)/+
    
-A ``GenomicInterval`` has four slots which allow to access its data::
+A :class:`GenomicInterval` is a simple data structure with four slots::
    
    >>> iv.chrom
    'II'
@@ -247,13 +256,13 @@ A ``GenomicInterval`` has four slots which allow to access its data::
    >>> iv.strand
    '+'
    
-Two notes: ``chrom`` does not have to be chromosome, it could also be a contig name,
+Two notes: :attr:`chrom <GenomicInterval.chrom>` does not 
+have to be chromosome, it could also be a contig name,
 or any other identifier. ``strand`` can be ``+``, ``-``, or ``.``, where the latter
 means "no strand", to be used whenever specifying a strand would be meaning-less.
 
-A ``GenomicInterval`` has some more features, e.g., to calculate overlaps etc. See
-[...] for these.
-
+A :class:`GenomicInterval` has some more features, e.g., to calculate overlaps etc. 
+See the reference documentation for these.
 
 In order to calculate the coverage vectors for our yeast RNA-Seq data, we first need
 a list of all the chromosomes in yeast::
@@ -261,13 +270,14 @@ a list of all the chromosomes in yeast::
    >>> yeast_chroms = [ "2-micron", "MT", "I", "II", "III", "IV", "V", "VI", "VII",
    ...    "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI" ]
 
-Now, we define a ``GenomicArray``:
+Now, we define a :class:`GenomicArray`:
 
    >>> cvg = HTSeq.GenomicArray( yeast_chroms, stranded=True, typecode='i' )
    
-As we specified ``stranded=True``, there are now two ``StepVector``s for each
+As we specified ``stranded=True``, there are now two 
+:class:`StepVector <StepVector.StepVector>` objects for each
 chromosome, all holding integer values (``typecode='i'``). They all have an
-"infinte" length as we did not specify teh actual lengths of the chromosomes.
+"infinte" length as we did not specify the actual lengths of the chromosomes.
 
 .. doctest::
 
@@ -338,7 +348,7 @@ to::
    ...    if alngt.aligned:
    ...       cvg.add_value( 1, alngt.iv )
 
-We can plot an excerpt of this with::
+We can plot an excerpt of this with:   
 
 .. doctest::
 
@@ -368,8 +378,8 @@ Ensembl_ (to be found here_).
 .. _Ensembl: http://www.ensembl.org/index.html
 .. _here: ftp://ftp.ensembl.org/pub/current_gtf/
 
-These file are in the `GTF format`, a tightening of the `GFF format`. `HTSeq` offers the
-`GFF_Reader` class to read in a GFF file:
+These file are in the `GTF format`_, a tightening of the `GFF format`_. HTSeq offers the
+:class:`GFF_Reader` class to read in a GFF file:
 
 .. _`GTF format`: http://mblab.wustl.edu/GTF22.html
 .. _`GFF format`: http://www.sanger.ac.uk/resources/software/gff/spec.html
@@ -389,8 +399,8 @@ These file are in the `GTF format`, a tightening of the `GFF format`. `HTSeq` of
    <GenomicFeature: exon 'R0030W' at 2-micron: 3270 -> 3816 (strand '+')>
    <GenomicFeature: CDS 'R0030W' at 2-micron: 3270 -> 3813 (strand '+')>
 
-The ``feature`` variable is filled with objects of class ``GenomicFeature``. As with all Python
-objects, the ``dir`` function shows us its slots and functions::
+The ``feature`` variable is filled with objects of class :class:`GenomicFeature`. 
+As with all Python objects, the **dir** function shows us its slots and functions:
 
 .. doctest::
 
@@ -400,7 +410,7 @@ objects, the ``dir`` function shows us its slots and functions::
    
 Ignoring the attributes starting with an underscore, we can see now how to access 
 the information stored in the GFF file. The information from the columns of the GFF
-table is accessable as follows::
+table is accessible as follows::
 
    >>> feature.iv
    <GenomicInterval object '2-micron', [3270,3813), strand '+'>
@@ -411,7 +421,7 @@ table is accessable as follows::
    >>> feature.score
    '.'
 
-The last column (the attributes) is parsed and presented as a `dict`::
+The last column (the attributes) is parsed and presented as a dict:
 
 .. doctest::
 
@@ -420,14 +430,14 @@ The last column (the attributes) is parsed and presented as a `dict`::
    'transcript_id': 'R0030W', 'protein_id': 'R0030W', 'gene_name': 'RAF1'}
    
 The very first attribute in this column is usually some kind of ID, hence it is
-stored in the slot `name`:
+stored in the slot :attr:`name <GenomicFeature.name>`:
 
    >>> feature.name
    'R0030W'
 
-To deal with this data, we will use a ``GenomicArray``. A ``GenomicArray`` can store 
+To deal with this data, we will use a :class:`GenomicArray`. A GenomicArray can store 
 not only numerical data but also arbitrary Python objects (with `typecode` `'O'`).
-Hence, we can assign those features that correspond to exons, to steps in the ``GenomicArray``::
+Hence, we can assign those features that correspond to exons, to steps in the GenomicArray::
 
    >>> exons = HTSeq.GenomicArray( yeast_chroms, stranded=False, typecode='O' )
    >>> for feature in gtf_file:
@@ -446,19 +456,20 @@ Now, we can ask what exons occur in a certain interval::
     (<GenomicInterval object 'II', [124762,125000), strand '.'>, None)]
 
 However, our RNA-Seq experiment was not strand-specific, i.e., we do not know whether
-the reads came from the plus or the minus strand. This is why we defined the ``GenomicArray``
-as non-stranded (``stranded=False`` in the instantiation of ``exons`` above), intructing
+the reads came from the plus or the minus strand. This is why we defined the GenomicArray
+as non-stranded (``stranded=False`` in the instantiation of ``exons`` above), instructing
 it to ignore all strand information. An issue with this is that we now have many overlapping
 genes and the simple assignment ``exons[ feature.iv ] = feature`` is overwriting, so that
 it is not clear which feature we set.
 
 The proper solution is to store not just single features at an interval but sets of all
-features which are present there. A specialization of ``GenomicArray``, ``GenomicArrayOfSets``
-is offered to simplify this::
+features which are present there. A specialization of :class:`GenomicArray`, 
+:class:`GenomicArrayOfSets` is offered to simplify this::
 
    >>> exons = HTSeq.GenomicArrayOfSets( yeast_chroms, stranded=False )
 
-We populate the array again with the feature data. This time, we use the ``add_value``
+We populate the array again with the feature data. This time, we use the 
+:meth:`add_value <GenomicArrayOfSets.add_value>`
 method, which adds an object without overwriting what might already be there. Instead,
 it uses sets to deal with overlaps. (Also, we only store the gene name this time, as this
 will be more convenient later).
@@ -496,9 +507,9 @@ coded as follows::
    >>> print intersection_set
    set(['YCL058C'])
 
-Here, we have used the ``values_only`` option of ``get_steps``, as we are not
-interested in the intervals, only in the sets. We also used the ``intersection_update`` 
-method Python's standard ``set`` class, which performs a set intersection in 
+Here, we have used the ``values_only`` option of :meth:`GenomicArray.get_steps`, as we are not
+interested in the intervals, only in the sets. We also used the **intersection_update**
+method Python's standard **set** class, which performs a set intersection in 
 place. Afterwards, we have a set with precisely one element. Getting this one 
 element is a tiny bit cumbersome; to access it, one needs to write::
 
@@ -528,7 +539,7 @@ Now, we can finally count::
    ...    if len( intersection_set ) == 1:
    ...       counts[ list(intersection_set)[0] ] += 1
 
-We can now conveniently print the result with::
+We can now conveniently print the result with:
 
 
 .. doctest::
@@ -550,4 +561,11 @@ We can now conveniently print the result with::
    tY(GUA)M2 0
    tY(GUA)O 0
    tY(GUA)Q 0
+   
+   
+And much more
+=============   
       
+This tour was only meant to give an overview. There are many more tasks that can
+be solved with HTSeq. Have a look at the reference documentation in the following pages
+to see what else is there.      
