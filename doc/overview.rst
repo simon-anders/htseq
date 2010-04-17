@@ -64,7 +64,7 @@ Documentation overview
 
   * :ref:`features`
   
-    The classes :class:`GenomicFeature` and :class:`GFF_File` help to deal with genomic
+    The classes :class:`GenomicFeature` and :class:`GFF_Reader` help to deal with genomic
     annotation data.
     
   * :ref:`misc`
