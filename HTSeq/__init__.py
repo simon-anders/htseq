@@ -1,8 +1,6 @@
-"""
+"""HTSeq is a package to process high-throughput sequencing data.
 
-[...]
-
-
+See http://www-huber.embl.de/users/anders/HTSeq for documentation.
 """
 
 import itertools, warnings
@@ -429,8 +427,9 @@ class SolexaExportReader( FileOrSequence ):
       for line in FileOrSequence.__iter__( self ):
          record = SolexaExportAlignment()
          fields = SolexaExportReader.parse_line_bare( line )
-         assert fields['index_string'] in ( "0", "" ), "Indexing not yet implemented"
-         assert fields['read_nbr'] == "1", "Paired-read data not yet supported"
+         if fields['read_nbr'] != "1":
+            warnings.warn( "Paired-end read encountered. PE is so far supported only for " +
+               "SAM files, not yet for SolexaExport. All PE-related fields are ignored. " )
          record.read = SequenceWithQualities( 
             fields['read_seq'], 
             "%s:%s:%s:%s:%s#0" % (fields['machine'], fields['lane'], fields['tile'], 
@@ -442,6 +441,7 @@ class SolexaExportReader( FileOrSequence ):
             record.passed_filter = False
          else:
             raise ValueError, "Illegal 'passed filter' value in Solexa export data: '%s'." % fields['passed_filtering']
+         record.index_string = fields['index_string']
          if fields['pos'] == '':
             record.iv = None
             record.nomatch_code = fields['chrom']
@@ -461,7 +461,7 @@ class SolexaExportReader( FileOrSequence ):
          yield record
  
 class SAM_Reader( FileOrSequence ):
-   """A BowtieFile object is associated with a Bowtie output file that 
+   """A SAM_Reader object is associated with a SAM file that 
    contains short read alignments. It can generate an iterator of Alignment
    objects."""
 
@@ -503,3 +503,56 @@ class GenomicArrayOfSets( GenomicArray ):
       self.apply( _f, iv )
       
        
+###########################
+##   paired-end handling
+###########################
+         
+def pair_SAM_alignments( alignments ):
+
+   def check_is_pe( read ):
+      if not read.paired_end:
+         raise ValueError, "'pair_alignments' needs a sequence of paired-end alignments"
+
+   def process_paired_reads( read1, read2 ):   
+      if read1.pe_which == "second":
+         aux = read1
+         read1 = read2
+         read2 = aux
+      if not ( ( read1.pe_which == "first" and read2.pe_which == "second" ) or 
+               ( read1.pe_which == "unknown" and read2.pe_which == "unknown" ) ):
+         warnings.warn( "Incorrect first/second assignments in mate pairs " + 
+            read1.read.name )
+      if not ( read1.proper_pair and read2.proper_pair ):
+         warnings.warn( "Incorrect 'proper_pair' flag value for read pair " + 
+            read1.read.name )
+      if not ( read1.mate_start == read2.iv.start_as_pos and 
+            read2.mate_start == read1.iv.start_as_pos ):
+         warnings.warn( "Read pair " + readA.read.name +
+            " show inconsitency between 'iv' and 'mate_start' values" )
+      return ( read1, read2 )
+
+   def process_single_read( read ):
+      if read.mate_aligned:         
+         warnings.warn( "Read " + read.read.name + " claims to have an aligned mate " +
+            "which could not be found. (Is the SAM file properly sorted?)" )
+      if read.pe_which == "second":
+         return ( None, read )
+      else:
+         return ( read, None )
+
+   alignments = iter( alignments )
+   read1 = None
+   read2 = None
+   while True:
+      if read1 is None:
+         read1 = alignments.next()
+         check_is_pe( read1 )
+      read2 = alignments.next()
+      check_is_pe( read2 )      
+      if read1.read.name == read2.read.name:
+         yield process_paired_reads( read1, read2 )
+      else:
+         yield process_single_read( read1 )
+         read1 = read2
+         read2 = None
+                

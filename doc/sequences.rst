@@ -189,7 +189,7 @@ Trimming reads
 
 
 ``SequenceWithQualities``
-=======================   
+=========================   
 
 The sequences obtained from high-throughput sequencing devices (in the following also
 referred to as "reads") typically come with `base-call quality scores`, which indicate

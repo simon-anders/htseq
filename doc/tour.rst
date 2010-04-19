@@ -502,7 +502,7 @@ coded as follows::
    >>> intersection_set = None
    >>> for step_set in exons.get_steps( iv, values_only=True ):
    ...    if intersection_set is None:
-   ...       intersection_set = step_set
+   ...       intersection_set = step_set.copy()
    ...    else:
    ...       intersection_set.intersection_update( step_set )
    ... 
@@ -510,7 +510,9 @@ coded as follows::
    set(['YCL058C'])
 
 Here, we have used the ``values_only`` option of :meth:`GenomicArray.get_steps`, as we are not
-interested in the intervals, only in the sets. We also used the **intersection_update**
+interested in the intervals, only in the sets. When we look at the first step, we make a
+copy of the step's (in order to not disturb the values stored in ``exons``.) For the following
+steps, we use the **intersection_update**
 method Python's standard **set** class, which performs a set intersection in 
 place. Afterwards, we have a set with precisely one element. Getting this one 
 element is a tiny bit cumbersome; to access it, one needs to write::
@@ -535,11 +537,11 @@ Now, we can finally count::
    ...       intersection_set = None
    ...       for step_set in exons.get_steps( alnmt.iv, values_only=True ):
    ...           if intersection_set is None:
-   ...              intersection_set = step_set
+   ...              intersection_set = step_set.copy()
    ...           else:
    ...              intersection_set.intersection_update( step_set )
-   ...    if len( intersection_set ) == 1:
-   ...       counts[ list(intersection_set)[0] ] += 1
+   ...       if len( intersection_set ) == 1:
+   ...          counts[ list(intersection_set)[0] ] += 1
 
 We can now conveniently print the result with:
 
@@ -557,13 +559,17 @@ We can now conveniently print the result with:
    YPR050C 0
    YPR051W 1
    YPR052C 1
-   YPR053C 11
+   YPR053C 5
    YPR054W 0
    ...
    tY(GUA)M2 0
    tY(GUA)O 0
    tY(GUA)Q 0
    
+Some aligners can output gapped or spliced alignments. In a SAM file, this in encoded
+in the CIGAR string. HTSeq has facilities to handle this conveniently, too, with the
+class :class:`CigarOperation`. Chapter :ref:`count` describes a script which offers
+some further counting schemes.
    
 And much more
 =============   
