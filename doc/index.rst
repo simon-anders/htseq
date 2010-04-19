@@ -17,6 +17,7 @@ HTSeq: Analysing high-throughput sequencing data with Python
    misc
    qa
    count   
+   history
    
 * :ref:`genindex`
 
