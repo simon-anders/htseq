@@ -13,6 +13,7 @@ def invert_strand( iv ):
       iv2.strand = "+"
    else:
       raise ValueError, "Illegal strand"
+   return iv2
 
 def count_reads_in_features( sam_filename, gff_filename, stranded, 
       overlap_mode, feature_type, id_attribute, quiet ):
@@ -44,7 +45,6 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    ambiguous = 0
    i = 0   
    for r in read_seq:
-
       if not pe_mode:
          if not r.aligned:
             continue
@@ -104,6 +104,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
 
       
 def main():
+   
    optParser = optparse.OptionParser( 
       
       usage = "%prog [options] sam_file gff_file",
@@ -152,17 +153,10 @@ def main():
       sys.exit( 1 )
       
       
-   count_reads_in_features( args[0], args[1], opts.stranded == "yes", 
-      opts.mode, opts.featuretype, opts.idattr, opts.quiet )
-
-
-def my_showwarning( message, category, filename, lineno = None, line = None ):
-   sys.stderr.write( "Warning: %s\n" % message )
-
-if __name__ == "__main__":
    warnings.showwarning = my_showwarning
    try:
-      main()
+      count_reads_in_features( args[0], args[1], opts.stranded == "yes", 
+         opts.mode, opts.featuretype, opts.idattr, opts.quiet )
    except Exception:
       sys.stderr.write( "Error: %s\n" % str( sys.exc_info()[1] ) )
       sys.stderr.write( "[Exception type: %s, raised in %s:%d]\n" % 
@@ -170,4 +164,10 @@ if __name__ == "__main__":
            os.path.basename(traceback.extract_tb( sys.exc_info()[2] )[-1][0]), 
            traceback.extract_tb( sys.exc_info()[2] )[-1][1] ) )
       sys.exit( 1 )
+
+def my_showwarning( message, category, filename, lineno = None, line = None ):
+   sys.stderr.write( "Warning: %s\n" % message )
+
+if __name__ == "__main__":
+   main()
 
