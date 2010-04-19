@@ -1050,7 +1050,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
    def mate_aligned( self ):
       if not ( self.flags & 0x0001 ):
          raise ValueError, "Not a paired-end read"
-      return bool( self.flags & 0x0008 )
+      return not bool( self.flags & 0x0008 )
 
    @property
    def passed_filter( self ):
