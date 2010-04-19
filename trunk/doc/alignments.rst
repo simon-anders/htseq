@@ -117,6 +117,11 @@ Depending on the format of your alignment file, choose from the following parser
       of normalizing this, so that ``iv`` always adheres to the conventions outlined
       in :class:GenomicInterval. Especially, all coordinates are counted from zero, not one.
 
+   .. attribute:: paired_end
+   
+      A boolean. True if the read stems from a paired-end sequencing run. (Note: At the moment
+      paired-end data is only supported for the SAM format.)
+      
 
 .. class:: AlignmentWithSequenceReversal( read_as_aligned, iv )
 
@@ -183,6 +188,71 @@ object you typically never call the constructor yourself.
    
       A string. At the moment, the extra tags are just put into this string field. A parser will
       be added soon.
+
+   .. attribute:: SAM_Alignment.passed_filter
+   
+      A boolean. Whether the read passed platform/vendor quality filter. (See SAM format reference,
+      flag 0x0200.)
+      
+   .. attribute:: SAM_Alignment.primary
+   
+      A boolean. Whether the alignment is primary. (See SAM format reference, flag 0x0100.)
+
+   .. attribute:: SAM_Alignment.duplicate
+   
+      A boolean. Whether the read is an optical or PCR duplicate. (See SAM format reference, flag 0x0400.)
+      
+   .. attribute:: SAM_Alignment.flags
+   
+      An int. The flags value. You will not need this usually, as the information from all individual
+      flags are accessible through specific attributes.
+
+   **Paired-end support**
+   
+      SAM_Alignment objects can represent paired-end data. If :attr:`Alignment.paired_end` is True,
+      the following fields may be used:
+      
+      .. attribute:: SAM_Alignment.mate_aligned
+      
+         A boolean. Whether the mate was aligned
+         
+      .. attribute:: SAM_Alignment.pe_which
+      
+         A string. Takes one of the values "first", "second", "unknown" and "not_paired_end", to indicate
+         whether the read stems from the first or second pass of the paired-end sequencing.
+         
+      .. attribute:: SAM_Alignment.proper_pair
+      
+         Boolean. Whether the mates form a proper pair. (See SAM format reference, flag 0x0002.)
+         
+      .. attribute:: SAM_Alignment.mate_start
+      
+         A :class:`GenomicPosition` object. The start (i.e., left-most position) of the mate's alignment.
+         Note that mate_start.strand is opposite to iv.strand for proper pairs.
+         
+.. function:: pair_SAM_alignments( alnmt_seq )
+
+   This function takes a generator of :class:`SAM_Alignment` objects (e.g., 
+   a :class:`SAM_Reader` object) and yields a sequence of pairs of alignments.
+   A typical use may be::
+   
+      for first, second in HTSeq.SAM_Reader( "some_paired_end_data.sam" ):
+          print "Pair, consisting of"
+          print "   ", first
+          print "   ", second
+          
+   Here, ``first`` and ``second`` are :class:`SAM_Alignment` objects, representing two reads
+   of the same cluster. If a read does not have a mate, it is assigned to one of ``first``
+   or ``second`` (depending on the sequencing pass it originates from) and the other is
+   set to ``None``. *Important*: For this to work, the SAM file has to be arranged such that
+   paired reads are always in adjacent lines. As the SAM format requires that the query names
+   (first column of the SAM file) is the same for mate pairs, this arrangement can easily be
+   achieved by sorting the SAM file lines lexicographically. (If your sorting tool cannot handle
+   big files, try Ruan Jue's *msort*, available from the SOAP_ web site.)
+         
+.. _SOAP: http://soap.genomics.org.cn
+         
+
       
 .. class:: SolexaExportAlignment( line )
 

@@ -83,6 +83,14 @@ Attributes
       The length is calculated as end - start. If you set the length, 
       ``start_d`` will be preserved, i.e., ``end`` is changed, 
       unless the strand is ``-``, in which case ``start`` is changed.
+      
+   .. attribute:: GenomicInterval.start_as_pos
+                  GenomicInterval.end_as_pos
+                  GenomicInterval.start_d_as_pos
+                  GenomicInterval.end_d_as_pos
+                  
+      These attributes return :class:`GenomicPosition` objects referring to the
+      respective positions.
 
 Directional instantiation   
    .. function:: GenomicInterval_from_directional( chrom, start_d, length, strand="." )
