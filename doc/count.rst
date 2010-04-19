@@ -58,8 +58,12 @@ If the file ``htseq-qa`` is not in your path, you can, alternatively, call the s
 
 The <sam_file> contains the aligned reads in the SAM format. (Note that the 
 SAMtools_ contain Perl scripts to convert most alignment formats to SAM.)
-
+If you have paired-end data, you have to sort the SAM file by read name first. 
+(If your sorting tool cannot handle big files, try e.g. Ruan Jue's *msort*, 
+available from the SOAP_ web site.)
+         
 .. _SAMtools: http://samtools.sourceforge.net/
+.. _SOAP: http://soap.genomics.org.cn
 
 The <gff_file> contains the features in the `GFF format`_.
 
