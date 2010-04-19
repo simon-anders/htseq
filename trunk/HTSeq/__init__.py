@@ -551,6 +551,8 @@ def pair_SAM_alignments( alignments ):
       check_is_pe( read2 )      
       if read1.read.name == read2.read.name:
          yield process_paired_reads( read1, read2 )
+         read1 = None
+         read2 = None
       else:
          yield process_single_read( read1 )
          read1 = read2
