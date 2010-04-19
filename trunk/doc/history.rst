@@ -18,6 +18,10 @@ change to the ``exons`` variable invalidated data.
 
 * SolexaExportReader no longer complains about multiplexing (indexing) not being supported.
 
+* Mention link to example data in Tour.
+
+* Fix installation instructions. (``--user`` does not work for Python 2.5.)
+
 Enhancements:
 
 * Paired-end support for SAM_Alignment.
