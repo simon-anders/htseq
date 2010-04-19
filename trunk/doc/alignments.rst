@@ -230,6 +230,10 @@ object you typically never call the constructor yourself.
          A :class:`GenomicPosition` object. The start (i.e., left-most position) of the mate's alignment.
          Note that mate_start.strand is opposite to iv.strand for proper pairs.
          
+      .. attribue:: SAM_Alignment.inferred_insert_size
+      
+         An int. The inferred size of the insert between the reads.
+         
 .. function:: pair_SAM_alignments( alnmt_seq )
 
    This function takes a generator of :class:`SAM_Alignment` objects (e.g., 

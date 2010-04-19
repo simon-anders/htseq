@@ -88,6 +88,9 @@ Documentation overview
 
 * Front and back matters
 
+  * :ref:`history`
+
+..
 
   * :ref:`Table of Contents<tableofcontents>`
 
