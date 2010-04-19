@@ -48,8 +48,11 @@ cdef class AlignmentWithSequenceReversal( Alignment ):
    cdef public GenomicInterval iv
 
 cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
+   cdef public int flags
    cdef public list cigar
    cdef public int aQual
    cdef str _tags
-   
-      
+   cdef public GenomicPosition mate_start
+   cdef public str pe_which
+   cdef public int inferred_insert_size
+ 

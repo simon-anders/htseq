@@ -14,6 +14,7 @@ cimport numpy
 import StepVector
 import _HTSeq_internal
 
+
 ###########################
 ##   GenomicInterval 
 ###########################
@@ -130,6 +131,23 @@ cdef class GenomicInterval:
             return self.end
          else:
             return self.start + 1
+            
+   property start_as_pos:
+      def __get__( GenomicInterval self ):
+         return GenomicPosition( self.chrom, self.start, self. strand )            
+
+   property end_as_pos:
+      def __get__( GenomicInterval self ):
+         return GenomicPosition( self.chrom, self.end, self. strand )            
+
+   property start_d_as_pos:
+      def __get__( GenomicInterval self ):
+         return GenomicPosition( self.chrom, self.start_d, self. strand )            
+
+   property end_d_as_pos:
+      def __get__( GenomicInterval self ):
+         return GenomicPosition( self.chrom, self.end_d, self. strand )            
+
          
    def __richcmp__( GenomicInterval self, GenomicInterval other, int op ):
       if op == 2:  # ==
@@ -792,12 +810,21 @@ cdef class Alignment( object ):
       raise NotImplemented, "Alignment is an abstract base class"
    
    def __repr__( self ):
-      if self.aligned:
-         return "<%s object: Read '%s' aligned to %s>" % (
-            self.__class__.__name__, self.read.name, str(self.iv) )
+      cdef str s
+      if self.paired_end:
+         s = "Paired-end read"
       else:
-         return "<%s object: Read '%s', not aligned>" % (
-            self.__class__.__name__, self.read.name )
+         s = "Read"
+      if self.aligned:
+         return "<%s object: %s '%s' aligned to %s>" % (
+            self.__class__.__name__, s, self.read.name, str(self.iv) )
+      else:
+         return "<%s object: %s '%s', not aligned>" % (
+            self.__class__.__name__, s, self.read.name )
+            
+   @property
+   def paired_end( self ):
+      return False
          
    @property
    def aligned( self ):
@@ -959,16 +986,18 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          raise ValueError, "Sequence in SAM file contains '=', which is not supported."
       if seq.count( "." ) > 0:
          raise ValueError, "Sequence in SAM file contains '.', which is not supported."
-      if flagint & 0x0001:
-         raise ValueError, "Paired-end data encountered; not yet supported."    
+      flagint = int( flag )
         
-      if rname == "*":
+      if flagint & 0x0004:         # flag "query sequence is unmapped"
+         if rname != "*":
+            raise ValueError, "Malformed SAM line: RNAME != '*' although flag bit 0x0004 set"
          iv = None
          self.cigar = None
       else:
-         posint = int( pos ) - 1   # SAM if one-based, but HTSeq is zero-based!
-         flagint = int( flag )
-         if flagint & 0x0010:
+         if rname == "*":
+            raise ValueError, "Malformed SAM line: RNAME == '*' although flag bit &0x0004 cleared"
+         posint = int( pos ) - 1   # SAM is one-based, but HTSeq is zero-based!
+         if flagint & 0x0010:      # flag "strand of the query"
             strand = "-"
          else:
             strand = "+"
@@ -979,6 +1008,61 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          SequenceWithQualities( seq.upper(), qname, qual ), iv )
          
       self._tags = tags
+      self.flags = flagint
       self.aQual = int( mapq )
+      self.inferred_insert_size = int( isize )
       
+      if flagint & 0x0001:         # flag "read is paired in sequencing"
+         if flagint & 0x0008:      # flag "mate is unmapped"
+            if mrnm != "*":
+               raise ValueError, "Malformed SAM line: MRNM != '*' although flag bit &0x0008 set"
+            self.mate_start = None
+         else:
+            if mrnm == "*":
+               raise ValueError, "Malformed SAM line: MRNM == '*' although flag bit &0x0008 cleared"
+            posint = int( mpos ) - 1
+            if flagint & 0x0020:   # flag "strand of the mate"
+               strand = "-"
+            else:
+               strand = "+"           
+            self.mate_start = GenomicPosition( mrnm, posint, strand )   
+            if self.mate_start.chrom == "=":
+               self.mate_start.chrom = self.iv.chrom
+         if flagint & 0x0040:
+            self.pe_which = intern( "first" )
+         elif flagint & 0x0080:
+            self.pe_which = intern( "second" )
+         else:
+            self.pe_which = intern( "unknown" )
+      else:
+        self.mate_start = None
+        self.pe_which = intern( "not_paired_end" )
+        
+   @property
+   def paired_end( self ):
+      return bool( self.flags & 0x0001 )
+
+   @property
+   def proper_pair( self ):
+      return bool( self.flags & 0x0002 )
          
+   @property
+   def mate_aligned( self ):
+      if not ( self.flags & 0x0001 ):
+         raise ValueError, "Not a paired-end read"
+      return bool( self.flags & 0x0008 )
+
+   @property
+   def passed_filter( self ):
+      return not bool( self.flags & 0x0200 )
+      
+   @property
+   def primary( self ):
+      return not bool( self.flags & 0x0100 )
+
+   @property
+   def duplicate( self ):
+      return bool( self.flags & 0x0400 )
+         
+         
+
