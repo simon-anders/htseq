@@ -75,14 +75,15 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                if iv.chrom not in features.step_vectors:
                   raise UnknownChrom
                for fs2 in features.get_steps( iv, values_only=True ):
-                  if fs is None:
-                     fs = fs2.copy()
-                  else:
-                     if len(fs2) > 0 or overlap_mode == "intersection-strict":
+                  if len(fs2) > 0 or overlap_mode == "intersection-strict":
+                     if fs is None:
+                        fs = fs2.copy()
+                     else:
                         fs = fs.intersection( fs2 )
+
          else:
             sys.exit( "Illegal overlap mode." )
-         if len( fs ) == 0:
+         if fs is None or len( fs ) == 0:
             empty += 1
          elif len( fs ) > 1:
             ambiguous += 1
