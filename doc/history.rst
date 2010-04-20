@@ -4,6 +4,16 @@
 Version history
 ***************
 
+Version 0.4.2
+=============
+
+2010-04-19
+
+Bug fixes to htseq-count and pair_SAM_alignments. Bumped version number to avoid
+confusion.
+
+* Version 0.4.2-p1 (2010-04-20): there was still a bug left in htseq-count, fixed.
+
 Version 0.4.1
 =============
 
