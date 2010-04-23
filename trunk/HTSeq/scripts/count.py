@@ -26,10 +26,15 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
          features.add_chrom( f.iv.chrom )
       if f.type == feature_type:
          try:
-            features.add_value( f.attr[ id_attribute ], f.iv )
+            feature_id = f.attr[ id_attribute ]
          except KeyError:
             sys.exit( "Feature %s does not contain a '%s' attribute" % 
                ( f.name, id_attribute ) )
+         if stranded and f.iv.strand == ".":
+            sys.exit( "Feature %s at %s does not have strand information but you are "
+               "running htseq-count in stranded mode. Use '--stranded=no'." % 
+               ( f.name, f.iv ) )
+         features.add_value( feature_id, f.iv )
          counts[ f.attr[ id_attribute ] ] = 0
          
    if len( counts ) == 0 and not quiet:
