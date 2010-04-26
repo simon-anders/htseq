@@ -557,7 +557,7 @@ cdef class Sequence( object ):
       cdef int match = 0
       cdef int i, j
       cdef int num_mismatches
-      for i in xrange( 1, minlen ):
+      for i in xrange( 1, minlen+1 ):
          num_mismatches = 0
          for j in xrange( i ):
             if seq_cstr[ j ] != pat_cstr[ patlen - i + j ]:
@@ -581,7 +581,7 @@ cdef class Sequence( object ):
       cdef int match = 0
       cdef int i, j
       cdef int num_mismatches
-      for i in xrange( 1, minlen ):
+      for i in xrange( 1, minlen+1 ):
          num_mismatches = 0
          for j in xrange( i ):
             if seq_cstr[ seqlen - i + j ] != pat_cstr[ j ]:
@@ -751,7 +751,7 @@ cdef class SequenceWithQualities( Sequence ):
       if self._qualarr is None:
          self._fill_qual_arr()   
       cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array = self._qualarr
-      for i in xrange( 1, minlen ):
+      for i in xrange( 1, minlen+1 ):
          num_mismatches = 0
          for j in xrange( i ):
             if seq_cstr[ j ] != pat_cstr[ patlen - i + j ]:
@@ -779,7 +779,7 @@ cdef class SequenceWithQualities( Sequence ):
       if self._qualarr is None:
          self._fill_qual_arr()   
       cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array = self._qualarr
-      for i in xrange( 1, minlen ):
+      for i in xrange( 1, minlen+1 ):
          sum_mm_qual = 0
          for j in xrange( i ):
             if seq_cstr[ seqlen - i + j ] != pat_cstr[ j ]:

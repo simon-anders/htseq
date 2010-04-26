@@ -14,6 +14,9 @@ confusion.
 
 * Version 0.4.2-p1 (2010-04-20): there was still a bug left in htseq-count, fixed.
 
+* Version 0.4.2-p2 (2010-04-26): bug fix: adapter trimming failed if the adapter
+  was completely included in the sequence
+
 Version 0.4.1
 =============
 
