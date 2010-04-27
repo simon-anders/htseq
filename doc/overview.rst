@@ -86,9 +86,15 @@ Documentation overview
     counts how many reads map to each feature. 
 
 
-* Front and back matters
+* Appendices
+
+..
 
   * :ref:`history`
+  
+..  
+  
+  * :ref:`contrib`
 
 ..
 
