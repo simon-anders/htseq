@@ -95,9 +95,10 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
          else:
             counts[ list(fs)[0] ] += 1
       except UnknownChrom:
-         sys.stderr.write( ( "Warning: Skipping read '%s', aligned to %s, because " +
-            "chromosome '%s' did not appear in the GFF file.\n" ) % 
-            ( r.read.name, r.iv, r.iv.chrom ) )
+         rr = r if not pe_mode else r[0]
+         sys.stderr.write( ( "Warning: Skipping read '%s', because chromosome " +
+            "'%s', to which it has been aligned, did not appear in the GFF file.\n" ) % 
+            ( rr.read.name, iv.chrom ) )
 
       i += 1
       if i % 100000 == 0 and not quiet:
