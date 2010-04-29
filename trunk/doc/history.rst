@@ -17,6 +17,11 @@ confusion.
 * Version 0.4.2-p2 (2010-04-26): bug fix: adapter trimming failed if the adapter
   was completely included in the sequence
 
+* Version 0.4.2-p3
+
+* Version 0.4.2-p4 (2010-04-29): bug fix: error in warning when htseq-count
+  encountered an unknown chromosome 
+
 Version 0.4.1
 =============
 
