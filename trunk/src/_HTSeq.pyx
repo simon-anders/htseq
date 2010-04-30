@@ -392,6 +392,8 @@ cdef class GenomicArray( object ):
       if iv is None:
          return _HTSeq_internal.Genomic_array_get_all_steps( self )
       if self.stranded:
+         if iv.strand not in ( strand_plus, strand_minus ):
+            raise KeyError, "Non-stranded index used for stranded GenomicArray."
          a = self.step_vectors[ iv.chrom ][ iv.strand ].get_steps( iv.start, iv.end, values_only )
       else:
          a = self.step_vectors[ iv.chrom ].get_steps( iv.start, iv.end, values_only )

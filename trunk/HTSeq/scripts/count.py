@@ -20,6 +20,9 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       
    features = HTSeq.GenomicArrayOfSets( [], stranded )     
    counts = {}
+
+   # Try to open samfile to fail early in case it is not there
+   open( sam_filename ).close()
       
    for f in HTSeq.GFF_Reader( gff_filename ):
       if f.iv.chrom not in features.step_vectors.keys():

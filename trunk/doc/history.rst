@@ -22,6 +22,11 @@ confusion.
 * Version 0.4.2-p4 (2010-04-29): bug fix: error in warning when htseq-count
   encountered an unknown chromosome 
 
+* Version 0.4.2-p5 (2010-04-30): bug fixes: error in warning when PE positions
+  are mismatched, and misleading error when calling get_steps with unstranded
+  interval in a stranded array  
+
+
 Version 0.4.1
 =============
 
