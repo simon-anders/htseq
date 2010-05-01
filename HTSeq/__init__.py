@@ -170,7 +170,7 @@ def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
 
 class GFF_Reader( FileOrSequence ):
 
-   """Parser a GFF file
+   """Parse a GFF file
    
    Pass the constructor either a file name or an iterator of lines of a 
    GFF files. If a file name is specified, it may refer to a gzip compressed
@@ -179,6 +179,11 @@ class GFF_Reader( FileOrSequence ):
    Iterating over the object then yields GenomicFeature objects.
    """
    
+   def __init__( self, filename_or_sequence, end_included=False ):
+      FileOrSequence.__init__( self, filename_or_sequence )
+      self.end_included = end_included
+   
+   
    def __iter__( self ):
       for line in FileOrSequence.__iter__( self ):
          if line.startswith( '#' ):
@@ -186,8 +191,11 @@ class GFF_Reader( FileOrSequence ):
          ( seqname, source, feature, start, end, score, 
             strand, frame, attributeStr ) = line.split( "\t", 8 )   
          ( attr, name ) = parse_GFF_attribute_string( attributeStr, True )
-         f = GenomicFeature( name, feature,
-             GenomicInterval( seqname, int(start)-1, int(end), strand ) )
+         if self.end_included:
+            iv = GenomicInterval( seqname, int(start)-1, int(end)-1, strand )
+         else:
+            iv = GenomicInterval( seqname, int(start)-1, int(end), strand )
+         f = GenomicFeature( name, feature, iv )
          if score != ".":
             score = int( score )
          if frame != ".":
