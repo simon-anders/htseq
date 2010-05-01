@@ -4,6 +4,14 @@
 Version history
 ***************
 
+Version 0.4.3
+=============
+
+2010-05-01
+
+New argument to constructer of GFF_Reader: ``end_include``
+
+
 Version 0.4.2
 =============
 
