@@ -11,6 +11,8 @@ Version 0.4.3
 
 New argument to constructer of GFF_Reader: ``end_include``
 
+* Version 0.4.3-p1 (2010-05-15): fixed '-q' option in htseq-count
+
 
 Version 0.4.2
 =============
