@@ -18,6 +18,9 @@ def invert_strand( iv ):
 def count_reads_in_features( sam_filename, gff_filename, stranded, 
       overlap_mode, feature_type, id_attribute, quiet ):
       
+   if quiet:
+      warnings.filterwarnings( action="ignore", module="HTSeq" ) 
+      
    features = HTSeq.GenomicArrayOfSets( [], stranded )     
    counts = {}
 
@@ -98,10 +101,14 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
          else:
             counts[ list(fs)[0] ] += 1
       except UnknownChrom:
-         rr = r if not pe_mode else r[0]
-         sys.stderr.write( ( "Warning: Skipping read '%s', because chromosome " +
-            "'%s', to which it has been aligned, did not appear in the GFF file.\n" ) % 
-            ( rr.read.name, iv.chrom ) )
+         if not pe_mode:
+            rr = r 
+         else: 
+            rr = r[0] if r[0] is not None else r[1]
+         if not quiet:
+            sys.stderr.write( ( "Warning: Skipping read '%s', because chromosome " +
+               "'%s', to which it has been aligned, did not appear in the GFF file.\n" ) % 
+               ( rr.read.name, iv.chrom ) )
 
       i += 1
       if i % 100000 == 0 and not quiet:
@@ -128,7 +135,7 @@ def main():
       epilog = 
          "Written by Simon Anders (sanders@fs.tum.de), European Molecular Biology " +
          "Laboratory (EMBL). (c) 2010. Released under the terms of the GNU General " +
-         "Public License v3. Part of the 'HTSeq' framework." )
+         "Public License v3. Part of the 'HTSeq' framework, version %s." % HTSeq.__version__ )
          
    optParser.add_option( "-m", "--mode", type="choice", dest="mode",
       choices = ( "union", "intersection-strict", "intersection-nonempty" ), 
@@ -149,7 +156,7 @@ def main():
       help = "whether the data is from a strand-specific assay (default: yes)" )
       
    optParser.add_option( "-q", "--quiet", action="store_true", dest="quiet",
-      help = "suppress progress report" )
+      help = "suppress progress report and warnings" )
 
    if len( sys.argv ) == 1:
       optParser.print_help()
@@ -167,7 +174,7 @@ def main():
    try:
       count_reads_in_features( args[0], args[1], opts.stranded == "yes", 
          opts.mode, opts.featuretype, opts.idattr, opts.quiet )
-   except Exception:
+   except:
       sys.stderr.write( "Error: %s\n" % str( sys.exc_info()[1] ) )
       sys.stderr.write( "[Exception type: %s, raised in %s:%d]\n" % 
          ( sys.exc_info()[1].__class__.__name__, 
