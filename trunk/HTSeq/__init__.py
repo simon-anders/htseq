@@ -145,7 +145,6 @@ def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
    """
    if attrStr.endswith( "\n" ):
       attrStr = attrStr[:-1]
-   print "attr:", attrStr
    d = {}
    for (i, attr) in itertools.izip( itertools.count(), attrStr.split( ";" ) ):
       if _re_attr_empty.match( attr ):
@@ -290,7 +289,6 @@ class FastaReader( FileOrSequence ):
          if line.startswith( ">" ):
             if seqname is not None:
                seqlengths[ seqname ] = length
-               print seqname, length
             mo = _re_fasta_header_line.match( line )
             seqname = mo.group(1)
             length = 0
