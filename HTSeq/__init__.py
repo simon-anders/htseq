@@ -71,9 +71,6 @@ class GeneratedSequence( object ):
    def __iter__( self ):
       return self.generator( *self.args )
 
-_re_attr_main = re.compile( "\s*(\w+)[\s=]+(.*)" )
-
-
 #########################
 ## Features
 #########################
@@ -137,6 +134,8 @@ class GenomicFeature( object ):
          self.iv.strand, frame, attr_str ) ) + "\n"
          
 
+_re_attr_main = re.compile( "\s*(\w+)[\s=]+(.*)" )
+_re_attr_empty = re.compile( "^\s*$" )
 
 def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
    """Parses a GFF attribute string and returns it as a dictionary.
@@ -146,9 +145,10 @@ def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
    """
    if attrStr.endswith( "\n" ):
       attrStr = attrStr[:-1]
+   print "attr:", attrStr
    d = {}
    for (i, attr) in itertools.izip( itertools.count(), attrStr.split( ";" ) ):
-      if attr == "":
+      if _re_attr_empty.match( attr ):
          continue
       if attr.count( '"' ) not in ( 0, 2 ):
          raise ValueError, "The attribute string seems to contain mismatched quotes."
@@ -197,7 +197,7 @@ class GFF_Reader( FileOrSequence ):
             iv = GenomicInterval( seqname, int(start)-1, int(end), strand )
          f = GenomicFeature( name, feature, iv )
          if score != ".":
-            score = int( score )
+            score = float( score )
          if frame != ".":
             frame = int( frame )
          f.source = source
