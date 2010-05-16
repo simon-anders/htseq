@@ -186,7 +186,7 @@ object you typically never call the constructor yourself.
       
    .. attribute:: SAM_Alignment._tags
    
-      A string. At the moment, the extra tags are just put into this string field. A parser will
+      A list of strings. At the moment, the extra tags are just put into this field. A parser will
       be added soon.
 
    .. attribute:: SAM_Alignment.passed_filter

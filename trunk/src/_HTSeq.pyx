@@ -977,12 +977,17 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
      
    def __init__( self, line ):
       cdef str qname, flag, rname, pos, mapq, cigar, 
-      cdef str mrnm, mpos, isize, seq, qual, tags
+      cdef str mrnm, mpos, isize, seq, qual
+      cdef list tags
       cdef int posint, flagint
       cdef str strand
       
+      fields = line.rstrip().split( "\t" )
+      if len( fields ) < 10:
+         raise ValueError, "SAM line does not contain at least 11 tab-delimited fields."
       (qname, flag, rname, pos, mapq, cigar, mrnm, mpos, isize, 
-         seq, qual, tags) = line.split( "\t", 11 )
+         seq, qual) = fields[ 0:11 ]
+      tags = fields[ 11: ]      
       
       if seq.count( "=" ) > 0:
          raise ValueError, "Sequence in SAM file contains '=', which is not supported."

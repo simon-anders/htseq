@@ -32,6 +32,20 @@ Miscellaneous
    
    Furthermore, if a file name is passed that end in ".gz" or ".gzip"
    (case insensitive), it is transparently gunzipped.
+   
+   
+   .. attribute:: FileOrSequence.fos
+      
+      The argument passed to the constructor, i.e., a filename or a sequence
+      
+   .. attribute:: FileOrSequence.line_no
+   
+      The line number (1-based) of the most recently read line. Initially None.
+      
+   .. method:: FileOrSequence.get_line_number_string( )
+   
+      Returns a string describing the position in the file. Useful for error messages.   
+
 
 Version
 =======
