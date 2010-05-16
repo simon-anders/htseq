@@ -35,6 +35,7 @@ class FileOrSequence( object ):
    
    def __init__( self, filename_or_sequence ):      
       self.fos = filename_or_sequence
+      self.line_no = None
       
    def __iter__( self ):
       if isinstance( self.fos, str ):
@@ -44,10 +45,13 @@ class FileOrSequence( object ):
             lines = open( self.fos )
       else:
          lines = self.fos
+      self.line_no = 1
       for line in lines:
          yield line
+         self.line_no += 1
       if isinstance( self.fos, str ):
          lines.close()
+      self.line_no = None
          
    def __repr__( self ):
       if isinstance( self.fos, str ):
@@ -56,6 +60,12 @@ class FileOrSequence( object ):
       else:
          return "<%s object, connected to %s >" % (
             self.__class__.__name__, repr( self.fos ) )   
+            
+   def get_line_number_string( self ):
+      if isinstance( self.fos, str ):
+         return "line %d of file %s" % ( self.line_no, self.fos )
+      else:
+         return "line %d" % self.line_no
 
 class GeneratedSequence( object ):
    """GeneratedSequence is a little helper class to get "respawnable"
@@ -474,8 +484,8 @@ class SAM_Reader( FileOrSequence ):
    def __iter__( self ):
       for line in FileOrSequence.__iter__( self ):
          if line.startswith( "@" ):
-	    # do something with the header line
-	    continue
+            # do something with the header line
+            continue
          algnt = SAM_Alignment( line )
          yield algnt
        

@@ -18,6 +18,11 @@ New argument to constructer of GFF_Reader: ``end_include``
 * Version 0.4.3-p3 (2010-05-15): parse_GFF_attribute_string can now deal with
   empty fields; score treated as float, not int
 
+* Version 0.4.3-p3 (2010-05-15): 
+  - parse_GFF_attribute_string can now deal with empty fields; 
+    score treated as float, not int
+  - fixed bug in SAM_Reader: can now deal with SAM files with 11 columns
+  - SAM_Alignment._tags is now a list of strings
 
 Version 0.4.2
 =============

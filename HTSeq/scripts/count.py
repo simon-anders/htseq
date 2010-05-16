@@ -27,92 +27,105 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    # Try to open samfile to fail early in case it is not there
    open( sam_filename ).close()
       
-   for f in HTSeq.GFF_Reader( gff_filename ):
-      if f.iv.chrom not in features.step_vectors.keys():
-         features.add_chrom( f.iv.chrom )
-      if f.type == feature_type:
-         try:
-            feature_id = f.attr[ id_attribute ]
-         except KeyError:
-            sys.exit( "Feature %s does not contain a '%s' attribute" % 
-               ( f.name, id_attribute ) )
-         if stranded and f.iv.strand == ".":
-            sys.exit( "Feature %s at %s does not have strand information but you are "
-               "running htseq-count in stranded mode. Use '--stranded=no'." % 
-               ( f.name, f.iv ) )
-         features.add_value( feature_id, f.iv )
-         counts[ f.attr[ id_attribute ] ] = 0
+   gff = HTSeq.GFF_Reader( gff_filename )   
+   try:
+      for f in gff:
+         if f.iv.chrom not in features.step_vectors.keys():
+            features.add_chrom( f.iv.chrom )
+         if f.type == feature_type:
+            try:
+               feature_id = f.attr[ id_attribute ]
+            except KeyError:
+               sys.exit( "Feature %s does not contain a '%s' attribute" % 
+                  ( f.name, id_attribute ) )
+            if stranded and f.iv.strand == ".":
+               sys.exit( "Feature %s at %s does not have strand information but you are "
+                  "running htseq-count in stranded mode. Use '--stranded=no'." % 
+                  ( f.name, f.iv ) )
+            features.add_value( feature_id, f.iv )
+            counts[ f.attr[ id_attribute ] ] = 0
+   except ValueError as e:
+      e.args += ( gff.get_line_number_string(), )
+      raise
+
          
    if len( counts ) == 0 and not quiet:
       sys.stderr.write( "Warning: No features of type '%s' found.\n" % feature_type )
    
-   first_read = iter( HTSeq.SAM_Reader( sam_filename ) ).next()
-   pe_mode = first_read.paired_end
-   
-   read_seq = HTSeq.SAM_Reader( sam_filename )
-   if pe_mode:
-      read_seq = HTSeq.pair_SAM_alignments( read_seq )
-   empty = 0
-   ambiguous = 0
-   i = 0   
-   for r in read_seq:
-      if not pe_mode:
-         if not r.aligned:
-            continue
-         iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" )
-      else:
-         if r[0] is not None and r[0].aligned:
-            iv_seq = ( co.ref_iv for co in r[0].cigar if co.type == "M" )
-         else:
-            iv_seq = tuple()
-         if r[1] is not None and r[1].aligned:            
-            iv_seq = itertools.chain( iv_seq, 
-               ( invert_strand( co.ref_iv ) for co in r[1].cigar if co.type == "M" ) )
-         else:
-            if ( r[0] is None ) or not ( r[0].aligned ):
-               continue         
-      
-      try:
-         if overlap_mode == "union":
-            fs = set()
-            for iv in iv_seq:
-               if iv.chrom not in features.step_vectors:
-                  raise UnknownChrom
-               for fs2 in features.get_steps( iv, values_only=True ):
-                  fs = fs.union( fs2 )
-         elif overlap_mode == "intersection-strict" or overlap_mode == "intersection-nonempty":
-            fs = None
-            for iv in iv_seq:
-               if iv.chrom not in features.step_vectors:
-                  raise UnknownChrom
-               for fs2 in features.get_steps( iv, values_only=True ):
-                  if len(fs2) > 0 or overlap_mode == "intersection-strict":
-                     if fs is None:
-                        fs = fs2.copy()
-                     else:
-                        fs = fs.intersection( fs2 )
+   try:
+      read_seq = HTSeq.SAM_Reader( sam_filename )
+      first_read = iter( read_seq ).next()
+      pe_mode = first_read.paired_end
 
-         else:
-            sys.exit( "Illegal overlap mode." )
-         if fs is None or len( fs ) == 0:
-            empty += 1
-         elif len( fs ) > 1:
-            ambiguous += 1
-         else:
-            counts[ list(fs)[0] ] += 1
-      except UnknownChrom:
+      read_seq = HTSeq.SAM_Reader( sam_filename )
+      if pe_mode:
+         read_seq = HTSeq.pair_SAM_alignments( read_seq )
+      empty = 0
+      ambiguous = 0
+      i = 0   
+      for r in read_seq:
          if not pe_mode:
-            rr = r 
-         else: 
-            rr = r[0] if r[0] is not None else r[1]
-         if not quiet:
-            sys.stderr.write( ( "Warning: Skipping read '%s', because chromosome " +
-               "'%s', to which it has been aligned, did not appear in the GFF file.\n" ) % 
-               ( rr.read.name, iv.chrom ) )
+            if not r.aligned:
+               continue
+            iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" )
+         else:
+            if r[0] is not None and r[0].aligned:
+               iv_seq = ( co.ref_iv for co in r[0].cigar if co.type == "M" )
+            else:
+               iv_seq = tuple()
+            if r[1] is not None and r[1].aligned:            
+               iv_seq = itertools.chain( iv_seq, 
+                  ( invert_strand( co.ref_iv ) for co in r[1].cigar if co.type == "M" ) )
+            else:
+               if ( r[0] is None ) or not ( r[0].aligned ):
+                  continue         
+         
+         try:
+            if overlap_mode == "union":
+               fs = set()
+               for iv in iv_seq:
+                  if iv.chrom not in features.step_vectors:
+                     raise UnknownChrom
+                  for fs2 in features.get_steps( iv, values_only=True ):
+                     fs = fs.union( fs2 )
+            elif overlap_mode == "intersection-strict" or overlap_mode == "intersection-nonempty":
+               fs = None
+               for iv in iv_seq:
+                  if iv.chrom not in features.step_vectors:
+                     raise UnknownChrom
+                  for fs2 in features.get_steps( iv, values_only=True ):
+                     if len(fs2) > 0 or overlap_mode == "intersection-strict":
+                        if fs is None:
+                           fs = fs2.copy()
+                        else:
+                           fs = fs.intersection( fs2 )
 
-      i += 1
-      if i % 100000 == 0 and not quiet:
-         sys.stderr.write( "%d reads processed.\n" % i )
+            else:
+               sys.exit( "Illegal overlap mode." )
+            if fs is None or len( fs ) == 0:
+               empty += 1
+            elif len( fs ) > 1:
+               ambiguous += 1
+            else:
+               counts[ list(fs)[0] ] += 1
+         except UnknownChrom:
+            if not pe_mode:
+               rr = r 
+            else: 
+               rr = r[0] if r[0] is not None else r[1]
+            if not quiet:
+               sys.stderr.write( ( "Warning: Skipping read '%s', because chromosome " +
+                  "'%s', to which it has been aligned, did not appear in the GFF file.\n" ) % 
+                  ( rr.read.name, iv.chrom ) )
+
+         i += 1
+         if i % 100000 == 0 and not quiet:
+            sys.stderr.write( "%d reads processed.\n" % i )
+
+   except ValueError as e:
+      e.args += ( read_seq.get_line_number_string(), )
+      raise
+
          
    for fn in sorted( counts.keys() ):
       print "%s\t%d" % ( fn, counts[fn] )
@@ -175,7 +188,7 @@ def main():
       count_reads_in_features( args[0], args[1], opts.stranded == "yes", 
          opts.mode, opts.featuretype, opts.idattr, opts.quiet )
    except:
-      sys.stderr.write( "Error: %s\n" % str( sys.exc_info()[1] ) )
+      sys.stderr.write( "Error: %s\n" % "; ".join( sys.exc_info()[1] ) )
       sys.stderr.write( "[Exception type: %s, raised in %s:%d]\n" % 
          ( sys.exc_info()[1].__class__.__name__, 
            os.path.basename(traceback.extract_tb( sys.exc_info()[2] )[-1][0]), 
