@@ -24,6 +24,9 @@ New argument to constructer of GFF_Reader: ``end_include``
   - fixed bug in SAM_Reader: can now deal with SAM files with 11 columns
   - SAM_Alignment._tags is now a list of strings
 
+* Version 0.4.3-p4 (2010-05-16):
+  bumped version number again just to make sure
+
 Version 0.4.2
 =============
 
