@@ -80,10 +80,29 @@ void step_vector<T>::set_value( long int from, long int to, T value )
       m.erase( it, m.upper_bound( to ) );
    }
 
-   // Either insert a new step, or, if left->first == from,
-   // overwrite the existing step's value
-   if( ! (left->second == value ) )
-      m[ from ] = value;
+   if( ! (left->second == value ) ) {
+      if( left->first != from )
+         // Insert a new step
+         m[ from ] = value;
+      else {
+         // We have from == left->first, so the step is already present.
+         // Would changing m[from] to value make it equal to its left
+         // neighbor?
+         if( left == m.begin() )      
+            // no, there is no left neighbor
+            m[ from ] = value;
+         else {
+            typename std::map< long int, T>::iterator leftleft = left;
+            leftleft--;
+            if( ! ( leftleft->second == value ) )
+               // ok, change the value
+               m[ from ] = value;
+            else
+               // no, rather delete the step
+               m.erase( left );
+         }
+      }
+   }
 }
 
 template< class T >
