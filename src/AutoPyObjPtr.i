@@ -15,6 +15,7 @@ Simon Anders, 2009-08-28
       AutoPyObjPtr( PyObject * o = Py_None );
       AutoPyObjPtr( const AutoPyObjPtr & op );
       AutoPyObjPtr & operator= ( const AutoPyObjPtr & po ); 
+      bool operator== ( const AutoPyObjPtr & po ) const; 
       ~AutoPyObjPtr( );
     #ifdef AUTOPYOBJPTR_EXTRAOPS
       AutoPyObjPtr & operator+=( const AutoPyObjPtr & po );   
@@ -40,6 +41,13 @@ Simon Anders, 2009-08-28
       obj = po.obj;
       Py_XINCREF( obj );
       return *this;
+   }
+
+   bool AutoPyObjPtr::operator== ( const AutoPyObjPtr & po ) const
+   {
+      int res = PyObject_RichCompareBool( obj, po.obj, Py_EQ );
+      assert( res == 0 || res == 1 );
+      return res;
    }
 
    AutoPyObjPtr::~AutoPyObjPtr( )

@@ -53,15 +53,37 @@ void step_vector<T>::set_value( long int from, long int to, T value )
       throw std::out_of_range( "Index too large in step_vector." );
    if( from < min_index )
       throw std::out_of_range( "Index too small in step_vector." );
+
+   // Unless the new step extends to the end, we need to insert a new
+   // value afterwards unless the step to the right has the same value
    if( to < max_index ) {
       T next_value = (*this)[to+1];
-      m[ to + 1 ] = next_value;
+      if( !( next_value == value ) )
+         m[ to + 1 ] = next_value;
    }
+
+   // Find the left step, i.e., the step whose start is smaller or equal
+   // to 'from':
+   typename std::map< long int, T>::iterator left = m.upper_bound( from );
+   if( left != m.end() )
+      left--;
+   else
+      left = m.begin();
+   assert( left->first <= from );
+                     
+   // Get rid of the steps present between from and to
    typename std::map< long int, T>::iterator it = m.lower_bound( from );
+   if( it->first == from )
+      it++;
+   assert( it->first > from );
    if( it->first <= to ) {
       m.erase( it, m.upper_bound( to ) );
    }
-   m[ from ] = value;
+
+   // Either insert a new step, or, if left->first == from,
+   // overwrite the existing step's value
+   if( ! (left->second == value ) )
+      m[ from ] = value;
 }
 
 template< class T >
