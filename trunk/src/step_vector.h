@@ -65,10 +65,7 @@ void step_vector<T>::set_value( long int from, long int to, T value )
    // Find the left step, i.e., the step whose start is smaller or equal
    // to 'from':
    typename std::map< long int, T>::iterator left = m.upper_bound( from );
-   if( left != m.end() )
-      left--;
-   else
-      left = m.begin();
+   left--;
    assert( left->first <= from );
                      
    // Get rid of the steps present between from and to
