@@ -315,16 +315,20 @@ cdef class GenomicArray( object ):
    cdef public dict step_vectors
    cdef readonly bool stranded
    cdef readonly str typecode
+   cdef public bool auto_add_chroms
    
    def __init__( self, object chroms, bool stranded=True, str typecode='d' ):
       cdef str chrom
       self.step_vectors = {}
       self.stranded = stranded
       self.typecode = typecode
-      if isinstance( chroms, list ):
+      self.auto_add_chroms = chroms == "auto"
+      if self.auto_add_chroms:
+         chroms = []
+      elif isinstance( chroms, list ):
          chroms = dict( [ ( c, sys.maxint ) for c in chroms ] )
       elif not isinstance( chroms, dict ):
-         raise TypeError, "'chroms' must be a list or a dict."
+         raise TypeError, "'chroms' must be a list or a dict or 'auto'."
       for chrom in chroms:
          self.add_chrom( chrom, chroms[chrom] )
             
@@ -349,6 +353,8 @@ cdef class GenomicArray( object ):
       if isinstance( index, GenomicInterval ):
          if self.stranded and index.strand not in ( strand_plus, strand_minus ):
             raise KeyError, "Non-stranded index used for stranded GenomicArray."
+         if self.auto_add_chroms and index.chrom not in self.step_vectors:
+            self.add_chrom( index.chrom )
          if isinstance( index, GenomicPosition ):
             if self.stranded:
                self.step_vectors[ index.chrom ][ index.strand ][ index.pos ] = value
