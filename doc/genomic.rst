@@ -372,8 +372,10 @@ Special methods
    
 Limitations
 
-- ``StepVector`` does not realize if two adjacent steps have the same value and
-  could be merged to save space.
+- ``StepVector`` does not realize when ``apply`` or ``add_value`` causes to
+  adjacent steps to have the same value. If this situation arises when
+  setting a value with indexing (``sv[3:5]``), it (usually but not always)
+  merges the adjacent steps.
 - If many steps are very narrow, a ``StepVector`` object may be less effective
   than an ordinary ``array``.
 
@@ -392,11 +394,14 @@ Instantiation
    
    If ``chroms`` is a list of chromosome names,  two (or one, see below) ``StepVector`` 
    objects for each chromosome are created, with start index 0 and indefinite
-   length. If ``chrom`` is a ``dict``, the keys are used for the chromosome names
+   length. If ``chroms`` is a ``dict``, the keys are used for the chromosome names
    and the values should be the lengths of the chromosome, i.e., the StepVectors
    index ranges are then from 0 to these lengths. (Note that the term chromosome
    is used only for convenience. Of course, you can as well specify contig IDs
-   or the like.)
+   or the like.) Finally, if ``chroms`` is the string ``"auto"``, the GenomicArray
+   is created without any chromosomes but whenever the user attempts to assign a 
+   value to a yet unknown chromosome, a new one is automatically created with 
+   :method:`GenomicArray.add_chrom`.
    
    If ``stranded`` is ``True``, two ``StepVector`` objects are created for each chromosome,
    one for the '+' and one for the '-' strand. For ``stranded == False``, only one
@@ -429,6 +434,13 @@ Attributes
                    '-': <StepVector object, type 'd', index range 0:inf, 1 step(s)>},
           'chr1': {'+': <StepVector object, type 'd', index range 0:inf, 1 step(s)>,
                    '-': <StepVector object, type 'd', index range 0:inf, 1 step(s)>}}
+
+   .. attribute: GenomicArray.auto_add_chroms
+   
+      A boolean. This attribute is set to True if the GenomicArray was created with the ``"auto"``
+      arguments for the ``chroms`` parameter. If it is true, an new chromosome
+      will be added whenever needed.
+
                    
 Data access
    One way to access your data is to access the ``step_vectors`` field directly.

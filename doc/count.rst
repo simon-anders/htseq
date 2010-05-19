@@ -111,3 +111,12 @@ Options
 .. cmdoption:: -h, --help
 
    Show a usage summary and exit
+   
+   
+Important
+.........
+
+The default for strandedness is *yes*. If your RNA-Seq data has not been made
+with a strand-specific protocol, this causes half of the reads to be lost.
+Hence, make sure to set the option ``--stranded=no`` unless you have strand-specific
+data!
