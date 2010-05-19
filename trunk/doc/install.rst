@@ -36,7 +36,9 @@ type
 
    easy_install HTSeq
    
-and ``easy_install`` will download and install everything automatically.   
+and ``easy_install`` will download and install everything automatically. (Warning:
+easy_install sometimes gets an old version. make sure you get the current one, and,
+if not, proceed with the manual way, as follows.)  
 
 Alternatively, you can download HTSeq from the
 
@@ -108,7 +110,8 @@ GNU tool chain and the Python header files installed:
   ``python-dev`` package. For other Linux distributions, similar packages are available.
 
 * On MS Windows, MinGW_ is a commonly used build environment. Using it may be
-  a bit tricky, so use a binary package if possible.
+  a bit tricky, so use a binary package if possible. If non is available, see below
+  for detailed instructions.
 
 .. _MinGW: http://www.mingw.org/
 
@@ -121,3 +124,23 @@ into the unpacked directory, and type
 Afterwards, proceed as with the binary package.
 
 
+Installation of a source package on MS Windows
+..............................................
+
+If the current version is not available as binary package for Windows, either 
+ask me to build a Windows package, or proceed as follows:
+
+- In addition to Python and numpy, also install MinGW_.
+
+.. _MinGW: http://www.mingw.org/
+
+- Download the source package and unpack it (e.g., with 7-zip) onto your desktop.
+
+- Start a command line terminal and type the following commands (substituting paths
+  where they are different on your system)::
+  
+  cd \Documents and Settings\anders\Desktop\HTSeq-0.4.4
+  PATH=%PATH%;C:\Python26;C:\MinGW\bin
+  python setup.py build --compiler=mingw32
+  python setup.py install
+    
