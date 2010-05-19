@@ -4,6 +4,18 @@
 Version history
 ***************
 
+Version 0.4.4
+=============
+
+2010-05-19
+
+- StepVectors (and hence also GenomicArrays) now notice if, when setting the
+  value of a step, this value is equal to an adjacent step and merge the steps.
+  
+- GenomicArray's constructor now allows the special value ``"auto"`` for its
+  first arguments in order to start without chromosomes and automatically add
+  them when first encountered.
+
 Version 0.4.3
 =============
 
