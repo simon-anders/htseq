@@ -486,7 +486,11 @@ class SAM_Reader( FileOrSequence ):
          if line.startswith( "@" ):
             # do something with the header line
             continue
-         algnt = SAM_Alignment( line )
+	 try:
+            algnt = SAM_Alignment( line )
+	 except ValueError as e:
+	    e.args = e.args + ( self.get_line_number_string(), )
+	    raise
          yield algnt
        
 
