@@ -16,6 +16,13 @@ Version 0.4.4
   first arguments in order to start without chromosomes and automatically add
   them when first encountered.
 
+Patch versions:
+
+* Version 0.4.4p1 (2010-05-26):
+  - minor change to make it run on Python 2.5 again
+  - changed 'str' to 'bytes' at various places, now compiles with Cython 0.12
+    (but no longer with Cython 0.11 and Python 2.5)
+
 Version 0.4.3
 =============
 
