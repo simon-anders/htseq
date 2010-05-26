@@ -17,7 +17,7 @@ cdef class GenomicPosition( GenomicInterval ):
 
 
 cdef class Sequence( object ):
-   cdef public str seq
+   cdef public bytes seq
    cdef public str name
    cdef public str descr
    cpdef Sequence get_reverse_complement( self )      
@@ -27,8 +27,8 @@ cdef class Sequence( object ):
    
 
 cdef class SequenceWithQualities( Sequence ):
-   cdef readonly str _qualstr
-   cdef readonly str _qualstr_phred
+   cdef readonly bytes _qualstr
+   cdef readonly bytes _qualstr_phred
    cdef readonly str _qualscale
    cdef readonly object _qualarr
    cdef _fill_qual_arr( SequenceWithQualities self )

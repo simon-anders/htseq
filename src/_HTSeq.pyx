@@ -471,9 +471,9 @@ def _make_translation_table_for_complementation( ):
    t[ ord('g') ] = 'c'
    return ''.join( t )
    
-cdef str _translation_table_for_complementation = _make_translation_table_for_complementation( )
+cdef bytes _translation_table_for_complementation = _make_translation_table_for_complementation( )
 
-cpdef str reverse_complement( str seq ):
+cpdef bytes reverse_complement( bytes seq ):
    """Returns the reverse complement of DNA sequence 'seq'. Does not yet
    work with extended IUPAC nucleotide letters or RNA."""
 
@@ -485,7 +485,7 @@ cdef class Sequence( object ):
    """A Sequence, typically of DNA, with a name.
    """
    
-   def __init__( self, str seq, str name="unnamed" ):
+   def __init__( self, bytes seq, str name="unnamed" ):
       self.seq = seq
       self.name = name
       self.descr = None
@@ -607,7 +607,7 @@ cdef class SequenceWithQualities( Sequence ):
    quality scores of the  base calls.
    """
 
-   def __init__( self, str seq, str name, str qualstr, str qualscale="phred" ):
+   def __init__( self, bytes seq, str name, bytes qualstr, str qualscale="phred" ):
       """ Construct a SequenceWithQuality object.
       
         seq       - The actual sequence.
