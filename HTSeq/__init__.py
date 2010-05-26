@@ -488,7 +488,7 @@ class SAM_Reader( FileOrSequence ):
             continue
 	 try:
             algnt = SAM_Alignment( line )
-	 except ValueError as e:
+	 except ValueError, e:
 	    e.args = e.args + ( self.get_line_number_string(), )
 	    raise
          yield algnt
