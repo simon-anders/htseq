@@ -23,6 +23,10 @@ Patch versions:
   - changed 'str' to 'bytes' at various places, now compiles with Cython 0.12
     (but no longer with Cython 0.11 and Python 2.5)
 
+* Version 0.4.4p2 (2010-06-05):
+  - change to SAM parser: if flag "query unmapped is set" but RNAME is not
+    "*", a qarning (rather than an error) is issued
+
 Version 0.4.3
 =============
 
