@@ -7,6 +7,7 @@ import urllib
 import itertools 
 import collections
 import cStringIO
+import warnings
 
 import numpy
 cimport numpy
@@ -1016,6 +1017,24 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
             strand = "+"
          self.cigar = parse_cigar( cigar, posint, rname, strand )
          iv = GenomicInterval( rname, posint, self.cigar[-1].ref_iv.end, strand )   
+
+      if rname == "*":
+         iv = None
+         self.cigar = None
+         if not flagint & 0x0004:     # flag "query sequence is unmapped"      
+            raise ValueError, "Malformed SAM line: RNAME == '*' although flag bit 0x0004 cleared"
+      else:
+         if flagint & 0x0004:         # flag "query sequence is unmapped"   
+            warnings.warn( "Malformed SAM line: RNAME != '*' although flag bit &0x0004 set" )
+         posint = int( pos ) - 1   # SAM is one-based, but HTSeq is zero-based!
+         if flagint & 0x0010:      # flag "strand of the query"
+            strand = "-"
+         else:
+            strand = "+"
+         self.cigar = parse_cigar( cigar, posint, rname, strand )
+         iv = GenomicInterval( rname, posint, self.cigar[-1].ref_iv.end, strand )   
+
+
             
       AlignmentWithSequenceReversal.__init__( self,
          SequenceWithQualities( seq.upper(), qname, qual ), iv )
