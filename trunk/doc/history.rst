@@ -25,7 +25,10 @@ Patch versions:
 
 * Version 0.4.4p2 (2010-06-05):
   - change to SAM parser: if flag "query unmapped is set" but RNAME is not
-    "*", a qarning (rather than an error) is issued
+    "*", a warning (rather than an error) is issued
+
+* Version 0.4.4p3 (2010-06-25)
+  - again removed an "except sth as e"
 
 Version 0.4.3
 =============

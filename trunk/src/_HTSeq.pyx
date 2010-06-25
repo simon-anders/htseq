@@ -430,9 +430,9 @@ cdef class GenomicArray( object ):
          f.write( "track type=bedGraph %s\n" % track_options )
       for chrom in self.step_vectors:
          if self.stranded:
-            sv =  self.step_vectors[ chrom ][ strand ]
+            sv = self.step_vectors[ chrom ][ strand ]
          else:
-            sv =  self.step_vectors[ chrom ]
+            sv = self.step_vectors[ chrom ]
          for start, stop, value in sv.get_steps():
             if start == -sys.maxint-1 or stop == sys.maxint:
                continue
