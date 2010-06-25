@@ -44,7 +44,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                   ( f.name, f.iv ) )
             features.add_value( feature_id, f.iv )
             counts[ f.attr[ id_attribute ] ] = 0
-   except ValueError as e:
+   except ValueError, e:
       e.args += ( gff.get_line_number_string(), )
       raise
 
