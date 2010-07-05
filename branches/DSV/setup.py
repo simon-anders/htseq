@@ -28,7 +28,7 @@ numpy_include_dir = os.path.join( os.path.dirname( numpy.__file__ ), 'core', 'in
 
 setup( name = 'HTSeq',
        version = file("VERSION").readline().rstrip(),
-       author = 'Simon Anders',
+       author = 'Simon Anders amongst other people :P',
        author_email = 'sanders@fs.tum.de',
        url = 'http://www-huber.embl.de/users/anders/HTSeq/',
        description = "A framework to process and analyze data from " +
@@ -47,6 +47,7 @@ setup( name = 'HTSeq',
        py_modules = [ 
           'HTSeq._HTSeq_internal', 
           'HTSeq.StepVector',
+          'HTSeq.DynamicStepVector',
           'HTSeq._version',
           'HTSeq.scripts.qa',
           'HTSeq.scripts.count'
@@ -56,6 +57,8 @@ setup( name = 'HTSeq',
              ['src/_HTSeq.c'], include_dirs=[numpy_include_dir], extra_compile_args=['-w'] ),
           Extension( 'HTSeq._StepVector', 
              ['src/StepVector_wrap.cxx'], extra_objects=['src/step_vector.h'], extra_compile_args=['-w'] ),
+          Extension( 'HTSeq._DynamicStepVector', 
+             ['src/DynamicStepVector_wrap.cxx', 'src/bamtools/BamReader.cpp', 'src/bamtools/BGZF.cpp'] ),
        ],
        scripts = [
           'scripts/htseq-qa',

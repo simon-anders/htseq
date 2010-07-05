@@ -186,7 +186,7 @@ template< class T >
 typename step_vector<T>::const_iterator step_vector<T>::end( ) const
 {
    return m.end();
-}   
+}
 
 
 //==================== extra stuff for Python =============
