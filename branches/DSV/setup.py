@@ -48,6 +48,7 @@ setup( name = 'HTSeq',
           'HTSeq._HTSeq_internal', 
           'HTSeq.StepVector',
           'HTSeq.DynamicStepVector',
+          'HTSeq.DSVector',
           'HTSeq._version',
           'HTSeq.scripts.qa',
           'HTSeq.scripts.count'
