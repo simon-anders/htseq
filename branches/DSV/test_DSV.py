@@ -8,24 +8,20 @@ import HTSeq.DSVector
 
 d = HTSeq.DSVector.DSVector()
 
-d[ 10:12 ] = 5
-d[ 13 ] = 6 
-d[ 14 ] = 3
-
-for i in xrange( 5, 20 ): 
-   print "%d:%d" % ( i, d[i] ),
-print   
-
-d2 = d[5:12] 
-d2 += 100
-
-print "Try A"
-d[5:12] += 200
-
-print "Try B"
-d[5:12].__iadd__( 200 )
-
-print "Try C"
-d.__getitem__(slice(5,12)).__iadd__(200)
-
+for i in xrange(10, 20):
+   d[i] = 100 + i
+   
+d[5:8] = 3   
+   
+print d
 print list( d[:30] )
+
+d2 = d[ 10:20 ]
+
+print d2
+print d2[0]
+print d2[4]
+print list( d2 )
+
+d3 = d2[ 5:10 ]
+print list( d3 )
