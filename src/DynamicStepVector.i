@@ -32,7 +32,9 @@ public:
     DSV(void);
     ~DSV(void);
 
-    DSV( size_t t ) : threshold( t );
+    DSV( size_t t );
+
+    DSV( DSV< TKey, TValue > const & other );
     
     void add( TKey const & from, TKey const & to, TValue const & offset );
 

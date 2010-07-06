@@ -215,7 +215,9 @@ public:
 
     DSV( size_t t ) : threshold( t ) {
         steps[0] = new TSV();
-        };
+    };
+    
+    DSV( DSV< TKey, TValue > const & other ) : threshold( other.get_threshold() ) , steps( other.get_steps() ) { };
     
     void add( TKey const & from, TKey const & to, TValue const & offset ){
         Add< TValue > adder( offset ); // The black adder :D
@@ -465,6 +467,14 @@ public:
     
     Map const & get_steps(){
         return steps;
+    }
+    
+    Map const & get_steps() const{
+        return steps;
+    }
+    
+    size_t get_threshold() const{
+        return threshold;
     }
     
 private:
