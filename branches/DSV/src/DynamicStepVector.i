@@ -18,105 +18,59 @@ namespace std {
    %template(dblvector) vector<double>;
 };
 
-namespace HTSeq{ //TODO: Namespace remove
 
-    template< typename TValue >
-    std::string display_vector( std::vector< TValue > const & );
-       
-    template< typename TKey, typename TValue >
-    class DSV{
-    public:
-        typedef std::map< TKey, Value< TValue >* > Map;
-        typedef SingleValue< TValue > TSV;
-        typedef MultipleValue< TValue > TMV;
+template< typename TValue >
+std::string display_vector( std::vector< TValue > const & );
+   
+template< typename TKey, typename TValue >
+class DSV{
+public:
+    typedef std::map< TKey, Value< TValue >* > Map;
+    typedef SingleValue< TValue > TSV;
+    typedef MultipleValue< TValue > TMV;
+
+    DSV(void);
+    ~DSV(void);
+
+    DSV( size_t t ) : threshold( t );
     
-        DSV(void);
-        ~DSV(void);
+    void add( TKey const & from, TKey const & to, TValue const & offset );
+
+    void clear();
+
+    void invert( TKey const & from, TKey const & to, TValue const & offset );
     
-        DSV( size_t t ) : threshold( t );
-        
-        void add( TKey const & from, TKey const & to, TValue const & offset );
+    TValue get( TKey const & key );
+    
+    std::vector< TValue > get( TKey const & from, TKey const & to );
 
-        void clear();
+    template< typename TFkt >
+    void apply( TKey const & from, TKey const & to, TFkt & fkt );
+    
+    void set( TKey const & key, TValue const & val );
+    
+    void set( TKey const & from, TKey const & to, TValue const & val );
+    
+    void refurbish( TKey const & key );
+    
+    typename Map::iterator get_iter( TKey const & key );
+            
+    std::string info();
+    
+    std::vector< std::string > rinfo();
+    
+    size_t size();
+    
+    Map const & get_steps();
+    
+private:
+    size_t threshold;
+    std::map< TKey, Value< TValue >* > steps;
+};
 
-        void invert( TKey const & from, TKey const & to, TValue const & offset );
-        
-        TValue get( TKey const & key );
-        
-        std::vector< TValue > get( TKey const & from, TKey const & to );
-
-        template< typename TFkt >
-        void apply( TKey const & from, TKey const & to, TFkt & fkt );
-        
-        void set( TKey const & key, TValue const & val );
-        
-        void refurbish( TKey const & key );
-        
-        typename Map::iterator get_iter( TKey const & key );
-                
-        std::string info();
-        
-        std::vector< std::string > rinfo();
-        
-        size_t size();
-        
-        Map const & get_steps();
-        
-    private:
-        size_t threshold;
-        std::map< TKey, Value< TValue >* > steps;
-    };
-
-//    %rename(intDSV) DSV< long int, int >;
-//    class DSV< long int, int >{
-//    public:
-//        typedef std::map< long int, Value< int >* > Map;
-//        typedef SingleValue< int > TSV;
-//        typedef MultipleValue< int > TMV;
-//    
-//        DSV< long int, int >(void);
-//        ~DSV< long int, int >(void);
-//    
-//        DSV< long int, int >( size_t t ) : threshold( t );
-//        
-//        void add( long int const & from, long int const & to, int const & offset );
-
-//        void clear();
-
-//        template< typename TFkt >
-//        void invert( long int const & from, long int const & to, int const & offset );
-//        
-//        int get( long int const & key );
-//        
-//        std::vector< int > get( long int const & from, long int const & to );
-
-//        template< typename TFkt >
-//        void apply( long int const & from, long int const & to, TFkt & fkt );
-//        
-//        void set( long int const & key, int const & val );
-//        
-//        void refurbish( long int const & key );
-//        
-//        typename Map::iterator get_iter( long int const & key );
-//                
-//        std::string info();
-//        
-//        std::vector< std::string > rinfo();
-//        
-//        size_t size();
-//        
-//        Map const & get_steps();
-//        
-//    private:
-//        size_t threshold;
-//        std::map< long int, Value< int >* > steps;
-//    };
-
-    %template(intDSV) DSV< long int, int >;
-//    %template(boolDSV) DSV< long int, bool >;
-    %template(floatDSV) DSV< long int, double >;
-
-}
+%template(intDSV) DSV< long int, int >;
+//%template(boolDSV) DSV< long int, bool >;
+%template(floatDSV) DSV< long int, double >;
 
 namespace BamTools {
 
