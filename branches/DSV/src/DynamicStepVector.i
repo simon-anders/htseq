@@ -72,7 +72,7 @@ public:
     
     Map const & get_steps();
     
-    DSVIter< TValue > get_step_iter( TKey from, TKey to );
+    DSVIter< TValue > get_step_iter( TKey from, TKey to, bool reverse = false );
     
 private:
     size_t threshold;
@@ -88,9 +88,11 @@ struct DSVIter{
     DSVIter(void); //default-ctor
     ~DSVIter(void); //default-dtor
     DSVIter( DSVIter< TValue > const & other ); //copy-ctor
-    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to );
+    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to, bool reverse );
     
     std::pair< long int, TValue > next();
+    std::pair< long int, TValue > prev();
+    
     bool valid();
     std::string info();
     long int start, stop, pos, step_size;
