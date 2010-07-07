@@ -7,7 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <assert.h>
-
+#include <utility>
 
 template< typename TValue >
 class Value{
@@ -200,6 +200,52 @@ struct Invert{
     TValue operator() ( TValue const & val ){
         return -val;
     }
+};
+
+template< typename TValue >
+struct DSVIter{
+
+    DSVIter(void) : start(0), stop(0), pos(0), it() { }; //default-ctor
+    ~DSVIter(void) { }; //default-dtor
+    
+    DSVIter( DSVIter< TValue > const & other )
+     :  start( other.start ),
+        stop( other.stop ),
+        pos( other.pos ),
+        it( other.it ),
+        map( other.map ) { }; //copy-ctor
+        
+    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to )
+     :  start( from ),
+        stop( to ),
+        pos( from ),
+        it( --(m->upper_bound( from ) ) ),
+        map( m ) { };
+    
+    std::pair< long int, TValue > next(){
+        std::pair< long int, TValue > p = std::make_pair( pos, ( *( it->second ) )[ pos - it->first ] );
+        ++pos;
+        
+        if( pos - it->first >= it->second->size() ){ //end of step
+            ++it;
+            pos = it->first;
+        }
+        return p;
+    };
+    
+    bool valid(){
+        return it != map->end() && pos != stop;
+    }
+    
+    std::string info() {
+        std::ostringstream os;
+        os << pos << ":\t" << it->second->info() << " | " << it->second->size();
+        return os.str();
+    }
+    
+    long int start, stop, pos, step_size;
+    typename std::map< long int, Value< TValue >* >::iterator it;
+    std::map< long int, Value< TValue >* > * map;
 };
 
 template< typename TKey, typename TValue >
@@ -465,7 +511,7 @@ public:
         return steps.size();
     }
     
-    Map const & get_steps(){
+    Map get_map(){
         return steps;
     }
     
@@ -477,7 +523,12 @@ public:
         return threshold;
     }
     
+    DSVIter< TValue > get_step_iter( TKey from, TKey to ){
+        return DSVIter< TValue >( &steps, from, to );
+    }
+    
 private:
     size_t threshold;
     std::map< TKey, Value< TValue >* > steps;
 };
+

@@ -2,11 +2,15 @@
 %module DynamicStepVector
 %include "std_string.i"
 %include "std_vector.i"
+%include "std_map.i"
+%include "std_pair.i"
 %include "cpointer.i"
 %{
 #define SWIG_FILE_WITH_INIT
 #include "bamtools/BamReader.h"
 #include "DynamicStepVector.hpp"
+#include <map>
+#include <utility>
 //HTSeq::DSV< long int, int >;
 //HTSeq::DSV< long int, bool >;
 //HTSeq::DSV< long int, double >;
@@ -16,8 +20,9 @@ namespace std {
    %template(strvector) vector<string>;
    %template(intvector) vector<int>;
    %template(dblvector) vector<double>;
+   %template(intintmap) map< long int, int>;
+   %template(intsteppair) pair< long int, int >;
 };
-
 
 template< typename TValue >
 std::string display_vector( std::vector< TValue > const & );
@@ -63,7 +68,11 @@ public:
     
     size_t size();
     
+    Map get_map();
+    
     Map const & get_steps();
+    
+    DSVIter< TValue > get_step_iter( TKey from, TKey to );
     
 private:
     size_t threshold;
@@ -73,6 +82,23 @@ private:
 %template(intDSV) DSV< long int, int >;
 //%template(boolDSV) DSV< long int, bool >;
 %template(floatDSV) DSV< long int, double >;
+
+template< typename TValue >
+struct DSVIter{
+    DSVIter(void); //default-ctor
+    ~DSVIter(void); //default-dtor
+    DSVIter( DSVIter< TValue > const & other ); //copy-ctor
+    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to );
+    
+    std::pair< long int, TValue > next();
+    bool valid();
+    std::string info();
+    long int start, stop, pos, step_size;
+    std::map< long int, Value< TValue >* >::iterator it;
+    std::map< long int, Value< TValue >* > * map;
+};
+
+%template(intDSVIter) DSVIter< int >;
 
 namespace BamTools {
 
