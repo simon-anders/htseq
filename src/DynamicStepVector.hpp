@@ -215,26 +215,41 @@ struct DSVIter{
         it( other.it ),
         map( other.map ) { }; //copy-ctor
         
-    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to )
+    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to, bool reverse = false )
      :  start( from ),
         stop( to ),
-        pos( from ),
-        it( --(m->upper_bound( from ) ) ),
-        map( m ) { };
+        pos( reverse ? to - 1 : from ),
+        it( --( m->upper_bound( pos ) ) ),
+        map( m ) {
+            pos = it->second->multiple() ? pos : it->first;
+        };
     
     std::pair< long int, TValue > next(){
         std::pair< long int, TValue > p = std::make_pair( pos, ( *( it->second ) )[ pos - it->first ] );
         ++pos;
         
-        if( pos - it->first >= it->second->size() ){ //end of step
+        if( it != map->end() && pos - it->first >= it->second->size() ){ //end of step
             ++it;
             pos = it->first;
         }
         return p;
     };
     
+    std::pair< long int, TValue > prev(){
+        std::pair< long int, TValue > p = std::make_pair( pos, ( *( it->second ) )[ pos - it->first ] );
+        --pos;
+        
+        if( it != map->begin() && pos < it->first ){ //begin of step
+            --it;
+            if( !it->second->multiple() ){
+                pos = it->first;
+            }
+        }
+        return p;
+    };
+    
     bool valid(){
-        return it != map->end() && pos != stop;
+        return it != map->end() && pos < stop && pos >= start;
     }
     
     std::string info() {
@@ -523,8 +538,8 @@ public:
         return threshold;
     }
     
-    DSVIter< TValue > get_step_iter( TKey from, TKey to ){
-        return DSVIter< TValue >( &steps, from, to );
+    DSVIter< TValue > get_step_iter( TKey from, TKey to, bool reverse = false ){
+        return DSVIter< TValue >( &steps, from, to, reverse );
     }
     
 private:
