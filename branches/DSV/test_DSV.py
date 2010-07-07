@@ -25,3 +25,14 @@ print list( d2 )
 
 d3 = d2[ 5:10 ]
 print list( d3 )
+
+print
+print list( d[:30] )
+
+print
+for val in d[5:15].values_iter():
+   print val
+
+print
+for start, stop, val in d[5:15].steps_iter():
+   print start, stop, val

@@ -124,4 +124,20 @@ class DSVector:
          str(self.stop) if self.stop != sys.maxint else "inf",
          (", offset %d" % self.offset) if self.offset != 0 else "")
    
+   def values_iter( self ):
+      return iter(self)
+      
+   def steps_iter( self ):
+      valstart = self.start
+      val = self[ self.start ]
+      for i in xrange( self.start+1, self.stop ):
+         if self[ i ] != val:
+            yield( valstart, i, val )
+            valstart = i
+            val = self[ i ]
+      yield( valstart, self.stop, val )
+
+            
+         
+         
      
