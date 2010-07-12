@@ -30,6 +30,10 @@ Patch versions:
 * Version 0.4.4p3 (2010-06-25)
   - again removed an "except sth as e"
 
+* Version 0.4.4p4 (2010-07-12)
+  - dto.
+
+
 Version 0.4.3
 =============
 

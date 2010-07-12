@@ -122,7 +122,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
          if i % 100000 == 0 and not quiet:
             sys.stderr.write( "%d reads processed.\n" % i )
 
-   except ValueError as e:
+   except ValueError, e:
       e.args += ( read_seq.get_line_number_string(), )
       raise
 
