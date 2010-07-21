@@ -188,7 +188,7 @@ def main():
       count_reads_in_features( args[0], args[1], opts.stranded == "yes", 
          opts.mode, opts.featuretype, opts.idattr, opts.quiet )
    except:
-      sys.stderr.write( "Error: %s\n" % "; ".join( sys.exc_info()[1] ) )
+      sys.stderr.write( "Error: %s\n" % str( sys.exc_info()[1] ) )
       sys.stderr.write( "[Exception type: %s, raised in %s:%d]\n" % 
          ( sys.exc_info()[1].__class__.__name__, 
            os.path.basename(traceback.extract_tb( sys.exc_info()[2] )[-1][0]), 

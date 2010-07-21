@@ -33,6 +33,8 @@ Patch versions:
 * Version 0.4.4p4 (2010-07-12)
   - dto.
 
+* Version 0.4.4p5 (2010-07-21)
+  - fixed bug in error reporting in count.py
 
 Version 0.4.3
 =============
