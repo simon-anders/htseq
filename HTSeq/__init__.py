@@ -123,7 +123,7 @@ class GenomicFeature( object ):
       except AttributeError:
          source = "."
       try:
-         source = self.score
+         score = self.score
       except AttributeError:
          score = "."
       try:
@@ -144,7 +144,7 @@ class GenomicFeature( object ):
          self.iv.strand, frame, attr_str ) ) + "\n"
          
 
-_re_attr_main = re.compile( "\s*(\w+)[\s=]+(.*)" )
+_re_attr_main = re.compile( "\s*([^\s\=]+)[\s=]+(.*)" )
 _re_attr_empty = re.compile( "^\s*$" )
 
 def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
