@@ -176,12 +176,12 @@ def main():
       pyplot.subplot( 221 )
       plot_bases( base_arr_U_n )
       pyplot.ylabel( "proportion of base" )
-      pyplot.title( "non-aligned reads\n%.0f%% (%.3f mio)" % 
+      pyplot.title( "non-aligned reads\n%.0f%% (%.3f million)" % 
 	 ( 100. * nreads_U / (nreads_U+nreads_A), nreads_U / 1e6 ) )
 
       pyplot.subplot( 222 )
       plot_bases( base_arr_A_n )
-      pyplot.title( "aligned reads\n%.0f%% (%.3f mio)" % 
+      pyplot.title( "aligned reads\n%.0f%% (%.3f million)" % 
 	 ( 100. * nreads_A / (nreads_U+nreads_A), nreads_A / 1e6 ) )
 
       pyplot.subplot( 223 )
@@ -202,7 +202,7 @@ def main():
       pyplot.subplot( 211 )
       plot_bases( base_arr_U_n )
       pyplot.ylabel( "proportion of base" )
-      pyplot.title( "%.3f mio reads" % ( nreads_U / 1e6 ) )
+      pyplot.title( "%.3f million reads" % ( nreads_U / 1e6 ) )
 
       pyplot.subplot( 212 )
       pyplot.pcolor( qual_arr_U_n.T ** gamma, cmap=pyplot.cm.Greens,

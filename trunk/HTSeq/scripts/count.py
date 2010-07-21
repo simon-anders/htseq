@@ -28,6 +28,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    open( sam_filename ).close()
       
    gff = HTSeq.GFF_Reader( gff_filename )   
+   i = 0
    try:
       for f in gff:
          if f.iv.chrom not in features.step_vectors.keys():
@@ -44,11 +45,16 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                   ( f.name, f.iv ) )
             features.add_value( feature_id, f.iv )
             counts[ f.attr[ id_attribute ] ] = 0
-   except ValueError, e:
-      e.args += ( gff.get_line_number_string(), )
+         i += 1
+         if i % 100000 == 0 and not quiet:
+	    sys.stderr.write( "%d GFF lines processed.\n" % i )
+   except:
+      sys.stderr.write( "Error occured in %s.\n" % gff.get_line_number_string() )
       raise
-
-         
+      
+   if not quiet:
+      sys.stderr.write( "%d GFF lines processed.\n" % i )
+      
    if len( counts ) == 0 and not quiet:
       sys.stderr.write( "Warning: No features of type '%s' found.\n" % feature_type )
    
@@ -122,10 +128,12 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
          if i % 100000 == 0 and not quiet:
             sys.stderr.write( "%d reads processed.\n" % i )
 
-   except ValueError, e:
-      e.args += ( read_seq.get_line_number_string(), )
+   except:
+      sys.stderr.write( "Error occured in %s.\n" % read_seq.get_line_number_string() )
       raise
 
+   if not quiet:
+      sys.stderr.write( "%d reads processed.\n" % i )
          
    for fn in sorted( counts.keys() ):
       print "%s\t%d" % ( fn, counts[fn] )

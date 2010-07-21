@@ -1002,30 +1002,14 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          raise ValueError, "Sequence in SAM file contains '.', which is not supported."
       flagint = int( flag )
         
-      if flagint & 0x0004:         # flag "query sequence is unmapped"
-         if rname != "*":
-            raise ValueError, "Malformed SAM line: RNAME != '*' although flag bit 0x0004 set"
+      if flagint & 0x0004:     # flag "query sequence is unmapped" 
          iv = None
          self.cigar = None
+         if rname != "*":     # flag "query sequence is unmapped"      
+            warnings.warn( "Malformed SAM line: RNAME != '*' although flag bit &0x0004 set" )
       else:
          if rname == "*":
             raise ValueError, "Malformed SAM line: RNAME == '*' although flag bit &0x0004 cleared"
-         posint = int( pos ) - 1   # SAM is one-based, but HTSeq is zero-based!
-         if flagint & 0x0010:      # flag "strand of the query"
-            strand = "-"
-         else:
-            strand = "+"
-         self.cigar = parse_cigar( cigar, posint, rname, strand )
-         iv = GenomicInterval( rname, posint, self.cigar[-1].ref_iv.end, strand )   
-
-      if rname == "*":
-         iv = None
-         self.cigar = None
-         if not flagint & 0x0004:     # flag "query sequence is unmapped"      
-            raise ValueError, "Malformed SAM line: RNAME == '*' although flag bit 0x0004 cleared"
-      else:
-         if flagint & 0x0004:         # flag "query sequence is unmapped"   
-            warnings.warn( "Malformed SAM line: RNAME != '*' although flag bit &0x0004 set" )
          posint = int( pos ) - 1   # SAM is one-based, but HTSeq is zero-based!
          if flagint & 0x0010:      # flag "strand of the query"
             strand = "-"
@@ -1047,7 +1031,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       if flagint & 0x0001:         # flag "read is paired in sequencing"
          if flagint & 0x0008:      # flag "mate is unmapped"
             if mrnm != "*":
-               raise ValueError, "Malformed SAM line: MRNM != '*' although flag bit &0x0008 set"
+               warnings.warn( "Malformed SAM line: MRNM != '*' although flag bit &0x0008 set" )
             self.mate_start = None
          else:
             if mrnm == "*":

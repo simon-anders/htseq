@@ -33,8 +33,16 @@ Patch versions:
 * Version 0.4.4p4 (2010-07-12)
   - dto.
 
-* Version 0.4.4p5 (2010-07-21)
+* Version 0.4.4p5 (2010-07-13)
+  - rebuilt with Cython 0.12.1 (previous one was accidently built with 
+    Cython 0.11.1, causing it to fail with Python 2.5)
+
+* Version 0.4.4p6 (2010-07-21)
   - fixed bug in error reporting in count.py
+  - losened GFF attribute parsing
+  - changed "mio" to "millions" in qa output
+  - improved error reporting in GFF parser
+  - made SAM parsing more tolerant
 
 Version 0.4.3
 =============
