@@ -73,6 +73,8 @@ class BamReader {
         int GetReferenceCount(void) const;
         // returns vector of reference objects
         const BamTools::RefVector GetReferenceData(void) const;
+        // returns the name of a reference object
+        std::string& GetReferenceName( int const refID ) const;
         // returns reference id (used for BamReader::Jump()) for the given reference name
         int GetReferenceID(const std::string& refName) const;
         // returns the name of the file associated with this BamReader

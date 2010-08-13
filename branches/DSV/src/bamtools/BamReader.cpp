@@ -169,6 +169,8 @@ bool BamReader::GetNextAlignmentCore(BamAlignment& bAlignment) { return d->GetNe
 const string BamReader::GetHeaderText(void) const { return d->HeaderText; }
 int BamReader::GetReferenceCount(void) const { return d->References.size(); }
 const RefVector BamReader::GetReferenceData(void) const { return d->References; }
+// returns the name of a reference object
+std::string& BamReader::GetReferenceName( int const refID ) const { return d->References[refID].RefName; };
 int BamReader::GetReferenceID(const string& refName) const { return d->GetReferenceID(refName); }
 const std::string BamReader::GetFilename(void) const { return d->Filename; }
 

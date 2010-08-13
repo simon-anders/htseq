@@ -26,9 +26,9 @@ print list( d2 )
 d3 = d2[ 5:10 ]
 print list( d3 )
 
-it_f = d._dsv.get_step_iter(0, 20)
-it_r = d._dsv.get_step_iter(0, 20, True) #reverse iterator
-print "Iterating the steps form 0 to 20:"
+it_f = d._dsv.get_step_iter(0, 30)
+it_r = d._dsv.get_step_iter(0, 30, True) #reverse iterator
+print "Iterating the steps form 0 to 30:"
 while it_f.valid() : print it_f.next()
 print "Now in reverse:"
 while it_r.valid() : print it_r.prev()
@@ -36,10 +36,10 @@ while it_r.valid() : print it_r.prev()
 print
 print list( d[:30] )
 
-print
-for val in d[5:15].values_iter():
-   print val
+#print
+#for val in d[5:15].values_iter():
+#   print val
 
-print
-for start, stop, val in d[5:15].steps_iter():
-   print start, stop, val
+#print
+#for start, stop, val in d[5:15].steps_iter():
+#   print start, stop, val
