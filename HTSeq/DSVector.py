@@ -70,8 +70,8 @@ class DSVector:
          if isinstance( value, self.__class__ ):
             if stop - start != len( value ):
                raise IndexError, "Attempt to assign a DSVector of wrong length"
-            if self._dsv is value._dsv and start + d1.offset == value.start + value.offset:
-               # Copying is unnecessarY:
+            if self._dsv is value._dsv and start + self.offset == value.start + value.offset:
+               # Copying is unnecessary:
                return   
             print "Debug notice: copying element-wise!"
             for i in xrange( start, stop ):

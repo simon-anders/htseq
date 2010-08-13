@@ -394,8 +394,9 @@ public:
         typename Map::iterator it = this->get_iter( key );
         
         if( it->second->multiple() ){
-            ( *( static_cast<TMV*>( it->second ) ) ).del_from( key - it->first );
-            set( key, val );
+            //( *( static_cast<TMV*>( it->second ) ) ).del_from( key - it->first );
+            //set( key, val );
+            ( *( static_cast<TMV*>( it->second ) ) ).set_from_to( val, key - it->first, key - it->first + 1 );
         }else{
             if( it->first != key ){
                 steps[ key ] = new TSV( val );
