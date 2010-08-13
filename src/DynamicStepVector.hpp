@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <utility>
+#include <limits>
 
 template< typename TValue >
 class Value{
@@ -202,6 +203,13 @@ struct Invert{
     }
 };
 
+template<>
+struct Invert< std::string >{
+    std::string operator() ( std::string const & val ){
+        return val;
+    }
+};
+
 template< typename TValue >
 struct DSVIter{
 
@@ -221,7 +229,9 @@ struct DSVIter{
         pos( reverse ? to - 1 : from ),
         it( --( m->upper_bound( pos ) ) ),
         map( m ) {
-            pos = it->second->multiple() ? pos : it->first;
+            if( reverse and !( it->second->multiple() ) ){
+                pos = it->first;
+            }
         };
     
     std::pair< long int, TValue > next(){
@@ -271,11 +281,11 @@ public:
     typedef MultipleValue< TValue > TMV;
 
     DSV() : threshold( 1 ) {
-        steps[0] = new TSV();
+        steps[ static_cast<TKey>(0) ] = new TSV();
     };
 
     DSV( size_t t ) : threshold( t ) {
-        steps[0] = new TSV();
+        steps[ static_cast<TKey>(0) ] = new TSV();
     };
     
     DSV( DSV< TKey, TValue > const & other ) : threshold( other.get_threshold() ) , steps( other.get_steps() ) { };
@@ -287,6 +297,7 @@ public:
 
     void clear(){
         steps.clear();
+        steps[ static_cast<TKey>(0) ] = new TSV();
     }
 
     void invert( TKey const & from, TKey const & to, TValue const & offset ){
@@ -538,7 +549,7 @@ public:
         return threshold;
     }
     
-    DSVIter< TValue > get_step_iter( TKey from, TKey to, bool reverse = false ){
+    DSVIter< TValue > get_step_iter( TKey from = static_cast< TKey >( 0 ), TKey to = std::numeric_limits< TKey >::max(), bool reverse = false ){
         return DSVIter< TValue >( &steps, from, to, reverse );
     }
     

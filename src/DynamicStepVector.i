@@ -1,27 +1,55 @@
 /* File: DynamicStepVector.i */
 %module DynamicStepVector
 %include "std_string.i"
+%include "AutoPyObjPtr.i"
 %include "std_vector.i"
 %include "std_map.i"
 %include "std_pair.i"
-%include "cpointer.i"
 %{
 #define SWIG_FILE_WITH_INIT
 #include "bamtools/BamReader.h"
 #include "DynamicStepVector.hpp"
 #include <map>
 #include <utility>
+#include <limits>
 //HTSeq::DSV< long int, int >;
 //HTSeq::DSV< long int, bool >;
 //HTSeq::DSV< long int, double >;
+
+template<>
+struct Add< AutoPyObjPtr >{
+    Add( AutoPyObjPtr const & v ) : offset( v ) { };
+    AutoPyObjPtr operator() ( AutoPyObjPtr const & val ){
+        return val;
+    }
+    
+    AutoPyObjPtr offset;
+};
+
+template<>
+struct Invert< AutoPyObjPtr >{        
+    AutoPyObjPtr operator() ( AutoPyObjPtr const & val ){
+        return val;
+    }
+};
+
+std::ostream& operator<< (std::ostream& stream, const AutoPyObjPtr& ) {
+    stream << "< PythonAutoPtrObject >";
+    return stream;
+}
+
 %}
 
 namespace std {
-   %template(strvector) vector<string>;
-   %template(intvector) vector<int>;
-   %template(dblvector) vector<double>;
-   %template(intintmap) map< long int, int>;
-   %template(intsteppair) pair< long int, int >;
+   %template( strvector ) vector< string >;
+   %template( intvector ) vector< int >;
+   %template( dblvector ) vector< double >;
+   %template( pyvector ) vector< AutoPyObjPtr >;
+   %template( intintmap ) map< long int, int >;
+   %template( intsteppair ) pair< long int, int >;
+   %template( dblsteppair ) pair< long int, double >;
+   %template( strsteppair ) pair< long int, string >;
+   %template( pysteppair ) pair< long int, AutoPyObjPtr >;
 };
 
 template< typename TValue >
@@ -34,18 +62,18 @@ public:
     typedef SingleValue< TValue > TSV;
     typedef MultipleValue< TValue > TMV;
 
-    DSV(void);
-    ~DSV(void);
+    DSV( void );
+    ~DSV( void );
 
     DSV( size_t t );
 
     DSV( DSV< TKey, TValue > const & other );
     
-    void add( TKey const & from, TKey const & to, TValue const & offset );
+    void add( TKey const & from, TKey const & to, TValue offset );
 
     void clear();
 
-    void invert( TKey const & from, TKey const & to, TValue const & offset );
+    void invert( TKey const & from, TKey const & to, TValue offset );
     
     TValue get( TKey const & key );
     
@@ -54,9 +82,9 @@ public:
     template< typename TFkt >
     void apply( TKey const & from, TKey const & to, TFkt & fkt );
     
-    void set( TKey const & key, TValue const & val );
+    void set( TKey const & key, TValue val );
     
-    void set( TKey const & from, TKey const & to, TValue const & val );
+    void set( TKey const & from, TKey const & to, TValue val );
     
     void refurbish( TKey const & key );
     
@@ -72,7 +100,7 @@ public:
     
     Map const & get_steps();
     
-    DSVIter< TValue > get_step_iter( TKey from, TKey to, bool reverse = false );
+    DSVIter< TValue > get_step_iter( TKey from = static_cast< TKey >( 0 ), TKey to = std::numeric_limits< TKey >::max(), bool reverse = false );
     
 private:
     size_t threshold;
@@ -82,6 +110,8 @@ private:
 %template(intDSV) DSV< long int, int >;
 //%template(boolDSV) DSV< long int, bool >;
 %template(floatDSV) DSV< long int, double >;
+%template(strDSV) DSV< long int, std::string >;
+%template(pyDSV) DSV< long int, AutoPyObjPtr >;
 
 template< typename TValue >
 struct DSVIter{
@@ -101,6 +131,9 @@ struct DSVIter{
 };
 
 %template(intDSVIter) DSVIter< int >;
+%template(floatDSVIter) DSVIter< double >;
+%template(strDSVIter) DSVIter< std::string >;
+%template(pyDSVIter) DSVIter< AutoPyObjPtr >;
 
 namespace BamTools {
 
@@ -155,6 +188,8 @@ class BamReader {
         int GetReferenceCount(void) const;
         // returns vector of reference objects
         const BamTools::RefVector GetReferenceData(void) const;
+        // returns the name of a reference object
+        std::string GetReferenceName( int const refID ) const;
         // returns reference id (used for BamReader::Jump()) for the given reference name
         int GetReferenceID(const std::string& refName) const;
         // returns the name of the file associated with this BamReader
@@ -286,4 +321,5 @@ struct BamAlignment {
 %{
 
 %}
+
 
