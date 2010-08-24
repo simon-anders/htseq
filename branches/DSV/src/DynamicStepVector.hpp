@@ -391,12 +391,17 @@ public:
     }
     
     void set( TKey const & key, TValue const & val ) {
+//        std::cout << "set called on " << this << " with key:val of " << key << ":" << val << std::endl;
         typename Map::iterator it = this->get_iter( key );
         
         if( it->second->multiple() ){
-            //( *( static_cast<TMV*>( it->second ) ) ).del_from( key - it->first );
-            //set( key, val );
-            ( *( static_cast<TMV*>( it->second ) ) ).set_from_to( val, key - it->first, key - it->first + 1 );
+            ( *( static_cast<TMV*>( it->second ) ) ).del_from( key - it->first );
+            set( key, val );
+//            if( ( *( static_cast<TMV*>( it->second ) ) ).size() >  key - it->first ){
+//                ( *( static_cast<TMV*>( it->second ) ) ).set_from_to( val, key - it->first, key - it->first + 1 );
+//            }else{
+//                ( *( static_cast<TMV*>( it->second ) ) ).push_back( val, 1 );
+//            }
         }else{
             if( it->first != key ){
                 steps[ key ] = new TSV( val );
@@ -409,16 +414,22 @@ public:
     
     void set( TKey const & from, TKey const & to, TValue const & val ) {
 
+//        std::cout << "set called on " << this << " with <from-to>:val of <" << from << "-" << to << ">:" << val << std::endl;
+
         typename Map::iterator it_from = this->get_iter( from );
         typename Map::iterator it_to = this->get_iter( to );
         
         if( it_to != it_from ){
         
             if( it_from->second->multiple() ){
-                static_cast<TMV*>( it_from->second )->del_from( from - it_from->first );
+                if( from != it_from->first ){
+                    static_cast<TMV*>( it_from->second )->del_from( from - it_from->first );
+                    ++it_from;
+                }
+            }else{
+                ++it_from;
             }
             
-            ++it_from;
             
             steps.erase( it_from, it_to ); //erase steps in between
         

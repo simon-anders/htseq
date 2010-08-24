@@ -60,7 +60,7 @@ setup( name = 'HTSeq',
              ['src/StepVector_wrap.cxx'], extra_objects=['src/step_vector.h'], extra_compile_args=['-w'] ),
           Extension( 'HTSeq._DynamicStepVector', 
              ['src/DynamicStepVector_wrap.cxx', 'src/bamtools/BamReader.cpp', 'src/bamtools/BGZF.cpp'],
-             extra_compile_args=['-w', '-O0'], libraries=['z'] ),
+             extra_compile_args=['-w'], libraries=['z'] ),
        ],
        scripts = [
           'scripts/htseq-qa',
