@@ -2,4 +2,4 @@
 
 (cd src; make)
 echo __version__ = \"`cat VERSION`\" > HTSeq/_version.py
-python setup.py build
+python setup.py build --debug

@@ -2,39 +2,37 @@ import sys, os, glob, os.path
 import distutils.util
 build_dir = "build/lib.%s-%s" % ( distutils.util.get_platform(), sys.version[0:3] )
 sys.path.insert( 0, os.path.join( os.getcwd(), build_dir ) )
-
-
 import HTSeq.DSVector
 
-d = HTSeq.DSVector.DSVector()
+#d = HTSeq.DSVector.DSVector()
 
-for i in xrange(10, 20):
-   d[i] = 100 + i
-   
-d[5:8] = 3   
-   
-print d
-print list( d[:30] )
+#for i in xrange(10, 20):HTSeq.DSVector.DSVector()
+#   d[i] = 100 + i
+#   
+#d[5:8] = 3   
+#   
+#print d
+#print list( d[:30] )
 
-d2 = d[ 10:20 ]
+#d2 = d[ 10:20 ]
 
-print d2
-print d2[0]
-print d2[4]
-print list( d2 )
+#print d2
+#print d2[0]
+#print d2[4]
+#print list( d2 )
 
-d3 = d2[ 5:10 ]
-print list( d3 )
+#d3 = d2[ 5:10 ]
+#print list( d3 )
 
-it_f = d._dsv.get_step_iter(0, 30)
-it_r = d._dsv.get_step_iter(0, 30, True) #reverse iterator
-print "Iterating the steps form 0 to 30:"
-while it_f.valid() : print it_f.next()
-print "Now in reverse:"
-while it_r.valid() : print it_r.prev()
+#it_f = d._dsv.get_step_iter(0, 30)
+#it_r = d._dsv.get_step_iter(0, 30, True) #reverse iterator
+#print "Iterating the steps form 0 to 30:"
+#while it_f.valid() : print it_f.next()
+#print "Now in reverse:"
+#while it_r.valid() : print it_r.prev()
 
-print
-print list( d[:30] )
+#print
+#print list( d[:30] )
 
 #print
 #for val in d[5:15].values_iter():
@@ -43,3 +41,25 @@ print list( d[:30] )
 #print
 #for start, stop, val in d[5:15].steps_iter():
 #   print start, stop, val
+
+wombat = HTSeq.DSVector.DSVector()
+koala = HTSeq.DSVector.DSVector()
+print "Assignment:"
+wombat[3:7] = 23
+print list( wombat[0:20] )
+print "Sliced Assignment (inter-DSV):"
+koala[13:17] = wombat[3:7]
+print list( wombat[0:20] )
+print list(  koala[0:20] )
+print "Sliced Assignment (intra-DSV, forwards):"
+wombat[13:17] = wombat[3:7]
+print list( wombat[0:20] )
+print "Sliced Assignment (intra-DSV, backwards):"
+koala[3:7] = koala[13:17]
+print list(  koala[0:20] )
+print "Attempting to overwrite full-cover (wombat[0:20] = 17):"
+wombat[0:20] = 17
+print list( wombat[0:20] )
+print "Attempting to overwrite partially ( koala[3:7] = 17):"
+koala[3:7] = 17
+print list(  koala[0:20] )
