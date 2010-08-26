@@ -290,12 +290,23 @@ public:
     
     DSV( DSV< TKey, TValue > const & other ) : threshold( other.get_threshold() ) , steps( other.get_steps() ) { };
     
+    ~DSV(){
+//        typename Map::iterator it = steps.begin();
+//        while( it != steps.end() ){
+//            delete it->second;
+//        };
+    };
+    
     void add( TKey const & from, TKey const & to, TValue const & offset ){
         Add< TValue > adder( offset ); // The black adder :D
         apply( from, to, adder );
     }
 
     void clear(){
+        typename Map::iterator it = steps.begin();
+        while( it != steps.end() ){
+            delete it->second;
+        };
         steps.clear();
         steps[ static_cast<TKey>(0) ] = new TSV();
     }
@@ -404,6 +415,7 @@ public:
 //            }
         }else{
             if( it->first != key ){
+                delete steps[key];
                 steps[ key ] = new TSV( val );
                 refurbish( key );
             }else{
@@ -437,6 +449,7 @@ public:
 
                 std::vector< TValue > tmp = static_cast<TMV*>( it_to->second )->get( to - it_to->first, it_to->second->size() );
                 steps.erase( it_to );
+                delete steps[to];
                 steps[ to ] = new TMV( tmp );
 
             }else{
