@@ -291,10 +291,11 @@ public:
     DSV( DSV< TKey, TValue > const & other ) : threshold( other.get_threshold() ) , steps( other.get_steps() ) { };
     
     ~DSV(){
-//        typename Map::iterator it = steps.begin();
-//        while( it != steps.end() ){
-//            delete it->second;
-//        };
+        typename Map::iterator it = steps.begin();
+        while( it != steps.end() ){
+            delete it->second;
+            ++it;
+        };
     };
     
     void add( TKey const & from, TKey const & to, TValue const & offset ){
@@ -306,6 +307,7 @@ public:
         typename Map::iterator it = steps.begin();
         while( it != steps.end() ){
             delete it->second;
+            ++it;
         };
         steps.clear();
         steps[ static_cast<TKey>(0) ] = new TSV();
