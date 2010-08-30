@@ -114,17 +114,27 @@ def main():
 
    # **** Main counting loop ****
 
-   for a in readfile:
-      if isAlnmntFile:
-	 r = a.read
-      else:
-	 r = a
-      if twoColumns and (isAlnmntFile and a.aligned):
-	 r.add_bases_to_count_array( base_arr_A )
-	 r.add_qual_to_count_array( qual_arr_A )
-      else:
-	 r.add_bases_to_count_array( base_arr_U )
-	 r.add_qual_to_count_array( qual_arr_U )   
+   i = 0
+   try:
+      for a in readfile:
+	 if isAlnmntFile:
+	    r = a.read
+	 else:
+	    r = a
+	 if twoColumns and (isAlnmntFile and a.aligned):
+	    r.add_bases_to_count_array( base_arr_A )
+	    r.add_qual_to_count_array( qual_arr_A )
+	 else:
+	    r.add_bases_to_count_array( base_arr_U )
+	    r.add_qual_to_count_array( qual_arr_U )   
+	 i += 1
+	 if i % 200000 == 0:
+            print i, "reads processed"
+   except:
+      sys.stderr.write( "Error occured in: %s\n" %
+         readfile.get_line_number_string() )
+      raise
+   print i, "reads processed"
 
 
    # **** Normalize result ****

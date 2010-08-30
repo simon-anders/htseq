@@ -3,7 +3,6 @@ import math
 import re
 import csv
 import gzip
-import urllib
 import itertools 
 import collections
 import cStringIO
@@ -337,6 +336,8 @@ cdef class GenomicArray( object ):
       if isinstance( index, GenomicInterval ):
          if self.stranded and index.strand not in ( strand_plus, strand_minus ):
             raise KeyError, "Non-stranded index used for stranded GenomicArray."
+         if self.auto_add_chroms and index.chrom not in self.step_vectors:
+            self.add_chrom( index.chrom )
          if isinstance( index, GenomicPosition ):
             if self.stranded:
                return self.step_vectors[ index.chrom ][ index.strand ][ index.pos ]
@@ -390,6 +391,8 @@ cdef class GenomicArray( object ):
    
    
    def add_value( self, value, iv ):
+      if self.auto_add_chroms and iv.chrom not in self.step_vectors:
+         self.add_chrom( iv.chrom )
       if self.stranded:
          self.step_vectors[ iv.chrom ][ iv.strand ].add_value( value, iv.start, iv.end )
       else:
@@ -397,7 +400,9 @@ cdef class GenomicArray( object ):
          
    def get_steps( self, GenomicInterval iv = None, bool values_only=False ):
       if iv is None:
-         return _HTSeq_internal.Genomic_array_get_all_steps( self )
+         return _HTSeq_internal.Genomic_array_get_all_steps( self, values_only=values_only )
+      if self.auto_add_chroms and iv.chrom not in self.step_vectors:
+         self.add_chrom( iv.chrom )
       if self.stranded:
          if iv.strand not in ( strand_plus, strand_minus ):
             raise KeyError, "Non-stranded index used for stranded GenomicArray."
@@ -806,7 +811,7 @@ cdef class SequenceWithQualities( Sequence ):
 
 cdef class Alignment( object ):
 
-   """Alignment abstract base type:
+   """Alignment base type:
 
    An alignment object can be defined in different ways but will always
    provide these attributes:
@@ -815,8 +820,9 @@ cdef class Alignment( object ):
      iv:        a GenomicInterval object with the alignment position 
    """
    
-   def __init__( self ):
-      raise NotImplemented, "Alignment is an abstract base class"
+   def __init__( self, read, iv ):
+      self.read = read
+      self.iv = iv
    
    def __repr__( self ):
       cdef str s
@@ -912,35 +918,67 @@ cdef class CigarOperation( object ):
    cdef public GenomicInterval ref_iv
    cdef public int query_from, query_to
    
-   def __init__( self, type_, size, rfrom, rto, qfrom, qto, chrom, strand ):
+   def __init__( self, str type_, int size, int rfrom, int rto, int qfrom, 
+         int qto, str chrom, str strand, bool check=True ):
       self.type = type_
       self.size = size
       self.ref_iv = GenomicInterval( chrom, rfrom, rto, strand )
       self.query_from = qfrom
       self.query_to = qto
-      
+      if check and not self.check():
+         raise ValueError, "Inconsistent CIGAR operation."
+               
    def __repr__( self ):
       return "< %s: %d base(s) %s on ref iv %s, query iv [%d,%d) >" % (
          self.__class__.__name__, self.size, cigar_operation_names[ self.type ],
          str( self.ref_iv ), self.query_from, self.query_to )
+         
+   def check( CigarOperation self ):
+      cdef int qlen = self.query_to - self.query_from
+      cdef int rlen = self.ref_iv.length
+      if self.type == 'M':
+         if not ( qlen == self.size and rlen == self.size ):
+            return False
+      elif self.type == 'I' or self.type == 'N' or self.type == 'S':
+         if not ( qlen == self.size and rlen == 0 ):
+            return False
+      elif self.type == 'D':
+         if not ( qlen == 0 and rlen == self.size ):
+            return False
+      elif self.type == 'H' or self.type == 'P':
+         if not ( qlen == 0 and rlen == 0 ):
+            return False
+      else:
+         return False
+      return True
+
+_re_cigar_codes = re.compile( '([A-Z])' )
 
 cpdef list parse_cigar( str cigar_string, int ref_left = 0, str chrom = "", str strand = "." ):
-   cdef list split_cigar, res
-   cdef int rpos, qpos, size
+   cdef list split_cigar, cl
+   cdef int size
    cdef str code
-   cigar_codes = re.compile( '([A-Z])' )
-   split_cigar = cigar_codes.split( cigar_string )
+   split_cigar = _re_cigar_codes.split( cigar_string )
    if split_cigar[-1] != '' or len(split_cigar) % 2 != 1:
       raise ValueError, "Illegal CIGAR string '%s'" % cigar_string
-   rpos = ref_left
-   qpos = 0
-   res = []
+   cl = []
    for i in xrange( len(split_cigar) // 2 ):
       try:
          size = int( split_cigar[2*i] )
       except ValueError:
          raise ValueError, "Illegal CIGAR string '%s'" % cigar_string
       code  = split_cigar[2*i+1]
+      cl.append( ( code, size ) )
+   return build_cigar_list( cl, ref_left, chrom, strand  )
+
+cpdef list build_cigar_list( list cigar_pairs, int ref_left = 0, str chrom = "", str strand = "." ):
+   cdef list split_cigar, res
+   cdef int rpos, qpos, size
+   cdef str code
+   rpos = ref_left
+   qpos = 0
+   res = []
+   for code, size in cigar_pairs:
       if code == 'M':
          res.append( CigarOperation ( 
             'M', size, rpos, rpos + size, qpos, qpos + size, chrom, strand ) )
@@ -970,7 +1008,7 @@ cpdef list parse_cigar( str cigar_string, int ref_left = 0, str chrom = "", str 
             'P', size, rpos, rpos, qpos, qpos, chrom, strand ) )
       else:
          raise ValueError, "Unknown CIGAR code '%s' encountered." % code
-   return res      
+   return res
       
 cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
 
@@ -988,6 +1026,10 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       cdef list tags
       cdef int posint, flagint
       cdef str strand
+      
+      if line is None:
+         AlignmentWithSequenceReversal.__init__( self, None, None )
+         
       
       fields = line.rstrip().split( "\t" )
       if len( fields ) < 10:
@@ -1017,14 +1059,11 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
             strand = "+"
          self.cigar = parse_cigar( cigar, posint, rname, strand )
          iv = GenomicInterval( rname, posint, self.cigar[-1].ref_iv.end, strand )   
-
-
             
       AlignmentWithSequenceReversal.__init__( self,
          SequenceWithQualities( seq.upper(), qname, qual ), iv )
          
       self._tags = tags
-      self.flags = flagint
       self.aQual = int( mapq )
       self.inferred_insert_size = int( isize )
       
@@ -1054,31 +1093,70 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
         self.mate_start = None
         self.pe_which = intern( "not_paired_end" )
         
+      self.proper_pair = flagint & 0x0002 > 0
+      self.not_primary_alignment = flagint & 0x0100 > 0
+      self.failed_platform_qc = flagint & 0x0200 > 0
+      self.pcr_or_optical_duplicate = flagint & 0x0400 > 0
+
+
    @property
    def paired_end( self ):
-      return bool( self.flags & 0x0001 )
+      return self.pe_which != "not_paired_end"
 
-   @property
-   def proper_pair( self ):
-      return bool( self.flags & 0x0002 )
          
-   @property
-   def mate_aligned( self ):
-      if not ( self.flags & 0x0001 ):
-         raise ValueError, "Not a paired-end read"
-      return not bool( self.flags & 0x0008 )
-
-   @property
-   def passed_filter( self ):
-      return not bool( self.flags & 0x0200 )
-      
-   @property
-   def primary( self ):
-      return not bool( self.flags & 0x0100 )
-
-   @property
-   def duplicate( self ):
-      return bool( self.flags & 0x0400 )
-         
-         
+   def get_sam_line( self ):
+       
+      cdef str cigar = ""
+      cdef int flag = 0
+      cdef GenomicInterval query_start, mate_start
+      cdef CigarOperation cop
+       
+      if self.pe_which != "not_paired_end":
+         self.flag |= 0x0001
+         if self.proper_pair:
+            self.flag |= 0x0002
+         if self.pe_which == "first":
+            self.flag |= 0x0040
+         elif self.pe_which == "second":
+            self.flag |= 0x0080
+         if self.pe_which != "unknown":
+            raise ValueError, "Illegal value in field 'pe_which'"
+       
+      if self.aligned:
+         query_start = self.iv
+         if self.iv.strand == "-":
+            flag |= 0x0010
+      else:
+         query_start = GenomicPosition( "*", -1 )
+         flag |= 0x0004
+          
+      if self.mate_start is not None:
+         mate_start = self.mate_start
+         if self.mate_start.strand == "-":
+            flag |= 0x0020
+      else:
+         mate_start = GenomicPosition( "*", -1 )
+         if self.paired_end:
+            flag |= 0x0008
+          
+      if self.proper_pair:
+         flag |= 0x0002
+      if self.not_primary_alignment:
+         flag |= 0x0100
+      if self.failed_platform_qc: 
+         flag |= 0x0200
+      if self.pcr_or_optical_duplicate:
+         flag |= 0x0400
+          
+      if self.cigar is not None:
+         for cop in self.cigar:
+            cigar += str(cop.size) + cop.type
+      else:
+         cigar = "*"
+       
+      return '\t'.join( ( self.read.name, str(flag), query_start.chrom, 
+          str(query_start.start+1), str(self.aQual), cigar, mate_start.chrom, 
+          str(mate_start.pos+1), str(self.inferred_insert_size), 
+           self.read_as_aligned.seq, self.read_as_aligned.qualstr,
+           ' '.join( self._tags ) ) )      
 

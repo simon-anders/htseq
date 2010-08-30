@@ -4,6 +4,20 @@
 Version history
 ***************
 
+Version 0.4.5
+=============
+
+2010-08-30
+  - correction to GenomicArray.get_steps() when called without arguments
+  - correction to FileOrSequence.get_line_number_string
+  - removed use of urllib's quote and unquote in GFF parsing/writing
+  - GFF_Reader now stores "meta information"
+  - qa.py now gives progress report
+  - auto add chrom now also works on read access
+  - refactored CIGAR parser
+  - added bool fields to SAM_Alignment for all flag bits
+
+
 Version 0.4.4
 =============
 
@@ -43,6 +57,7 @@ Patch versions:
   - changed "mio" to "millions" in qa output
   - improved error reporting in GFF parser
   - made SAM parsing more tolerant
+
 
 Version 0.4.3
 =============

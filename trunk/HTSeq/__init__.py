@@ -62,6 +62,11 @@ class FileOrSequence( object ):
             self.__class__.__name__, repr( self.fos ) )   
             
    def get_line_number_string( self ):
+      if self.line_no is None:
+         if isinstance( self.fos, str ):
+            return "file %s closed" % self.fos
+	 else:
+            return "file closed"
       if isinstance( self.fos, str ):
          return "line %d of file %s" % ( self.line_no, self.fos )
       else:
@@ -138,9 +143,9 @@ class GenomicFeature( object ):
          sep = "="
       else:
          sep = " "
-      attr_str = '; '.join( [ '%s%s\"%s\"' % ( ak, sep, urllib.quote( attr[ak] ) ) for ak in attr ] )
+      attr_str = '; '.join( [ '%s%s\"%s\"' % ( ak, sep, attr[ak] ) for ak in attr ] )
       return "\t".join( str(a) for a in ( self.iv.chrom, source, 
-         self.type, self.iv.start, self.iv.end, score, 
+         self.type, self.iv.start+1, self.iv.end, score, 
          self.iv.strand, frame, attr_str ) ) + "\n"
          
 
@@ -167,7 +172,7 @@ def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
       val = mo.group(2)
       if val.startswith( '"' ) and val.endswith( '"' ):
          val = val[1:-1]
-      val = urllib.unquote( val )
+      #val = urllib.unquote( val )
       d[ intern(mo.group(1)) ] = intern(val)
       if extra_return_first_value and i == 0:
          first_val = val         
@@ -176,6 +181,7 @@ def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
    else:
       return d
 
+_re_gff_meta_comment = re.compile( "##\s*(\S+)\s+(\S*)" )
 
 class GFF_Reader( FileOrSequence ):
 
@@ -191,11 +197,16 @@ class GFF_Reader( FileOrSequence ):
    def __init__( self, filename_or_sequence, end_included=False ):
       FileOrSequence.__init__( self, filename_or_sequence )
       self.end_included = end_included
+      self.metadata = {}
    
    
    def __iter__( self ):
       for line in FileOrSequence.__iter__( self ):
          if line.startswith( '#' ):
+            if line.startswith( "##" ):
+               mo = _re_gff_meta_comment.match( line )
+               if mo:
+                  self.metadata[ mo.group(1) ] = mo.group(2)
             continue
          ( seqname, source, feature, start, end, score, 
             strand, frame, attributeStr ) = line.split( "\t", 8 )   
@@ -423,7 +434,7 @@ class SolexaExportReader( FileOrSequence ):
       if solexa_old:
          self.qualscale = "solexa-old"
       else:
-         self.qualscale = "solexa-1.3"
+         self.qualscale = "solexa"
 
    @classmethod
    def parse_line_bare( dummy, line ):

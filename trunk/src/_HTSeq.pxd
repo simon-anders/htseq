@@ -40,19 +40,23 @@ cdef class SequenceWithQualities( Sequence ):
 
       
 cdef class Alignment( object ):
-   pass
+   cdef public SequenceWithQualities read
+   cdef public GenomicInterval iv
    
 cdef class AlignmentWithSequenceReversal( Alignment ):   
    cdef public SequenceWithQualities read_as_aligned
    cdef public SequenceWithQualities _read_as_sequenced
-   cdef public GenomicInterval iv
 
 cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
-   cdef public int flags
    cdef public list cigar
    cdef public int aQual
    cdef list _tags
    cdef public GenomicPosition mate_start
    cdef public str pe_which
    cdef public int inferred_insert_size
+   cdef public bool proper_pair
+   cdef public bool not_primary_alignment
+   cdef public bool failed_platform_qc
+   cdef public bool pcr_or_optical_duplicate
+   
  
