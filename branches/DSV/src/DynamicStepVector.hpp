@@ -10,10 +10,16 @@
 #include <utility>
 #include <limits>
 
+#define NDEBUG
+
 template< typename TValue >
 class Value{
 public:
-    virtual ~Value() {};
+    virtual ~Value() {
+#ifdef NDEBUG
+        std::cout << "Value Base Destructor called!" << std::endl;
+#endif
+    };
     virtual std::string info() = 0;
     virtual bool multiple(){
         return false;
@@ -45,6 +51,12 @@ public:
         value = other.get();
     };
     SingleValue( TValue const & val ) : value( val ) {};
+    
+    virtual ~SingleValue() {
+    #ifdef NDEBUG
+        std::cout << this->info() << " Destructor called!" << std::endl;
+    #endif
+    };
     
     operator TValue() const {
         return value;
@@ -83,6 +95,13 @@ private:
 template< typename TValue >
 class MultipleValue : public Value< TValue > {
 public:
+
+    virtual ~MultipleValue() {
+    #ifdef NDEBUG
+        std::cout << this->info() << " Destructor called!" << std::endl;
+    #endif
+    };
+
     MultipleValue( TValue const & val, size_t count ) : values( count, val ) { 
         //assert( count > 0 && " attempted to create MV with length <= 0!" );
     };
@@ -410,14 +429,9 @@ public:
         if( it->second->multiple() ){
             ( *( static_cast<TMV*>( it->second ) ) ).del_from( key - it->first );
             set( key, val );
-//            if( ( *( static_cast<TMV*>( it->second ) ) ).size() >  key - it->first ){
-//                ( *( static_cast<TMV*>( it->second ) ) ).set_from_to( val, key - it->first, key - it->first + 1 );
-//            }else{
-//                ( *( static_cast<TMV*>( it->second ) ) ).push_back( val, 1 );
-//            }
         }else{
             if( it->first != key ){
-                delete steps[key];
+                delete steps[ key ];
                 steps[ key ] = new TSV( val );
                 refurbish( key );
             }else{
@@ -444,22 +458,27 @@ public:
                 ++it_from;
             }
             
-            
+            typename Map::iterator it_tmp = it_from;
+            while( it_tmp != it_to ){
+                delete it_tmp->second;
+                ++it_tmp;
+            }
             steps.erase( it_from, it_to ); //erase steps in between
         
             if( it_to->second->multiple() ){
 
                 std::vector< TValue > tmp = static_cast<TMV*>( it_to->second )->get( to - it_to->first, it_to->second->size() );
-                steps.erase( it_to );
                 delete steps[to];
+                steps.erase( it_to );
                 steps[ to ] = new TMV( tmp );
 
             }else{
 
                 TValue to_val = ( *( it_to->second ) )[0];
+                delete it_to->second;
                 steps.erase(it_to);
                 set( to, to_val );
-
+                
             }
             
             set( from, val );
