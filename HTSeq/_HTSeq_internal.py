@@ -26,16 +26,27 @@ def GenomicArray_get_steps_convert_iv( step_iter, chrom, strand ):
    for start, end, value in step_iter:
       yield HTSeq.GenomicInterval( chrom, start, end, strand ), value
       
-def Genomic_array_get_all_steps( self ):
-   for chrom in self.step_vectors:
-      if self.stranded:
-         for a in GenomicArray_get_steps_convert_iv( 
-               self.step_vectors[chrom]["+"].get_steps(), chrom, "+" ):
-            yield a         
-         for a in GenomicArray_get_steps_convert_iv( 
-               self.step_vectors[chrom]["-"].get_steps(), chrom, "-" ):
-            yield a         
-      else:
-         for a in GenomicArray_get_steps_convert_iv( 
-               self.step_vectors[chrom].get_steps(), chrom, "." ):
-            yield a
+def Genomic_array_get_all_steps( self, values_only = False ):
+   if values_only:
+      for chrom in self.step_vectors:
+	 if self.stranded:
+	    for a in self.step_vectors[chrom]["+"].get_steps( values_only=True):
+	       yield a
+	    for a in self.step_vectors[chrom]["-"].get_steps( values_only=True):
+	       yield a
+	 else:
+	    for a in self.step_vectors[chrom].get_steps( values_only=True):
+	       yield a
+   else:
+      for chrom in self.step_vectors:
+	 if self.stranded:
+            for a in GenomicArray_get_steps_convert_iv( 
+        	  self.step_vectors[chrom]["+"].get_steps(), chrom, "+" ):
+               yield a         
+            for a in GenomicArray_get_steps_convert_iv( 
+        	  self.step_vectors[chrom]["-"].get_steps(), chrom, "-" ):
+               yield a         
+	 else:
+            for a in GenomicArray_get_steps_convert_iv( 
+        	  self.step_vectors[chrom].get_steps(), chrom, "." ):
+               yield a
