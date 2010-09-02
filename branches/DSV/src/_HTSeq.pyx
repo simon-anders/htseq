@@ -314,11 +314,11 @@ cdef class GenomicPosition( GenomicInterval ):
 cdef class GenomicArray( object ):
    
    cdef public dict step_vectors
-   cdef readonly bool stranded
+   cdef readonly bint stranded
    cdef readonly str typecode
-   cdef public bool auto_add_chroms
+   cdef public bint auto_add_chroms
    
-   def __init__( self, object chroms, bool stranded=True, str typecode='d' ):
+   def __init__( self, object chroms, bint stranded=True, str typecode='d' ):
       cdef str chrom
       self.step_vectors = {}
       self.stranded = stranded
@@ -395,7 +395,7 @@ cdef class GenomicArray( object ):
       else:
          self.step_vectors[ iv.chrom ].add_value( value, iv.start, iv.end )
          
-   def get_steps( self, GenomicInterval iv = None, bool values_only=False ):
+   def get_steps( self, GenomicInterval iv = None, bint values_only=False ):
       if iv is None:
          return _HTSeq_internal.Genomic_array_get_all_steps( self )
       if self.stranded:
@@ -682,7 +682,7 @@ cdef class SequenceWithQualities( Sequence ):
             self._qualstr_phred = self._qualstr
          else:
             seqlen = len( self.seq )
-            self._qualstr_phred = ' ' * seqlen
+            self._qualstr_phred = b' ' * seqlen
             qualstr_phred_cstr = self._qualstr_phred
             if self._qualarr is None:
                self._fill_qual_arr()
@@ -703,7 +703,7 @@ cdef class SequenceWithQualities( Sequence ):
       for i in xrange( ( len( self ) + 1 ) // 70 + 1):
          fastq_file.write( self.qualstr[ i*70 : (i+1)*70 ] + "\n" )
 
-   def get_fastq_str( self, bool convert_to_phred=False ):
+   def get_fastq_str( self, bint convert_to_phred=False ):
       sio = cStringIO.StringIO()
       self.write_to_fastq_file( sio, convert_to_phred )
       return sio.getvalue()
