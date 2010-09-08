@@ -54,9 +54,9 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
    cdef public GenomicPosition mate_start
    cdef public str pe_which
    cdef public int inferred_insert_size
-   cdef public bool proper_pair
-   cdef public bool not_primary_alignment
-   cdef public bool failed_platform_qc
-   cdef public bool pcr_or_optical_duplicate
+   cdef public bint proper_pair
+   cdef public bint not_primary_alignment
+   cdef public bint failed_platform_qc
+   cdef public bint pcr_or_optical_duplicate
    
  
