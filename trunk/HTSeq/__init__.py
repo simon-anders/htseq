@@ -553,13 +553,11 @@ def pair_SAM_alignments( alignments ):
                ( read1.pe_which == "unknown" and read2.pe_which == "unknown" ) ):
          warnings.warn( "Incorrect first/second assignments in mate pairs " + 
             read1.read.name )
-      if not ( read1.proper_pair and read2.proper_pair ):
-         warnings.warn( "Incorrect 'proper_pair' flag value for read pair " + 
-            read1.read.name )
-      if not ( read1.mate_start == read2.iv.start_as_pos and 
-            read2.mate_start == read1.iv.start_as_pos ):
-         warnings.warn( "Read pair " + read1.read.name +
-            " show inconsistency between 'iv' and 'mate_start' values" )
+      if read1.aligned and read2.aligned:
+	 if not ( read1.mate_start == read2.iv.start_as_pos and 
+               read2.mate_start == read1.iv.start_as_pos ):
+            warnings.warn( "Read pair " + read1.read.name +
+               " show inconsistency between 'iv' and 'mate_start' values" )
       return ( read1, read2 )
 
    def process_single_read( read ):
