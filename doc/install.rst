@@ -27,20 +27,7 @@ HTSeq is available from the `Python Package Index (PyPI)`_.
 
 .. _`Python Package Index (PyPI)`: http://pypi.python.org/
 
-If you have ``easy_install`` (part of the Python `setuptools`_) you can simply
-type
-
-.. _`setuptools`: http://pypi.python.org/pypi/setuptools
-
-::
-
-   easy_install HTSeq
-   
-and ``easy_install`` will download and install everything automatically. (Warning:
-easy_install sometimes gets an old version. make sure you get the current one, and,
-if not, proceed with the manual way, as follows.)  
-
-Alternatively, you can download HTSeq from the
+Download HTSeq from the
 
   `HTSeq package download page on PyPI`_,
 
@@ -55,7 +42,9 @@ versions.
 Installing a binary package
 ===========================
 
-If you have a binary package (not containing a subdirectory called ``src``),
+For Windows, the binary package contains an automatic installer, Simply execute it.
+
+If you have a binary package (not containing a subdirectory called ``src``) for Linux or MacOS,
 unpack it, open a terminal and type, in the unpacked directory,
 ::
 
