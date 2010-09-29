@@ -16,7 +16,7 @@ def invert_strand( iv ):
    return iv2
 
 def count_reads_in_features( sam_filename, gff_filename, stranded, 
-      overlap_mode, feature_type, id_attribute, quiet ):
+      overlap_mode, feature_type, id_attribute, quiet, minaqual ):
       
    if quiet:
       warnings.filterwarnings( action="ignore", module="HTSeq" ) 
@@ -68,10 +68,16 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
          read_seq = HTSeq.pair_SAM_alignments( read_seq )
       empty = 0
       ambiguous = 0
+      notaligned = 0
+      lowqual = 0
       i = 0   
       for r in read_seq:
          if not pe_mode:
             if not r.aligned:
+	       notaligned += 1
+               continue
+            if r.aQual < minaqual:
+	       lowqual += 1
                continue
             iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" )
          else:
@@ -84,8 +90,13 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                   ( invert_strand( co.ref_iv ) for co in r[1].cigar if co.type == "M" ) )
             else:
                if ( r[0] is None ) or not ( r[0].aligned ):
+                  notaligned += 1
                   continue         
+            if ( r[0] and r[0].aQual < minaqual ) or ( r[1] and r[1].aQual < minaqual ):
+	       lowqual += 1
+               continue
          
+	 
          try:
             if overlap_mode == "union":
                fs = set()
@@ -129,7 +140,11 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
             sys.stderr.write( "%d reads processed.\n" % i )
 
    except:
-      sys.stderr.write( "Error occured in %s.\n" % read_seq.get_line_number_string() )
+      try:
+         sys.stderr.write( "Error occured in %s.\n" % read_seq.get_line_number_string() )
+         # For paired read this does not work. (TODC: Fix it)
+      except AttributeError:
+         pass	 
       raise
 
    if not quiet:
@@ -139,6 +154,8 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       print "%s\t%d" % ( fn, counts[fn] )
    print "no_feature\t%d" % empty
    print "ambiguous\t%d" % ambiguous
+   print "too low aQual\t%d" % lowqual
+   print "not aligned\t%d" % notaligned
 
       
 def main():
@@ -163,6 +180,14 @@ def main():
       default = "union", help = "mode to handle reads overlapping more than one feature" +
          "(choices: union, intersection-strict, intersection-nonempty; default: union)" )
          
+   optParser.add_option( "-s", "--stranded", type="choice", dest="stranded",
+      choices = ( "yes", "no" ), default = "yes",
+      help = "whether the data is from a strand-specific assay (default: yes)" )
+      
+   optParser.add_option( "-a", "--minaqual", type="int", dest="minaqual",
+      default = 0,
+      help = "whether the data is from a strand-specific assay (default: yes)" )
+      
    optParser.add_option( "-t", "--type", type="string", dest="featuretype",
       default = "exon", help = "feature type (3rd column in GFF file) to be used, " +
          "all features of other type are ignored (default, suitable for Ensembl " +
@@ -172,10 +197,6 @@ def main():
       default = "gene_id", help = "GFF attribute to be used as feature ID (default, " +
       "suitable for Ensembl GTF files: gene_id)" )
 
-   optParser.add_option( "-s", "--stranded", type="choice", dest="stranded",
-      choices = ( "yes", "no" ), default = "yes",
-      help = "whether the data is from a strand-specific assay (default: yes)" )
-      
    optParser.add_option( "-q", "--quiet", action="store_true", dest="quiet",
       help = "suppress progress report and warnings" )
 
@@ -194,7 +215,7 @@ def main():
    warnings.showwarning = my_showwarning
    try:
       count_reads_in_features( args[0], args[1], opts.stranded == "yes", 
-         opts.mode, opts.featuretype, opts.idattr, opts.quiet )
+         opts.mode, opts.featuretype, opts.idattr, opts.quiet, opts.minaqual )
    except:
       sys.stderr.write( "Error: %s\n" % str( sys.exc_info()[1] ) )
       sys.stderr.write( "[Exception type: %s, raised in %s:%d]\n" % 
