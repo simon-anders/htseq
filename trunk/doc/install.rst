@@ -126,10 +126,12 @@ ask me to build a Windows package, or proceed as follows:
 - Download the source package and unpack it (e.g., with 7-zip) onto your desktop.
 
 - Start a command line terminal and type the following commands (substituting paths
-  where they are different on your system)::
+  where they are different on your system):
+
+  ::  
   
-  cd \Documents and Settings\anders\Desktop\HTSeq-0.4.4
-  PATH=%PATH%;C:\Python26;C:\MinGW\bin
-  python setup.py build --compiler=mingw32
-  python setup.py install
+     cd \Documents and Settings\anders\Desktop\HTSeq-0.4.4
+     PATH=%PATH%;C:\Python26;C:\MinGW\bin
+     python setup.py build --compiler=mingw32
+     python setup.py install
     

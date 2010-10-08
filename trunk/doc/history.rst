@@ -22,7 +22,7 @@ Patch versions:
 
 * Version 0.4.5p1 (2010-10-08)
 
-- correction of a mistake in CIGAR checking, misreading symbol "N"
+  - correction of a mistake in CIGAR checking, misreading symbol "N"
 
 Version 0.4.4
 =============
@@ -39,25 +39,31 @@ Version 0.4.4
 Patch versions:
 
 * Version 0.4.4p1 (2010-05-26):
+
   - minor change to make it run on Python 2.5 again
   - changed 'str' to 'bytes' at various places, now compiles with Cython 0.12
     (but no longer with Cython 0.11 and Python 2.5)
 
 * Version 0.4.4p2 (2010-06-05):
+
   - change to SAM parser: if flag "query unmapped is set" but RNAME is not
     "*", a warning (rather than an error) is issued
 
 * Version 0.4.4p3 (2010-06-25)
+
   - again removed an "except sth as e"
 
 * Version 0.4.4p4 (2010-07-12)
+
   - dto.
 
 * Version 0.4.4p5 (2010-07-13)
+
   - rebuilt with Cython 0.12.1 (previous one was accidently built with 
     Cython 0.11.1, causing it to fail with Python 2.5)
 
 * Version 0.4.4p6 (2010-07-21)
+
   - fixed bug in error reporting in count.py
   - losened GFF attribute parsing
   - changed "mio" to "millions" in qa output
@@ -81,7 +87,7 @@ New argument to constructer of GFF_Reader: ``end_include``
 
 * Version 0.4.3-p3 (2010-05-15): 
   - parse_GFF_attribute_string can now deal with empty fields; 
-    score treated as float, not int
+  score treated as float, not int
   - fixed bug in SAM_Reader: can now deal with SAM files with 11 columns
   - SAM_Alignment._tags is now a list of strings
 
@@ -121,7 +127,7 @@ Bug fixes:
 * Fixed bug in ``htseq-count``: CIGAR strings with gaps were not correctly handled
 
 * Fixed bug in Tour (last section, on counting): An wrong indent, and accidental
-change to the ``exons`` variable invalidated data.
+  change to the ``exons`` variable invalidated data.
 
 * SolexaExportReader no longer complains about multiplexing (indexing) not being supported.
 
