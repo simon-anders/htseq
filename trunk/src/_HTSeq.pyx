@@ -939,10 +939,10 @@ cdef class CigarOperation( object ):
       if self.type == 'M':
          if not ( qlen == self.size and rlen == self.size ):
             return False
-      elif self.type == 'I' or self.type == 'N' or self.type == 'S':
+      elif self.type == 'I' or self.type == 'S':
          if not ( qlen == self.size and rlen == 0 ):
             return False
-      elif self.type == 'D':
+      elif self.type == 'D' or self.type == 'N':
          if not ( qlen == 0 and rlen == self.size ):
             return False
       elif self.type == 'H' or self.type == 'P':

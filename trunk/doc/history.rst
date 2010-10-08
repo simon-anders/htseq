@@ -8,15 +8,21 @@ Version 0.4.5
 =============
 
 2010-08-30
-  - correction to GenomicArray.get_steps() when called without arguments
-  - correction to FileOrSequence.get_line_number_string
-  - removed use of urllib's quote and unquote in GFF parsing/writing
-  - GFF_Reader now stores "meta information"
-  - qa.py now gives progress report
-  - auto add chrom now also works on read access
-  - refactored CIGAR parser
-  - added bool fields to SAM_Alignment for all flag bits
 
+- correction to GenomicArray.get_steps() when called without arguments
+- correction to FileOrSequence.get_line_number_string
+- removed use of urllib's quote and unquote in GFF parsing/writing
+- GFF_Reader now stores "meta information"
+- qa.py now gives progress report
+- auto add chrom now also works on read access
+- refactored CIGAR parser
+- added bool fields to SAM_Alignment for all flag bits
+
+Patch versions:
+
+* Version 0.4.5p1 (2010-10-08)
+
+- correction of a mistake in CIGAR checking, misreading symbol "N"
 
 Version 0.4.4
 =============
