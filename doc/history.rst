@@ -24,6 +24,12 @@ Patch versions:
 
   - correction of a mistake in CIGAR checking, misreading symbol "N"
 
+* Version 0.4.5p2 (2010-10-13)
+
+  - Sequence.add_bases_to_count_array and hence htseq-qa now 
+    accepts '.' instead of 'N' in a fastq file
+
+
 Version 0.4.4
 =============
 
