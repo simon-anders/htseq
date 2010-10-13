@@ -551,7 +551,7 @@ cdef class Sequence( object ):
             count_array[ i, 2 ] += 1
          elif b == 'T' or b == 't':
             count_array[ i, 3 ] += 1
-         elif b == 'N' or b == 'n':
+         elif b == 'N' or b == 'n' or b == ".":
             count_array[ i, 4 ] += 1
          else:
             raise ValueError, "Illegal base letter encountered."
