@@ -29,6 +29,10 @@ Patch versions:
   - Sequence.add_bases_to_count_array and hence htseq-qa now 
     accepts '.' instead of 'N' in a fastq file
 
+* Version 0.4.5p3 (2010-10-20)
+
+  - fixed error reporting for PE in htseq-count
+
 
 Version 0.4.4
 =============
