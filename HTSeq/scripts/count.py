@@ -62,9 +62,14 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       read_seq = HTSeq.SAM_Reader( sam_filename )
       first_read = iter( read_seq ).next()
       pe_mode = first_read.paired_end
+   except:
+      sys.stderr.write( "Error occured when reading first line of sam file." )
+      raise
 
+   try:
       read_seq = HTSeq.SAM_Reader( sam_filename )
       if pe_mode:
+         read_seq_pe_file = read_seq
          read_seq = HTSeq.pair_SAM_alignments( read_seq )
       empty = 0
       ambiguous = 0
@@ -140,11 +145,10 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
             sys.stderr.write( "%d reads processed.\n" % i )
 
    except:
-      try:
+      if not pe_mode:
          sys.stderr.write( "Error occured in %s.\n" % read_seq.get_line_number_string() )
-         # For paired read this does not work. (TODC: Fix it)
-      except AttributeError:
-         pass	 
+      else:
+         sys.stderr.write( "Error occured in %s.\n" % read_seq_pe_file.get_line_number_string() )
       raise
 
    if not quiet:
