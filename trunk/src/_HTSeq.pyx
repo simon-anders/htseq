@@ -1103,6 +1103,9 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
    def paired_end( self ):
       return self.pe_which != "not_paired_end"
 
+   @property
+   def mate_aligned( self ):
+      return self.mate_start is not None
          
    def get_sam_line( self ):
        

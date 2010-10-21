@@ -65,7 +65,7 @@ class FileOrSequence( object ):
       if self.line_no is None:
          if isinstance( self.fos, str ):
             return "file %s closed" % self.fos
-	 else:
+         else:
             return "file closed"
       if isinstance( self.fos, str ):
          return "line %d of file %s" % ( self.line_no, self.fos )
@@ -497,11 +497,11 @@ class SAM_Reader( FileOrSequence ):
          if line.startswith( "@" ):
             # do something with the header line
             continue
-	 try:
+         try:
             algnt = SAM_Alignment( line )
-	 except ValueError, e:
-	    e.args = e.args + ( self.get_line_number_string(), )
-	    raise
+         except ValueError, e:
+            e.args = e.args + ( self.get_line_number_string(), )
+            raise
          yield algnt
        
 
@@ -554,7 +554,7 @@ def pair_SAM_alignments( alignments ):
          warnings.warn( "Incorrect first/second assignments in mate pairs " + 
             read1.read.name )
       if read1.aligned and read2.aligned:
-	 if not ( read1.mate_start == read2.iv.start_as_pos and 
+         if not ( read1.mate_start == read2.iv.start_as_pos and 
                read2.mate_start == read1.iv.start_as_pos ):
             warnings.warn( "Read pair " + read1.read.name +
                " show inconsistency between 'iv' and 'mate_start' values" )

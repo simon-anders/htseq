@@ -33,6 +33,11 @@ Patch versions:
 
   - fixed error reporting for PE in htseq-count
 
+* Version 0.4.5p4 (2010-10-21)
+
+  - fixed another error reporting for PE in htseq-count
+
+
 
 Version 0.4.4
 =============
