@@ -821,15 +821,21 @@ cdef class Alignment( object ):
    """
    
    def __init__( self, read, iv ):
-      self.read = read
+      self._read = read
       self.iv = iv
+      
+   @property
+   def read( self ):
+      return self._read
    
    def __repr__( self ):
       cdef str s
       if self.paired_end:
-         s = "Paired-end read"
+         s = "Paired-end Read"
       else:
          s = "Read"
+      print self.read
+      print self.read.name
       if self.aligned:
          return "<%s object: %s '%s' aligned to %s>" % (
             self.__class__.__name__, s, self.read.name, str(self.iv) )
@@ -998,7 +1004,7 @@ cpdef list build_cigar_list( list cigar_pairs, int ref_left = 0, str chrom = "",
          rpos += size
       elif code == 'S':
          res.append( CigarOperation ( 
-            'N', size, rpos, rpos, qpos, qpos + size, chrom, strand ) )
+            'S', size, rpos, rpos, qpos, qpos + size, chrom, strand ) )
          qpos += size
       elif code == 'H':
          res.append( CigarOperation ( 
