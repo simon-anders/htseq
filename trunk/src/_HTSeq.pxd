@@ -40,7 +40,7 @@ cdef class SequenceWithQualities( Sequence ):
 
       
 cdef class Alignment( object ):
-   cdef public SequenceWithQualities read
+   cdef public SequenceWithQualities _read
    cdef public GenomicInterval iv
    
 cdef class AlignmentWithSequenceReversal( Alignment ):   

@@ -37,6 +37,12 @@ Patch versions:
 
   - fixed another error reporting for PE in htseq-count
 
+* Version 0.4.5p5 (2010-10-28)
+
+  - Not only 'N' but also 'S' was read the wrong way. Fixed.
+  
+  - Cython had some odd way handling properties overloading attributes,
+    which caused issues with 'Alignment.read'. Worked around.
 
 
 Version 0.4.4
