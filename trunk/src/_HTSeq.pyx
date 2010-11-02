@@ -697,16 +697,14 @@ cdef class SequenceWithQualities( Sequence ):
       return self._qualstr_phred
       
 
-   def write_to_fastq_file( self, fastq_file ):
+   def write_to_fastq_file( self, file fastq_file ):
       if hasattr( self, "descr" ) and self.descr is not None:
          fastq_file.write( "@%s %s\n" % ( self.name, self.descr ) )
       else:
          fastq_file.write( "@%s\n" % self.name )
-      for i in xrange( ( len( self ) + 1 ) // 70 + 1):
-         fastq_file.write( self.seq[ i*70 : (i+1)*70 ] + "\n" )
+      fastq_file.write( self.seq + "\n" )
       fastq_file.write( "+\n" )
-      for i in xrange( ( len( self ) + 1 ) // 70 + 1):
-         fastq_file.write( self.qualstr[ i*70 : (i+1)*70 ] + "\n" )
+      fastq_file.write( self.qualstr + "\n" )
 
    def get_fastq_str( self, bint convert_to_phred=False ):
       sio = cStringIO.StringIO()

@@ -44,6 +44,10 @@ Patch versions:
   - Cython had some odd way handling properties overloading attributes,
     which caused issues with 'Alignment.read'. Worked around.
 
+* Version 0.4.5p6 (2010-11-02)
+
+  - write_to_fastq should not break lines. Fixed.
+
 
 Version 0.4.4
 =============
