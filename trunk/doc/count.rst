@@ -85,6 +85,16 @@ Options
    `<mode>` are ``union``, ``intersection-strict`` and ``intersection-nonempty``
    (default: ``union``)
 
+.. cmdoption:: -s <yes or no>, --stranded=<yes or no>
+
+   whether the data is from a strand-specific assay (default: ``yes``)
+
+.. cmdoption:: -a <minaqual>, --a=<minaqual>
+
+   skip all reads with alignment quality lower than the given
+   minimum value (default: 0)
+
+
 .. cmdoption:: -t <feature type>, --type=<feature type>
 
    feature type (3rd column in GFF file) to be used, all
@@ -100,9 +110,6 @@ Options
    is used to identity the counts in the output table. The default, suitable 
    for RNA-SEq and Ensembl GTF files, is ``gene_id``. 
 
-.. cmdoption:: -s <yes or no>, --stranded=<yes or no>
-
-   whether the data is from a strand-specific assay (default: ``yes``)
    
 .. cmdoption:: -q, --quiet           
    
