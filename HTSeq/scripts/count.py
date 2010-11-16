@@ -190,7 +190,8 @@ def main():
       
    optParser.add_option( "-a", "--minaqual", type="int", dest="minaqual",
       default = 0,
-      help = "whether the data is from a strand-specific assay (default: yes)" )
+      help = "skip all reads with alignment quality lower than the given " +
+         "minimum value (default: 0)" )
       
    optParser.add_option( "-t", "--type", type="string", dest="featuretype",
       default = "exon", help = "feature type (3rd column in GFF file) to be used, " +

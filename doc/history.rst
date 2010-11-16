@@ -48,6 +48,11 @@ Patch versions:
 
   - write_to_fastq should not break lines. Fixed.
 
+* Version 0.4.5p7 (2010-11-16)
+
+  - added fallback to distutils in case setuptools in unavailable
+  
+  - fixed documentation of '-a' option to htseq-count
 
 Version 0.4.4
 =============
