@@ -11,7 +11,7 @@ Sequences and FASTA/FASTQ files
 
    >>> import HTSeq
 
-**Sequence**
+``Sequence``
 ============
 
 A **Sequence** object holds a DNA sequence. Besides the actual sequence, an object

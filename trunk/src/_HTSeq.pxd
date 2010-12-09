@@ -50,7 +50,7 @@ cdef class AlignmentWithSequenceReversal( Alignment ):
 cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
    cdef public list cigar
    cdef public int aQual
-   cdef list _tags
+   cdef list _optional_fields
    cdef public GenomicPosition mate_start
    cdef public str pe_which
    cdef public int inferred_insert_size

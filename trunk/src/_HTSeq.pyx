@@ -832,8 +832,6 @@ cdef class Alignment( object ):
          s = "Paired-end Read"
       else:
          s = "Read"
-      print self.read
-      print self.read.name
       if self.aligned:
          return "<%s object: %s '%s' aligned to %s>" % (
             self.__class__.__name__, s, self.read.name, str(self.iv) )
@@ -1014,6 +1012,23 @@ cpdef list build_cigar_list( list cigar_pairs, int ref_left = 0, str chrom = "",
          raise ValueError, "Unknown CIGAR code '%s' encountered." % code
    return res
       
+cdef _parse_SAM_optional_field_value( str field ):
+   if len(field) < 5 or field[2] != ':' or field[4] != ':':
+      raise ValueError, "Malformatted SAM optional field '%'" % field
+   if field[3] == 'A':
+      return field[5]
+   elif field[3] == 'i':
+      return int( field[5:] )
+   elif field[3] == 'f':
+      return float( field[5:] )
+   elif field[3] == 'Z':
+      return field[5:]
+   elif field[3] == 'H':
+      return int( field[5:], 16 )
+   else:
+      raise ValueError, "SAM optional field with illegal type letter '%s'" % field[2]
+      
+      
 cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
 
    """When reading in a SAM file, objects of the class SAM_Alignment
@@ -1027,7 +1042,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
    def __init__( self, line ):
       cdef str qname, flag, rname, pos, mapq, cigar, 
       cdef str mrnm, mpos, isize, seq, qual
-      cdef list tags
+      cdef list optional_fields
       cdef int posint, flagint
       cdef str strand
       
@@ -1040,7 +1055,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          raise ValueError, "SAM line does not contain at least 11 tab-delimited fields."
       (qname, flag, rname, pos, mapq, cigar, mrnm, mpos, isize, 
          seq, qual) = fields[ 0:11 ]
-      tags = fields[ 11: ]      
+      optional_fields = fields[ 11: ]      
       
       if seq.count( "=" ) > 0:
          raise ValueError, "Sequence in SAM file contains '=', which is not supported."
@@ -1067,7 +1082,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       AlignmentWithSequenceReversal.__init__( self,
          SequenceWithQualities( seq.upper(), qname, qual ), iv )
          
-      self._tags = tags
+      self._optional_fields = optional_fields
       self.aQual = int( mapq )
       self.inferred_insert_size = int( isize )
       
@@ -1094,8 +1109,8 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          else:
             self.pe_which = intern( "unknown" )
       else:
-        self.mate_start = None
-        self.pe_which = intern( "not_paired_end" )
+         self.mate_start = None
+         self.pe_which = intern( "not_paired_end" )
         
       self.proper_pair = flagint & 0x0002 > 0
       self.not_primary_alignment = flagint & 0x0100 > 0
@@ -1165,5 +1180,17 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
           str(query_start.start+1), str(self.aQual), cigar, mate_start.chrom, 
           str(mate_start.pos+1), str(self.inferred_insert_size), 
            self.read_as_aligned.seq, self.read_as_aligned.qualstr,
-           ' '.join( self._tags ) ) )      
+           ' '.join( self._optional_fields ) ) )      
+
+   def optional_field( SAM_Alignment self, str tag ):
+      cdef str field
+      for field in self._optional_fields:
+         if field[:2] == tag:
+            return _parse_SAM_optional_field_value( field )
+      raise KeyError, "SAM optional field tag %s not found" % tag
+
+   def optional_fields( SAM_Alignment self ):
+      cdef str field
+      return dict( [ ( field[:2], _parse_SAM_optional_field_value( field ) ) 
+         for field in self._optional_fields ] )
 

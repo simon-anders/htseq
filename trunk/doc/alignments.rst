@@ -84,9 +84,9 @@ Depending on the format of your alignment file, choose from the following parser
 ``Alignment`` and ``AlignmentWithSequenceReversal``
 ===================================================
 
-.. class:: Alignment( )
+.. class:: Alignment( read, iv )
 
-   This is the abstract abse class of all Alignment classes. Any class derived 
+   This is the base class of all Alignment classes. Any class derived 
    from ``Alignment`` has at least the following attributes:
    
    .. attribute:: read  
@@ -183,29 +183,38 @@ object you typically never call the constructor yourself.
    
       A list of :class:`CigarOperation` objects, as parsed from the extended CIGAR string. See
       :class:`CigarOperation` for details.
-      
-   .. attribute:: SAM_Alignment._tags
    
-      A list of strings. At the moment, the extra tags are just put into this field. A parser will
-      be added soon.
+   .. attribute:: SAM_Alignment.nor_primary_alignment
+   
+      A boolean. Whether the alignment is not primary. (See SAM format reference, flag 0x0100.)
 
-   .. attribute:: SAM_Alignment.passed_filter
+   .. attribute:: SAM_Alignment.failed_platform_qc
    
-      A boolean. Whether the read passed platform/vendor quality filter. (See SAM format reference,
-      flag 0x0200.)
-      
-   .. attribute:: SAM_Alignment.primary
-   
-      A boolean. Whether the alignment is primary. (See SAM format reference, flag 0x0100.)
+      A boolean. Whether the read failed a platform quality check. (See SAM format reference, flag 0x0200.)
 
-   .. attribute:: SAM_Alignment.duplicate
+   .. attribute:: SAM_Alignment.pcr_or_optical_duplicate
    
-      A boolean. Whether the read is an optical or PCR duplicate. (See SAM format reference, flag 0x0400.)
+      A boolean. Whether the read is a PCR or optical duplicate. (See SAM format reference, flag 0x0400.)
+
+   These methods access the optional fields:
+
+   .. attribute:: SAM_Alignment.optional_field( tag )
+   
+      Returns the optional field ``tag``. See SAM format reference for the defined tags (which
+      are two-letter strings).
       
-   .. attribute:: SAM_Alignment.flags
+   .. attribute:: SAM_Alignment.optional_fields( )
    
-      An int. The flags value. You will not need this usually, as the information from all individual
-      flags are accessible through specific attributes.
+      Returns a dict with all optional fields, using their tags as keys.
+      
+      
+
+   This method is useful to write out a SAM file:
+
+   .. method:: SAM_Alignment.get_sam_line( )
+   
+      Constructs a SAM line to describe the alignment, which is returned as a string.
+
 
    **Paired-end support**
    
@@ -230,7 +239,7 @@ object you typically never call the constructor yourself.
          A :class:`GenomicPosition` object. The start (i.e., left-most position) of the mate's alignment.
          Note that mate_start.strand is opposite to iv.strand for proper pairs.
          
-      .. attribue:: SAM_Alignment.inferred_insert_size
+      .. attribute:: SAM_Alignment.inferred_insert_size
       
          An int. The inferred size of the insert between the reads.
          
@@ -253,6 +262,9 @@ object you typically never call the constructor yourself.
    (first column of the SAM file) is the same for mate pairs, this arrangement can easily be
    achieved by sorting the SAM file lines lexicographically. (If your sorting tool cannot handle
    big files, try Ruan Jue's *msort*, available from the SOAP_ web site.)
+   
+   Special care is taken to properly pair up multiple alignment lines for the same read.
+   
          
 .. _SOAP: http://soap.genomics.org.cn
          
@@ -342,7 +354,10 @@ objects in the list.
    .. attribute:: CigarOperation.query_from
                   CigarOperation.query_to
                   
-      To ints, specifying the affected bases on the query (the read). In case of a
+      Two ints, specifying the affected bases on the query (the read). In case of a
       deletion, ``query_from == query_to``.
    
+   .. method:: CigarOperation.check( )
+   
+      Checks the ``CigarOperation`` object for consitency. Returns a boolean.
 

@@ -537,53 +537,56 @@ class GenomicArrayOfSets( GenomicArray ):
 ###########################
 ##   paired-end handling
 ###########################
-         
+                
+                
 def pair_SAM_alignments( alignments ):
 
-   def check_is_pe( read ):
-      if not read.paired_end:
+   def process_list( almnt_list ):
+      while len( almnt_list ) > 0:
+         a1 = almnt_list.pop( 0 )
+         # Find its mate
+         for a2 in almnt_list:
+            if a1.pe_which == a2.pe_which:
+               continue
+            if not a1.aligned and not a2.mate_aligned:
+               break
+            if not a1.mate_aligned and not a2.aligned:
+               break
+            if a1.aligned and not a2.mate_aligned:
+               continue
+            if a1.mate_aligned and not a2.aligned:
+               continue
+            assert a1.aligned and a2.aligned
+            if a1.iv.chrom == a2.mate_start.chrom and a1.iv.start == a2.mate_start.pos and \
+                  a2.iv.chrom == a1.mate_start.chrom and a2.iv.start == a1.mate_start.pos:
+               break
+         else:
+            if a1.mate_aligned:
+               warnings.warn( "Read " + a1.read.name + " claims to have an aligned mate " +
+                  "which could not be found. (Is the SAM file properly sorted?)" )
+            a2 = None
+         if a2 is not None:
+            almnt_list.remove( a2 )
+         if a1.pe_which == "first":
+            yield ( a1, a2 )
+         else:
+            assert a1.pe_which == "second"
+            yield ( a2, a1 )
+
+   almnt_list = []
+   current_name = None
+   for almnt in alignments:
+      if not almnt.paired_end:
          raise ValueError, "'pair_alignments' needs a sequence of paired-end alignments"
-
-   def process_paired_reads( read1, read2 ):   
-      if read1.pe_which == "second":
-         aux = read1
-         read1 = read2
-         read2 = aux
-      if not ( ( read1.pe_which == "first" and read2.pe_which == "second" ) or 
-               ( read1.pe_which == "unknown" and read2.pe_which == "unknown" ) ):
-         warnings.warn( "Incorrect first/second assignments in mate pairs " + 
-            read1.read.name )
-      if read1.aligned and read2.aligned:
-         if not ( read1.mate_start == read2.iv.start_as_pos and 
-               read2.mate_start == read1.iv.start_as_pos ):
-            warnings.warn( "Read pair " + read1.read.name +
-               " show inconsistency between 'iv' and 'mate_start' values" )
-      return ( read1, read2 )
-
-   def process_single_read( read ):
-      if read.mate_aligned:         
-         warnings.warn( "Read " + read.read.name + " claims to have an aligned mate " +
-            "which could not be found. (Is the SAM file properly sorted?)" )
-      if read.pe_which == "second":
-         return ( None, read )
+      if almnt.pe_which == "unknown":
+         raise ValueError, "Paired-end read found with 'unknown' 'pe_which' status."
+      if almnt.read.name == current_name:
+         almnt_list.append( almnt )
       else:
-         return ( read, None )
+         for p in process_list( almnt_list ):
+            yield p
+         current_name = almnt.read.name
+         almnt_list = [ almnt ]
+   for p in process_list( almnt_list ):
+      yield p
 
-   alignments = iter( alignments )
-   read1 = None
-   read2 = None
-   while True:
-      if read1 is None:
-         read1 = alignments.next()
-         check_is_pe( read1 )
-      read2 = alignments.next()
-      check_is_pe( read2 )      
-      if read1.read.name == read2.read.name:
-         yield process_paired_reads( read1, read2 )
-         read1 = None
-         read2 = None
-      else:
-         yield process_single_read( read1 )
-         read1 = read2
-         read2 = None
-                

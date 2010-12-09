@@ -47,7 +47,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
             counts[ f.attr[ id_attribute ] ] = 0
          i += 1
          if i % 100000 == 0 and not quiet:
-	    sys.stderr.write( "%d GFF lines processed.\n" % i )
+            sys.stderr.write( "%d GFF lines processed.\n" % i )
    except:
       sys.stderr.write( "Error occured in %s.\n" % gff.get_line_number_string() )
       raise
@@ -75,14 +75,21 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       ambiguous = 0
       notaligned = 0
       lowqual = 0
+      nonunique = 0
       i = 0   
       for r in read_seq:
          if not pe_mode:
             if not r.aligned:
-	       notaligned += 1
+               notaligned += 1
                continue
+            try:
+               if r.optional_field( "NH" ) > 1:
+                  nonunique += 1
+                  continue
+            except KeyError:
+               pass
             if r.aQual < minaqual:
-	       lowqual += 1
+               lowqual += 1
                continue
             iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" )
          else:
@@ -97,11 +104,17 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                if ( r[0] is None ) or not ( r[0].aligned ):
                   notaligned += 1
                   continue         
+            try:
+               if ( r[0] is not None and r[0].optional_field( "NH" ) > 1 ) or \
+                     ( r[1] is not None and r[1].optional_field( "NH" ) > 1 ):
+                  nonunique += 1
+                  continue
+            except KeyError:
+               pass
             if ( r[0] and r[0].aQual < minaqual ) or ( r[1] and r[1].aQual < minaqual ):
-	       lowqual += 1
-               continue
+               lowqual += 1
+               continue         
          
-	 
          try:
             if overlap_mode == "union":
                fs = set()
@@ -121,7 +134,6 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                            fs = fs2.copy()
                         else:
                            fs = fs.intersection( fs2 )
-
             else:
                sys.exit( "Illegal overlap mode." )
             if fs is None or len( fs ) == 0:
@@ -158,8 +170,9 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       print "%s\t%d" % ( fn, counts[fn] )
    print "no_feature\t%d" % empty
    print "ambiguous\t%d" % ambiguous
-   print "too low aQual\t%d" % lowqual
-   print "not aligned\t%d" % notaligned
+   print "too_low_aQual\t%d" % lowqual
+   print "not_aligned\t%d" % notaligned
+   print "alignment_not_unique\t%d" % nonunique
 
       
 def main():
