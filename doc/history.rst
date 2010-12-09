@@ -4,6 +4,21 @@
 Version history
 ***************
 
+Version 0.4.6
+=============
+
+2010-12-09
+
+- pair_SAM_alignments now handles multiple matches properly
+
+- SAM_Alignments now allows access to optional fields via the new methods
+  optional_field and optional_fields
+  
+- htseq-count now skips reads that are non-uniquely mapped according to the 'NH'
+  optional field
+  
+- updated documentation    
+
 Version 0.4.5
 =============
 

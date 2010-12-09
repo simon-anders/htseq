@@ -49,8 +49,8 @@ genomic array::
 See :class:`GenomicArray` and :class:`GenomicArrayOfSets` for more sophisticated use.
 
 
-``GFF_File`` and ``GenomicFeature``
-===================================
+``GFF_Reader`` and ``GenomicFeature``
+=====================================
 
 One of the most common format for annotation data is GFF_ (which includes GTF_ as
 a sub-type). Hence, a parse for GFF files is included in HTSeq.
@@ -82,6 +82,15 @@ and each describes one line of a GFF file. See Section :ref:`tour` for an exampl
    1 from the start position, and, for ``end_included=True``, also subtract 1 from
    the end position.
    
+      .. attribute:: GFF_Reader.metadata
+      
+         GFF_Reader skips all lines starting with a single '#' as this marks
+         a comment. However, lines starying with '##' contain meta data (at least
+         accoring to the Sanger Institute's version of the GFF standard.) Such meta
+         data has the format ``##key value``. When a metadata line is encountered,
+         it is added to the ``metadata`` dictionary.
+         
+  
 .. class:: GenomicFeature( name, type_, interval )
 
    A GenomicFeature object always contains the following attributes:
