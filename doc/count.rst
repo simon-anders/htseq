@@ -27,8 +27,8 @@ how to do so.
 
 The three overlap resolution modes of ``htseq-count`` work as follows. For 
 each position `i` in the read, a set `S(i)` is defined as the set of all 
-features overlapping position `i`. Then, the read is assigned to the features
-in the set `S`, which is (with `i` running through all position within the read)
+features overlapping position `i`. Then, consider the set `S`, which is 
+(with `i` running through all position within the read)
 
 * the union of all the sets `S(i)` for mode ``union``.
 
@@ -36,7 +36,12 @@ in the set `S`, which is (with `i` running through all position within the read)
 
 * the intersection of all non-empty sets `S(i)` for mode ``intersection-nonempty``.
 
-The following figure illustrates the effect of these rules:
+If `S` contains precisely one feature, the read is counted for this feature. If
+it contains more than one feature, the read is counted as ``ambiguous`` (and
+not counted for any features), and if ``S`` is empty, the read is counted
+as ``no_feature``. 
+
+The following figure illustrates the effect of these three modes:
 
 .. image:: count_modes.png
 
@@ -55,12 +60,15 @@ If the file ``htseq-qa`` is not in your path, you can, alternatively, call the s
    
    python -m HTSeq.scripts.count [options] <sam_file> <gff_file>
    
-
 The <sam_file> contains the aligned reads in the SAM format. (Note that the 
 SAMtools_ contain Perl scripts to convert most alignment formats to SAM.)
-If you have paired-end data, you have to sort the SAM file by read name first. 
-(If your sorting tool cannot handle big files, try e.g. Ruan Jue's *msort*, 
-available from the SOAP_ web site.)
+Make sure to use a splicing-aware aligner such as TopHat. HTSeq-count makes 
+full use of the information in the CIGAR field.
+
+If you have paired-end data, 
+you have to sort the SAM file by read name first.  (If your sorting tool 
+cannot handle big files, try e.g. Ruan Jue's *msort*, available from the 
+SOAP_ web site.)
          
 .. _SAMtools: http://samtools.sourceforge.net/
 .. _SOAP: http://soap.genomics.org.cn
@@ -69,12 +77,34 @@ The <gff_file> contains the features in the `GFF format`_.
 
 .. _`GFF format`: http://www.sanger.ac.uk/resources/software/gff/spec.html
 
-The script outputs a table with counts for each feature. The last two lines of
-the table contain the counts for reads which could not be assigned to any feature
-(``no_feature``) and reads which were assigned to more than one feature and hence
-not counted for any of these (``ambiguous``).
+The script outputs a table with counts for each feature, followed by
+the special counters, which count reads that were not counted for any feature
+for various reasons, namely:
 
+* ``no_feature``: reads which could not be assigned to any feature 
+  (set `S` as described above was empty).
+   
+* ``ambiguous``: reads which could have been assigned to more than 
+  one feature and hence were not counted for any of these (set `S`
+  had mroe than one element).
+  
+* ``too_low_aQual``: reads which were not counted due to the ``-a``
+  option, see below
+  
+* ``not_aligned``: reads in the SAM file without alignment
 
+* ``alignment_not_unique``: reads with more than one reported alignment.
+  These reads are recognized from the ``NH`` optional SAM field tag. 
+  (If the aligner does not set this field, multiply aligned reads will 
+  be counted multiple times.)
+  
+
+*Important:* The default for strandedness is *yes*. If your RNA-Seq data has not been made
+with a strand-specific protocol, this causes half of the reads to be lost.
+Hence, make sure to set the option ``--stranded=no`` unless you have strand-specific
+data!
+  
+      
 Options
 .......
 
@@ -117,13 +147,4 @@ Options
 
 .. cmdoption:: -h, --help
 
-   Show a usage summary and exit
-   
-   
-Important
-.........
-
-The default for strandedness is *yes*. If your RNA-Seq data has not been made
-with a strand-specific protocol, this causes half of the reads to be lost.
-Hence, make sure to set the option ``--stranded=no`` unless you have strand-specific
-data!
+   Show a usage summary and exit  
