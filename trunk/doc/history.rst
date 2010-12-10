@@ -19,6 +19,13 @@ Version 0.4.6
   
 - updated documentation    
 
+Patch versions:
+
+* Version 0.4.6p1 (2010-12-10)
+
+- updated htseq-count documentation page
+
+
 Version 0.4.5
 =============
 
