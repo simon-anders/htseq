@@ -202,6 +202,8 @@ class GFF_Reader( FileOrSequence ):
    
    def __iter__( self ):
       for line in FileOrSequence.__iter__( self ):
+         if line == "\n":
+            continue
          if line.startswith( '#' ):
             if line.startswith( "##" ):
                mo = _re_gff_meta_comment.match( line )
