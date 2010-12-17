@@ -21,9 +21,11 @@ Version 0.4.6
 
 Patch versions:
 
-* Version 0.4.6p1 (2010-12-10)
+* Version 0.4.6p1 (2010-12-17)
 
 - updated htseq-count documentation page
+
+- htseq-count now accepts '-' as SAM file name
 
 
 Version 0.4.5
