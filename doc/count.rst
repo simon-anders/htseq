@@ -65,6 +65,8 @@ SAMtools_ contain Perl scripts to convert most alignment formats to SAM.)
 Make sure to use a splicing-aware aligner such as TopHat. HTSeq-count makes 
 full use of the information in the CIGAR field.
 
+To read from standard input, use ``-`` as ``<sam_file>``.
+
 If you have paired-end data, 
 you have to sort the SAM file by read name first.  (If your sorting tool 
 cannot handle big files, try e.g. Ruan Jue's *msort*, available from the 

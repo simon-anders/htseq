@@ -25,7 +25,8 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    counts = {}
 
    # Try to open samfile to fail early in case it is not there
-   open( sam_filename ).close()
+   if sam_filename != "-":
+      open( sam_filename ).close()
       
    gff = HTSeq.GFF_Reader( gff_filename )   
    i = 0
@@ -59,15 +60,18 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       sys.stderr.write( "Warning: No features of type '%s' found.\n" % feature_type )
    
    try:
-      read_seq = HTSeq.SAM_Reader( sam_filename )
-      first_read = iter( read_seq ).next()
+      if sam_filename != "-":
+         read_seq = HTSeq.SAM_Reader( sam_filename )
+      else:
+         read_seq = HTSeq.SAM_Reader( sys.stdin )      
+      iter( read_seq )
+      first_read, read_seq = HTSeq.peek( read_seq )
       pe_mode = first_read.paired_end
    except:
       sys.stderr.write( "Error occured when reading first line of sam file." )
       raise
 
    try:
-      read_seq = HTSeq.SAM_Reader( sam_filename )
       if pe_mode:
          read_seq_pe_file = read_seq
          read_seq = HTSeq.pair_SAM_alignments( read_seq )
