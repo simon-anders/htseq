@@ -77,7 +77,11 @@ Depending on the format of your alignment file, choose from the following parser
    
 .. _SAMtools: http://samtools.sourceforge.net/
 
-   Paired-end support will be added very soon. Contact me if you need it now.
+   .. method:: SAM_Reader.peek( num = 1 ):
+      
+      Peek into a SAM file or connection, reporting the first ``num`` records.
+      If you then call an iterator on the ``SAM_Reader``, the record will
+      be yielded again.
    
 
              

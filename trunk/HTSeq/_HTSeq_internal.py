@@ -11,17 +11,6 @@ def GenomicInterval_xranged( gi, step ):
    for pos in xrange( gi.start_d, gi.end_d, step ):
       yield HTSeq.GenomicPosition( gi.chrom, pos, gi.strand, gi.genome ) 
       
-def peek( iter_ ):
-   """Peek at the first element of an iterator without consuming it.
-   
-   This function has to be called following this idiom:
-      first, it = peek( it )
-   """
-   
-   it = iter( iter_ )
-   first = it.next()
-   return first, itertools.chain( [ first ], it )      
-
 def GenomicArray_get_steps_convert_iv( step_iter, chrom, strand ):
    for start, end, value in step_iter:
       yield HTSeq.GenomicInterval( chrom, start, end, strand ), value

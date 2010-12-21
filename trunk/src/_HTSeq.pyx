@@ -1093,7 +1093,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
             self.mate_start = None
          else:
             if mrnm == "*":
-               raise ValueError, "Malformed SAM line: MRNM == '*' although flag bit &0x0008 cleared"
+               raise ValueError, "Malformed SAM line: MRNM == '*' although flag bit &0x0008 cleared"               
             posint = int( mpos ) - 1
             if flagint & 0x0020:   # flag "strand of the mate"
                strand = "-"
