@@ -65,10 +65,10 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       else:
          read_seq = HTSeq.SAM_Reader( sys.stdin )      
       iter( read_seq )
-      first_read, read_seq = HTSeq.peek( read_seq )
+      first_read = read_seq.peek( )[0]
       pe_mode = first_read.paired_end
    except:
-      sys.stderr.write( "Error occured when reading first line of sam file." )
+      sys.stderr.write( "Error occured when reading first line of sam file.\n" )
       raise
 
    try:

@@ -7,8 +7,6 @@ import itertools, warnings
 
 from _HTSeq import *
 
-from _HTSeq_internal import peek
-
 from _version import __version__
 
 
@@ -38,6 +36,7 @@ class FileOrSequence( object ):
       self.line_no = None
       
    def __iter__( self ):
+      self.line_no = 1
       if isinstance( self.fos, str ):
          if self.fos.lower().endswith( ( ".gz" , ".gzip" ) ):
             lines = gzip.open( self.fos )
@@ -45,7 +44,6 @@ class FileOrSequence( object ):
             lines = open( self.fos )
       else:
          lines = self.fos
-      self.line_no = 1
       for line in lines:
          yield line
          self.line_no += 1
@@ -71,7 +69,7 @@ class FileOrSequence( object ):
          return "line %d of file %s" % ( self.line_no, self.fos )
       else:
          return "line %d" % self.line_no
-
+         
 class GeneratedSequence( object ):
    """GeneratedSequence is a little helper class to get "respawnable"
    iterator generators. Pass its constructor a function that generates
@@ -494,7 +492,15 @@ class SAM_Reader( FileOrSequence ):
    contains short read alignments. It can generate an iterator of Alignment
    objects."""
 
+   def __init__( self, filename_or_sequence ):      
+      FileOrSequence.__init__( self, filename_or_sequence )
+      self.peeked = None      
+
    def __iter__( self ):
+      if self.peeked is not None and self.peeked != []:
+         for read in self.peeked:
+            yield read
+         self.peeked = None
       for line in FileOrSequence.__iter__( self ):
          if line.startswith( "@" ):
             # do something with the header line
@@ -506,7 +512,15 @@ class SAM_Reader( FileOrSequence ):
             raise
          yield algnt
        
-
+   def peek( self, num = 1 ):
+      i = 0
+      self.peeked = []
+      for read in self:
+         self.peeked.append( read )
+         i += 1
+         if i >= num:
+            break
+      return self.peeked
 
 class GenomicArrayOfSets( GenomicArray ):
 
