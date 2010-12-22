@@ -142,6 +142,11 @@ Options
    is used to identity the counts in the output table. The default, suitable 
    for RNA-SEq and Ensembl GTF files, is ``gene_id``. 
 
+.. cmdoption:: -o <samout>, --samout=<samout>
+   write out all SAM alignment records into an output SAM
+   file called <samout>, annotating each line with its
+   assignment to a feature or a special counter
+   (as an optional field with tag 'XF')
    
 .. cmdoption:: -q, --quiet           
    

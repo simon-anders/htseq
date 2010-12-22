@@ -4,6 +4,14 @@
 Version history
 ***************
 
+Version 0.4.7
+=============
+
+2010-12-22
+
+- added new option ``-o`` (or ``--samout``) to htseq-count
+
+
 Version 0.4.6
 =============
 

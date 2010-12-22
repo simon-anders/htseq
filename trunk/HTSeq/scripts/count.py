@@ -16,10 +16,25 @@ def invert_strand( iv ):
    return iv2
 
 def count_reads_in_features( sam_filename, gff_filename, stranded, 
-      overlap_mode, feature_type, id_attribute, quiet, minaqual ):
+      overlap_mode, feature_type, id_attribute, quiet, minaqual, samout ):
+      
+   def write_to_samout( r, assignment ):
+      if samoutfile is None:
+         return
+      if not pe_mode:
+         r = (r,)
+      for read in r:
+         if read is not None:
+            samoutfile.write( read.original_sam_line.rstrip() + 
+               "\tXF:Z:" + assignment + "\n" )
       
    if quiet:
       warnings.filterwarnings( action="ignore", module="HTSeq" ) 
+      
+   if samout != "":
+      samoutfile = open( samout, "w" )
+   else:
+      samoutfile = None
       
    features = HTSeq.GenomicArrayOfSets( [], stranded )     
    counts = {}
@@ -85,15 +100,18 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
          if not pe_mode:
             if not r.aligned:
                notaligned += 1
+               write_to_samout( r, "not_aligned" )
                continue
             try:
                if r.optional_field( "NH" ) > 1:
+                  write_to_samout( r, "alignment_not_unique" )
                   nonunique += 1
                   continue
             except KeyError:
                pass
             if r.aQual < minaqual:
                lowqual += 1
+               write_to_samout( r, "too_low_aQual" )
                continue
             iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" )
          else:
@@ -106,17 +124,20 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                   ( invert_strand( co.ref_iv ) for co in r[1].cigar if co.type == "M" ) )
             else:
                if ( r[0] is None ) or not ( r[0].aligned ):
+                  write_to_samout( r, "not_aligned" )
                   notaligned += 1
                   continue         
             try:
                if ( r[0] is not None and r[0].optional_field( "NH" ) > 1 ) or \
                      ( r[1] is not None and r[1].optional_field( "NH" ) > 1 ):
                   nonunique += 1
+                  write_to_samout( r, "alignment_not_unique" )
                   continue
             except KeyError:
                pass
             if ( r[0] and r[0].aQual < minaqual ) or ( r[1] and r[1].aQual < minaqual ):
                lowqual += 1
+               write_to_samout( r, "too_low_aQual" )
                continue         
          
          try:
@@ -141,10 +162,13 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
             else:
                sys.exit( "Illegal overlap mode." )
             if fs is None or len( fs ) == 0:
+               write_to_samout( r, "no_feature" )
                empty += 1
             elif len( fs ) > 1:
+               write_to_samout( r, "ambiguous[" + '+'.join( fs ) + "]" )
                ambiguous += 1
             else:
+               write_to_samout( r, list(fs)[0] )
                counts[ list(fs)[0] ] += 1
          except UnknownChrom:
             if not pe_mode:
@@ -170,6 +194,9 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    if not quiet:
       sys.stderr.write( "%d reads processed.\n" % i )
          
+   if samoutfile is not None:
+      samoutfile.close()
+
    for fn in sorted( counts.keys() ):
       print "%s\t%d" % ( fn, counts[fn] )
    print "no_feature\t%d" % empty
@@ -219,6 +246,11 @@ def main():
       default = "gene_id", help = "GFF attribute to be used as feature ID (default, " +
       "suitable for Ensembl GTF files: gene_id)" )
 
+   optParser.add_option( "-o", "--samout", type="string", dest="samout",
+      default = "", help = "write out all SAM alignment records into an output " +
+      "SAM file called SAMOUT, annotating each line with its feature assignment " +
+      "(as an optional field with tag 'XF')" )
+
    optParser.add_option( "-q", "--quiet", action="store_true", dest="quiet",
       help = "suppress progress report and warnings" )
 
@@ -233,11 +265,11 @@ def main():
       sys.stderr.write( "  Call with '-h' to get usage information.\n" )
       sys.exit( 1 )
       
-      
    warnings.showwarning = my_showwarning
    try:
       count_reads_in_features( args[0], args[1], opts.stranded == "yes", 
-         opts.mode, opts.featuretype, opts.idattr, opts.quiet, opts.minaqual )
+         opts.mode, opts.featuretype, opts.idattr, opts.quiet, opts.minaqual,
+         opts.samout )
    except:
       sys.stderr.write( "Error: %s\n" % str( sys.exc_info()[1] ) )
       sys.stderr.write( "[Exception type: %s, raised in %s:%d]\n" % 
