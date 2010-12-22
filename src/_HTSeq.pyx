@@ -1085,6 +1085,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       self._optional_fields = optional_fields
       self.aQual = int( mapq )
       self.inferred_insert_size = int( isize )
+      self.original_sam_line = line
       
       if flagint & 0x0001:         # flag "read is paired in sequencing"
          if flagint & 0x0008:      # flag "mate is unmapped"
