@@ -77,3 +77,8 @@ Simon Anders, 2009-08-28
    Py_XINCREF( $1.obj );
    $result = $1.obj;
 }
+
+%typemap(typecheck) AutoPyObjPtr {
+   $1 = 1;
+}
+
