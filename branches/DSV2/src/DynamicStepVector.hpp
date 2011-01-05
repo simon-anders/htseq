@@ -16,9 +16,9 @@ template< typename TValue >
 class Value{
 public:
     virtual ~Value() {
-#ifdef NDEBUG
-        std::cout << "Value Base Destructor called!" << std::endl;
-#endif
+//#ifdef NDEBUG
+//        std::cout << "Value Base Destructor called!" << std::endl;
+//#endif
     };
     virtual std::string info() = 0;
     virtual bool multiple(){
@@ -53,9 +53,9 @@ public:
     SingleValue( TValue const & val ) : value( val ) {};
     
     virtual ~SingleValue() {
-    #ifdef NDEBUG
-        std::cout << this->info() << " Destructor called!" << std::endl;
-    #endif
+//    #ifdef NDEBUG
+//        std::cout << this->info() << " Destructor called!" << std::endl;
+//    #endif
     };
     
     operator TValue() const {
@@ -97,9 +97,9 @@ class MultipleValue : public Value< TValue > {
 public:
 
     virtual ~MultipleValue() {
-    #ifdef NDEBUG
-        std::cout << this->info() << " Destructor called!" << std::endl;
-    #endif
+    //#ifdef NDEBUG
+    //    std::cout << this->info() << " Destructor called!" << std::endl;
+    //#endif
     };
 
     MultipleValue( TValue const & val, size_t count ) : values( count, val ) { 

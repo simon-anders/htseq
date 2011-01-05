@@ -1,4 +1,4 @@
-import sys
+import sys, warnings
 
 import DynamicStepVector
 
@@ -13,23 +13,41 @@ def isiterable( obj ):
 
 class DSVector:
 
-   def __init__( self, typecode = 'i', start = 0, stop = sys.maxint, offset = 0, _dsv = None ):
+   def __init__( self, length = sys.maxint, typecode = 'd', start = 0, offset = 0, _dsv = None ):
       self.typecode = typecode
       self.start = start
-      self.stop = stop
+      self.stop = start + length
       self.offset = offset
       if _dsv is None:
-         if typecode == 'i':
+         if typecode == 'd':
+            self._dsv = DynamicStepVector.floatDSV()
+         elif typecode == 'i':
             self._dsv = DynamicStepVector.intDSV()
+         elif typecode == 'b':
+            raise NotImplementedError, "typecode 'b' does not work for now."
+         elif typecode == 's':
+            self._dsv = DynamicStepVector.strDSV()
+         elif typecode == 'O':
+            self._dsv = DynamicStepVector.pyDSV()
          else:
-            raise NotImplementedError, "So far, only type code 'i' works."
+            raise ValueError, "Illegal typecode"
       else:
+         if typecode not in ( 'd', 'i', 'b', 's', 'O' ):
+            raise ValueError, "Illegal typecode"
+         if (
+               ( typecode == 'd' and not isinstance( _dsv, DynamicStepVector.floatDSV ) ) or
+               ( typecode == 'i' and not isinstance( _dsv, DynamicStepVector.intDSV ) ) or
+            #  ( typecode == 'b' and not isinstance( _dsv, DynamicStepVector.boolDSV ) ) or
+               ( typecode == 's' and not isinstance( _dsv, DynamicStepVector.strDSV ) ) or
+               ( typecode == 'O' and not isinstance( _dsv, DynamicStepVector.pyDSV ) ) ):
+            raise ValueError, "typecode does not match _dsv"
+         if typecode == 'b':
+            raise NotImplementedError, "typecode 'b' does not work for now."
          self._dsv = _dsv
       assert isinstance( self.typecode, str )
       assert isinstance( self.start, int )
       assert isinstance( self.stop, int )
       assert isinstance( self.offset, int )
-      assert isinstance( self._dsv, DynamicStepVector.intDSV )
          
    def __getitem__( self, key ):
 
@@ -45,7 +63,7 @@ class DSVector:
             raise IndexError, "Index out of bounds"
          if key.step is not None and key.step != 1:
             raise IndexError, "Slices with steps are not supported"
-         return DSVector( self.typecode, 0, stop-start, start + self.offset, self._dsv )
+         return DSVector( stop-start, self.typecode, 0, start + self.offset, self._dsv )
          
       else:
          raise TypeError, "Illegal index"
@@ -91,7 +109,7 @@ class DSVector:
       return self.stop - self.start
          
    def __iadd__( self, value ):
-     self._dsv.add( self.start, self.stop, value )
+     self._dsv.add( self.start + self.offset, self.stop + self.offset, value )
      return self
      
    def __add__( self, value ):
@@ -102,7 +120,7 @@ class DSVector:
    def copy( self ):
       # TODO: This is not compliant with the deepcopy protocol
       if self.typecode == "i":
-         return DSVector( self.typecode, self.start, self.stop, self.offset, 
+         return DSVector( self.stop-self.start, self.typecode, self.start, self.offset, 
             DynamicStepVector.intDSV( self._dsv ) )
       else:
          raise NotImplemented
@@ -128,6 +146,7 @@ class DSVector:
       return iter(self)
       
    def steps_iter( self ):
+      # TO DO: Make this efficient
       valstart = self.start
       val = self[ self.start ]
       for i in xrange( self.start+1, self.stop ):
@@ -137,7 +156,18 @@ class DSVector:
             val = self[ i ]
       yield( valstart, self.stop, val )
 
-            
+   def get_steps( self, start=None, stop=None, values_only = False ):
+      warnings.warn( "'get_steps' is deprecated, use 'steps_iter' instead.",
+         DeprecationWarning )
+      if not values_only:
+         return self[start:stop].steps_iter()
+      else:
+         return ( value for start_, stop_, value in self[start:stop].steps_iter() )
+      
+   def add_value( self, value, start=None, stop=None ):
+      warnings.warn( "'add_value' is deprecated, use '+=' instead.",
+         DeprecationWarning )
+      self[start:stop] += value
          
          
      

@@ -193,7 +193,7 @@ a data structure defined for this purpose.
 
 It works as follows: Let's define a :class:`StepVector <StepVector.StepVector>` of length 30::
 
-   >>> sv = HTSeq.StepVector.StepVector( 30 )
+   >>> sv = HTSeq.DSVector( 30 )
    
 Initially, it has value 0 everywhere. We set the positions 7 to 15 to the value 120::
 
@@ -201,7 +201,7 @@ Initially, it has value 0 everywhere. We set the positions 7 to 15 to the value 
 
 Internally, ``sv`` now does not hold 30 numbers, but 3 steps, as follows::
 
-   >>> list( sv.get_steps() )
+   >>> list( sv.steps_iter() )
    [(0, 7, 0.0), (7, 15, 120.0), (15, 30, 0.0)]
 
 Each step is a triple, giving start, end and value of the step. If we now add the
