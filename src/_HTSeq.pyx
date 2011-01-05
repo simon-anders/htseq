@@ -11,7 +11,7 @@ import warnings
 import numpy
 cimport numpy
 
-import StepVector
+from DSVector import DSVector
 import _HTSeq_internal
 
 
@@ -384,10 +384,10 @@ cdef class GenomicArray( object ):
    def add_chrom( self, chrom, length = sys.maxint, start_index = 0 ):
       if self.stranded:
          self.step_vectors[ chrom ] = {
-            strand_plus:  StepVector.StepVector( length, self.typecode, start_index ),
-            strand_minus: StepVector.StepVector( length, self.typecode, start_index ) }
+            strand_plus:  DSVector( length, self.typecode, start_index ),
+            strand_minus: DSVector( length, self.typecode, start_index ) }
       else:   
-         self.step_vectors[ chrom ] = StepVector.StepVector( length, self.typecode, start_index )
+         self.step_vectors[ chrom ] = DSVector( length, self.typecode, start_index )
    
    
    def add_value( self, value, iv ):
