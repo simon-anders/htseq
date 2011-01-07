@@ -423,7 +423,7 @@ public:
     }
     
     void set( TKey const & key, TValue const & val ) {
-        std::cout << "set called on " << this << " with key:val of " << key << ":" << val << std::endl;
+        // std::cout << "set called on " << this << " with key:val of " << key << ":" << val << std::endl;
         typename Map::iterator it = this->get_iter( key );
         
         if( it->second->multiple() ){
@@ -451,7 +451,7 @@ public:
     
     void set( TKey const & from, TKey const & to, TValue const & val ) {
 
-        std::cout << "set called on " << this << " with <from-to>:val of <" << from << "-" << to << ">:" << val << std::endl;
+        // std::cout << "set called on " << this << " with <from-to>:val of <" << from << "-" << to << ">:" << val << std::endl;
 
         typename Map::iterator it_from = this->get_iter( from );
         typename Map::iterator it_to = this->get_iter( to );

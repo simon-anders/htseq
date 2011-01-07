@@ -57,22 +57,30 @@ class DSVector:
          return self._dsv.get( key + self.offset )
 
       elif isinstance( key, slice ):
-         start = key.start if key.start is not None else self.start
-         stop  = key.stop  if key.stop  is not None else self.stop 
-         if start < self.start or stop > self.stop:
-            raise IndexError, "Index out of bounds"
          if key.step is not None and key.step != 1:
             raise IndexError, "Slices with steps are not supported"
-         return DSVector( stop-start, self.typecode, 0, start + self.offset, self._dsv )
+         return self.slice( start, stop, False )
          
       else:
          raise TypeError, "Illegal index"
+
+   def slice( self, start, stop, withOffset = True ):
+      start = start if start is not None else self.start
+      stop  = stop  if stop  is not None else self.stop 
+      if start < self.start or stop > self.stop:
+         raise IndexError, "Index out of bounds"
+      if withOffset:
+         return DSVector( stop-start, self.typecode, 0, start + self.offset, self._dsv )
+      else:
+         return DSVector( stop-start, self.typecode, start, self.offset, self._dsv )
+   
 
    def __setitem__( self, key, value ):      
 
       if isinstance( key, int ):
          if key < self.start or key >= self.stop:
             raise IndexError, "Index out of bounds"
+         self._check_value_type( value )
          self._dsv.set( key + self.offset, key + self.offset + 1, value )
 
       elif isinstance( key, slice ):         
@@ -85,12 +93,14 @@ class DSVector:
          if stop - start > sys.maxint / 2 - 2:
             raise IndexError, "Attempt to assign to unlimited slice"
 
-         if isinstance( value, self.__class__ ):
+         if isinstance( value, DSVector ):
             if stop - start != len( value ):
                raise IndexError, "Attempt to assign a DSVector of wrong length"
             if self._dsv is value._dsv and start + self.offset == value.start + value.offset:
                # Copying is unnecessary:
                return   
+            if self.typecode != value.typecode:
+               raise TypeError, "Type mismatch in copying between DSVector objects."
             print "Debug notice: copying element-wise!"
             for i in xrange( start, stop ):
                self._dsv.set( i + self.offset, i + self.offset + 1, 
@@ -98,6 +108,7 @@ class DSVector:
                # TODO: This is inefficient
          
          else:
+            self._check_value_type( value )
             self._dsv.set( start + self.offset, stop + self.offset, value )
          
       else:
@@ -169,5 +180,13 @@ class DSVector:
          DeprecationWarning )
       self[start:stop] += value
          
+   def _check_value_type( self, value ):
+      if (
+            ( self.typecode == 'd' and not ( type( value ) == float or type( value ) == int ) ) or
+            ( self.typecode == 'i' and not type( value ) == float ) or
+            ( self.typecode == 'b' and not type( value ) == bool ) or
+            ( self.typecode == 's' and not type( value ) == str ) ):
+         raise TypeError, "Type mismatch in assignment to step vector."
+      
          
      
