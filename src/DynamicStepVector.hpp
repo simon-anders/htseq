@@ -193,7 +193,7 @@ public:
             os << *it << " ";
             ++it;
         }
-        os << " >";
+        os << ">";
         return os.str();
     }
     
@@ -423,12 +423,21 @@ public:
     }
     
     void set( TKey const & key, TValue const & val ) {
-//        std::cout << "set called on " << this << " with key:val of " << key << ":" << val << std::endl;
+        std::cout << "set called on " << this << " with key:val of " << key << ":" << val << std::endl;
         typename Map::iterator it = this->get_iter( key );
         
         if( it->second->multiple() ){
-            ( *( static_cast<TMV*>( it->second ) ) ).del_from( key - it->first );
-            set( key, val );
+            if( it->first != key ){
+                ( *( static_cast<TMV*>( it->second ) ) ).del_from( key - it->first );
+                delete steps[ key ];
+                steps[ key ] = new TSV( val );
+                refurbish( key );
+            }else{
+                delete steps[key];
+                steps.erase( it );
+                steps[ key ] = new TSV( val );
+            }
+//            set( key, val );
         }else{
             if( it->first != key ){
                 delete steps[ key ];
@@ -442,7 +451,7 @@ public:
     
     void set( TKey const & from, TKey const & to, TValue const & val ) {
 
-//        std::cout << "set called on " << this << " with <from-to>:val of <" << from << "-" << to << ">:" << val << std::endl;
+        std::cout << "set called on " << this << " with <from-to>:val of <" << from << "-" << to << ">:" << val << std::endl;
 
         typename Map::iterator it_from = this->get_iter( from );
         typename Map::iterator it_to = this->get_iter( to );
