@@ -59,14 +59,16 @@ class DSVector:
       elif isinstance( key, slice ):
          if key.step is not None and key.step != 1:
             raise IndexError, "Slices with steps are not supported"
-         return self.slice( start, stop, False )
+         return self.slice( key.start, key.stop, False )
          
       else:
          raise TypeError, "Illegal index"
 
    def slice( self, start, stop, withOffset = True ):
-      start = start if start is not None else self.start
-      stop  = stop  if stop  is not None else self.stop 
+      if start is None:
+         start = self.start
+      if stop is None:
+         stop = self.stop
       if start < self.start or stop > self.stop:
          raise IndexError, "Index out of bounds"
       if withOffset:
