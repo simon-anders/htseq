@@ -157,17 +157,23 @@ class DSVector:
    
    def values_iter( self ):
       return iter(self)
-      
+   
    def steps_iter( self ):
-      # TO DO: Make this efficient
-      valstart = self.start
-      val = self[ self.start ]
-      for i in xrange( self.start+1, self.stop ):
-         if self[ i ] != val:
-            yield( valstart, i, val )
-            valstart = i
-            val = self[ i ]
-      yield( valstart, self.stop, val )
+      si = self._dsv.get_step_iter()
+      while si.valid():
+         f, v = si.next()
+         yield ( f, si.pos if si.valid() else si.stop, v )
+      
+#   def steps_iter( self ):
+#      # TO DO: Make this efficient
+#      valstart = self.start
+#      val = self[ self.start ]
+#      for i in xrange( self.start+1, self.stop ):
+#         if self[ i ] != val:
+#            yield( valstart, i, val )
+#            valstart = i
+#            val = self[ i ]
+#      yield( valstart, self.stop, val )
 
    def get_steps( self, start=None, stop=None, values_only = False ):
       warnings.warn( "'get_steps' is deprecated, use 'steps_iter' instead.",

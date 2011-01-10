@@ -85,6 +85,8 @@ public:
     
     void set( TKey const & from, TKey const & to, TValue val );
     
+    void set( DSVIter< TValue > other_it );
+    
     void refurbish( TKey const & key );
     
     typename Map::iterator get_iter( TKey const & key );
@@ -117,7 +119,7 @@ struct DSVIter{
     DSVIter(void); //default-ctor
     ~DSVIter(void); //default-dtor
     DSVIter( DSVIter< TValue > const & other ); //copy-ctor
-    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to, bool reverse );
+    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to, bool rev );
     
     std::pair< long int, TValue > next();
     std::pair< long int, TValue > prev();
@@ -127,6 +129,7 @@ struct DSVIter{
     long int start, stop, pos, step_size;
     std::map< long int, Value< TValue >* >::iterator it;
     std::map< long int, Value< TValue >* > * map;
+    bool reverse;
 };
 
 %template(intDSVIter) DSVIter< int >;
