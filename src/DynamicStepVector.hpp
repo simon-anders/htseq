@@ -232,7 +232,7 @@ struct Invert< std::string >{
 template< typename TValue >
 struct DSVIter{
 
-    DSVIter(void) : start(0), stop(0), pos(0), it() { }; //default-ctor
+    DSVIter(void) : start(0), stop(0), pos(0), it(), reverse( false ) { }; //default-ctor
     ~DSVIter(void) { }; //default-dtor
     
     DSVIter( DSVIter< TValue > const & other )
@@ -240,15 +240,17 @@ struct DSVIter{
         stop( other.stop ),
         pos( other.pos ),
         it( other.it ),
+        reverse( other.reverse ),
         map( other.map ) { }; //copy-ctor
         
-    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to, bool reverse = false )
+    DSVIter( std::map< long int, Value< TValue >* > * m, long int from, long int to, bool rev = false )
      :  start( from ),
         stop( to ),
-        pos( reverse ? to - 1 : from ),
+        pos( rev ? to - 1 : from ),
         it( --( m->upper_bound( pos ) ) ),
+        reverse( rev ),
         map( m ) {
-            if( reverse and !( it->second->multiple() ) ){
+            if( rev and !( it->second->multiple() ) ){
                 pos = it->first;
             }
         };
@@ -290,6 +292,7 @@ struct DSVIter{
     long int start, stop, pos, step_size;
     typename std::map< long int, Value< TValue >* >::iterator it;
     std::map< long int, Value< TValue >* > * map;
+    bool reverse;
 };
 
 template< typename TKey, typename TValue >
@@ -505,9 +508,32 @@ public:
         }
     }
     
-    void refurbish( TKey const & key ){
+    void set( DSVIter< TValue > other_it ) {
+    
+        std::pair< TKey, TValue > p;
+        if( other_it.reverse ){
+             while( other_it.valid() ){
+            
+                p = other_it.prev();
+                this->set( p.first, p.second );
+            
+            }
+        }else{
+            while( other_it.valid() ){
+            
+                p = other_it.next();
+                this->set( p.first, p.second );
+            
+            }
+        }
+        
+    }
+    
+    void refurbish( TKey const & key, bool recurse = true ){
         typename Map::iterator it = steps.find( key ); // get iterator to key's steps
         //assert( it != steps.end() && " attempted to refurbish key that doesn't exist!" );
+        
+        std::cout << "refurbish: " << key << std::endl;
         
         TKey new_key = (++it)->first;
         --it;
@@ -540,12 +566,16 @@ public:
                     }
                 }
             }else{
+                ++it;
+                if( recurse && it != steps.end() ){
+                    refurbish( it->first, false ); // check to see if we have to merge the next step also
+                }
                 return;
             }
             
         }
         ++it;
-        if( it != steps.end() ){
+        if( recurse && it != steps.end() ){
             refurbish( it->first ); // check to see if we have to merge the next step also
         }
     }
