@@ -85,7 +85,7 @@ public:
     
     void set( TKey const & from, TKey const & to, TValue val );
     
-    void set( DSVIter< TValue > other_it );
+    void set( DSVIter< TValue > other_it, TKey offset = static_cast< TKey >( 0 )  );
     
     void refurbish( TKey const & key );
     

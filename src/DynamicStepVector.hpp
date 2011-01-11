@@ -508,21 +508,21 @@ public:
         }
     }
     
-    void set( DSVIter< TValue > other_it ) {
+    void set( DSVIter< TValue > other_it, TKey offset = static_cast< TKey >( 0 ) ) {
     
         std::pair< TKey, TValue > p;
         if( other_it.reverse ){
              while( other_it.valid() ){
             
                 p = other_it.prev();
-                this->set( p.first, p.second );
+                this->set( p.first + offset, other_it.pos + offset, p.second );
             
             }
         }else{
             while( other_it.valid() ){
             
                 p = other_it.next();
-                this->set( p.first, p.second );
+                this->set( p.first + offset, other_it.pos + offset, p.second );
             
             }
         }

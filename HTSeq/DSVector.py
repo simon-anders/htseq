@@ -103,10 +103,14 @@ class DSVector:
                return   
             if self.typecode != value.typecode:
                raise TypeError, "Type mismatch in copying between DSVector objects."
-            print "Debug notice: copying element-wise!"
-            for i in xrange( start, stop ):
-               self._dsv.set( i + self.offset, i + self.offset + 1, 
-                  value._dsv.get( i - start + value.offset ) )
+
+            self._dsv.set( value._dsv.get_step_iter( value.start, value.stop ), key.start - value.start )
+            #TODO: include offset
+            
+#            print "Debug notice: copying element-wise!"
+#            for i in xrange( start, stop ):
+#               self._dsv.set( i + self.offset, i + self.offset + 1, 
+#                  value._dsv.get( i - start + value.offset ) )
                # TODO: This is inefficient
          
          else:
