@@ -533,7 +533,7 @@ public:
         typename Map::iterator it = steps.find( key ); // get iterator to key's steps
         //assert( it != steps.end() && " attempted to refurbish key that doesn't exist!" );
         
-        std::cout << "refurbish: " << key << std::endl;
+//        std::cout << "refurbish: " << key << std::endl;
         
         TKey new_key = (++it)->first;
         --it;

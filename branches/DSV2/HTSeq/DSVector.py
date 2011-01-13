@@ -163,10 +163,10 @@ class DSVector:
       return iter(self)
    
    def steps_iter( self ):
-      si = self._dsv.get_step_iter()
+      si = self._dsv.get_step_iter( self.start - self.offset, self.stop - self.offset )
       while si.valid():
          f, v = si.next()
-         yield ( f, si.pos if si.valid() else si.stop, v )
+         yield ( f, ( si.pos if si.valid() else si.stop, v ) - self.offset )
       
 #   def steps_iter( self ):
 #      # TO DO: Make this efficient
