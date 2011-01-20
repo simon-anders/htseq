@@ -529,7 +529,7 @@ public:
         
     }
     
-    void refurbish( TKey const & key, bool recurse = true ){
+    inline void refurbish( TKey const & key, bool recurse = true ){
         typename Map::iterator it = steps.find( key ); // get iterator to key's steps
         //assert( it != steps.end() && " attempted to refurbish key that doesn't exist!" );
         
@@ -547,10 +547,12 @@ public:
                     std::vector< TValue > values( it->first - it_low->first, (*(it_low->second))[0] );    
                     delete it_low->second;
                     it_low->second = new TMV( values );
+                    make_single_if_possible( it_low );
                 }
                 if( it_low != steps.end() ){
                     if( it->second->multiple() && it != steps.end() ){
                         (static_cast<TMV*>(it_low->second))->append( (static_cast<TMV*>(it->second))->get_all() );
+                        make_single_if_possible( it_low );
                         delete it->second;
                         steps.erase( it );
                         it = steps.find( new_key );
@@ -561,6 +563,7 @@ public:
                     --it_lower;
                     if( it_lower->second->multiple() ){
                         (static_cast<TMV*>(it_lower->second))->append( (static_cast<TMV*>(it_low->second))->get_all() );
+                        make_single_if_possible( it_lower );
                         delete it_low->second;
                         steps.erase( it_low );
                     }
@@ -570,6 +573,7 @@ public:
                 if( recurse && it != steps.end() ){
                     refurbish( it->first, false ); // check to see if we have to merge the next step also
                 }
+                merge_if_possible( get_iter( key ), ++get_iter( key ) );
                 return;
             }
             
@@ -578,9 +582,40 @@ public:
         if( recurse && it != steps.end() ){
             refurbish( it->first ); // check to see if we have to merge the next step also
         }
+        merge_if_possible( get_iter( key ), ++get_iter( key ) );
     }
     
-    typename Map::iterator get_iter( TKey const & key ){
+    inline void make_single_if_possible( typename Map::iterator it ){
+        if( it->second->multiple() ){
+            std::vector<TValue> tmp = (static_cast<TMV*>(it->second))->get_all();
+            TValue val = tmp[0];
+            for( typename std::vector<TValue>::iterator it = tmp.begin(); it != tmp.end(); ++it ){
+                if( val != *it ){
+                    return;
+                }
+            }
+            TKey key = it->first;
+            delete it->second;
+            steps.erase( it );
+            steps[ key ] = new TSV( val );
+        }
+    }
+    
+    inline void merge_if_possible( typename Map::iterator lower_it, typename Map::iterator higher_it ){
+        if( not lower_it->second->multiple() and not higher_it->second->multiple() ){
+            if( ( *( static_cast< TSV* >( lower_it->second ) ) )[0] == ( *( static_cast< TSV* >( higher_it->second ) ) )[0] and (++lower_it)->first == higher_it->first ){
+                delete higher_it->second;
+                steps.erase( higher_it );
+            }
+        }else{
+            if( lower_it->second->multiple() and higher_it->second->multiple() and (++lower_it)->first == higher_it->first ){
+                --lower_it;
+                (static_cast<TMV*>( lower_it->second ))->append( (static_cast<TMV*>(higher_it->second))->get_all());
+            }
+        }
+    }
+    
+    inline typename Map::iterator get_iter( TKey const & key ){
         typename Map::iterator it = steps.upper_bound( key );
         //assert( it != steps.begin() && " key with upper_bound == steps.begin() requested, this should not have happened!" );
         //assert( it->first != key && "Upper bound Misbehaves!" );
