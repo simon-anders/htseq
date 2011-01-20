@@ -547,12 +547,12 @@ public:
                     std::vector< TValue > values( it->first - it_low->first, (*(it_low->second))[0] );    
                     delete it_low->second;
                     it_low->second = new TMV( values );
-                    make_single_if_possible( it_low );
+//                    make_single_if_possible( it_low );
                 }
                 if( it_low != steps.end() ){
                     if( it->second->multiple() && it != steps.end() ){
                         (static_cast<TMV*>(it_low->second))->append( (static_cast<TMV*>(it->second))->get_all() );
-                        make_single_if_possible( it_low );
+//                        make_single_if_possible( it_low );
                         delete it->second;
                         steps.erase( it );
                         it = steps.find( new_key );
@@ -563,7 +563,7 @@ public:
                     --it_lower;
                     if( it_lower->second->multiple() ){
                         (static_cast<TMV*>(it_lower->second))->append( (static_cast<TMV*>(it_low->second))->get_all() );
-                        make_single_if_possible( it_lower );
+//                        make_single_if_possible( it_lower );
                         delete it_low->second;
                         steps.erase( it_low );
                     }
@@ -573,7 +573,7 @@ public:
                 if( recurse && it != steps.end() ){
                     refurbish( it->first, false ); // check to see if we have to merge the next step also
                 }
-                merge_if_possible( get_iter( key ), ++get_iter( key ) );
+//                merge_if_possible( get_iter( key ), ++get_iter( key ) );
                 return;
             }
             
@@ -582,7 +582,7 @@ public:
         if( recurse && it != steps.end() ){
             refurbish( it->first ); // check to see if we have to merge the next step also
         }
-        merge_if_possible( get_iter( key ), ++get_iter( key ) );
+//        merge_if_possible( get_iter( key ), ++get_iter( key ) );
     }
     
     inline void make_single_if_possible( typename Map::iterator it ){
