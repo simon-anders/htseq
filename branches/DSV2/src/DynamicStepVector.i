@@ -101,6 +101,8 @@ public:
     
     Map const & get_steps();
     
+    size_t step_count() const;
+    
     DSVIter< TValue > get_step_iter( TKey from = static_cast< TKey >( 0 ), TKey to = std::numeric_limits< TKey >::max(), bool reverse = false );
     
 private:

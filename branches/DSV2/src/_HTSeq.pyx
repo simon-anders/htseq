@@ -438,7 +438,7 @@ cdef class GenomicArray( object ):
             sv = self.step_vectors[ chrom ][ strand ]
          else:
             sv = self.step_vectors[ chrom ]
-         for start, stop, value in sv.get_steps():
+         for start, stop, value in sv.steps_iter():
             if start == -sys.maxint-1 or stop == sys.maxint:
                continue
             f.write( "%s\t%d\t%d\t%f\n" % (chrom, start, stop, value) )    

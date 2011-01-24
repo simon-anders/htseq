@@ -580,11 +580,12 @@ public:
         }
         ++it;
         if( recurse && it != steps.end() ){
-            refurbish( it->first ); // check to see if we have to merge the next step also
+            refurbish( it->first, true ); // check to see if we have to merge the next step also
         }
 //        merge_if_possible( get_iter( key ), ++get_iter( key ) );
     }
     
+    //TODO: buggy, fix!
     inline void make_single_if_possible( typename Map::iterator it ){
         if( it->second->multiple() ){
             std::vector<TValue> tmp = (static_cast<TMV*>(it->second))->get_all();
@@ -667,6 +668,10 @@ public:
     
     size_t get_threshold() const{
         return threshold;
+    }
+    
+    size_t step_count() const{
+        return steps.size();
     }
     
     DSVIter< TValue > get_step_iter( TKey from = static_cast< TKey >( 0 ), TKey to = std::numeric_limits< TKey >::max(), bool reverse = false ){
