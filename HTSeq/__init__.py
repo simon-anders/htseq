@@ -159,6 +159,7 @@ def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
    if attrStr.endswith( "\n" ):
       attrStr = attrStr[:-1]
    d = {}
+   first_val = "_unnamed_"
    for (i, attr) in itertools.izip( itertools.count(), attrStr.split( ";" ) ):
       if _re_attr_empty.match( attr ):
          continue
