@@ -11,6 +11,11 @@ Version 0.4.7
 
 - added new option ``-o`` (or ``--samout``) to htseq-count
 
+Patch versions:
+
+* Version 0.4.7p1 (2011-02-14)
+
+  - bug fix: GFF files with empty attribute fiels are now read correctly
 
 Version 0.4.6
 =============
