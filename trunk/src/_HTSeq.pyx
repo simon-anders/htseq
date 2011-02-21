@@ -628,7 +628,7 @@ cdef class SequenceWithQualities( Sequence ):
       self._qualstr = qualstr
       self._qualscale = qualscale
       self._qualarr = None
-      self._qualstr_phred = ''
+      self._qualstr_phred = b''
 
    cdef _fill_qual_arr( SequenceWithQualities self ):
       cdef int seq_len = len( self.seq )
@@ -661,9 +661,9 @@ cdef class SequenceWithQualities( Sequence ):
          if not ( newvalue.shape == ( len(self.seq), ) ) :
             raise TypeError, "assignment to qual with illegal shape"
          self._qualarr = newvalue
-         self._qualstr = ""
+         self._qualstr = b""
          self._qualscale = "none"
-         self._qualstr_phred = ""
+         self._qualstr_phred = b""
               
    def __repr__( self ):
       return "<%s object '%s'>" % ( self.__class__.__name__, self.name )
@@ -697,7 +697,7 @@ cdef class SequenceWithQualities( Sequence ):
       return self._qualstr_phred
       
 
-   def write_to_fastq_file( self, file fastq_file ):
+   def write_to_fastq_file( self, fastq_file ):
       if hasattr( self, "descr" ) and self.descr is not None:
          fastq_file.write( "@%s %s\n" % ( self.name, self.descr ) )
       else:

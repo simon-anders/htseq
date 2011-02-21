@@ -53,7 +53,8 @@ setup( name = 'HTSeq',
           'HTSeq.StepVector',
           'HTSeq._version',
           'HTSeq.scripts.qa',
-          'HTSeq.scripts.count'
+          'HTSeq.scripts.count',
+          'HTSeq.vcf_reader'
        ],
        ext_modules = [ 
           Extension( 'HTSeq._HTSeq', 
