@@ -508,7 +508,7 @@ class SAM_Reader( FileOrSequence ):
             # do something with the header line
             continue
          try:
-            algnt = SAM_Alignment( line )
+            algnt = SAM_Alignment.from_SAM_line( line )
          except ValueError, e:
             e.args = e.args + ( self.get_line_number_string(), )
             raise
