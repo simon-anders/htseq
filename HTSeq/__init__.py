@@ -7,8 +7,6 @@ import itertools, warnings
 
 from _HTSeq import *
 
-import pysam
-
 from _version import __version__
 
 #from vcf_reader import *
@@ -721,12 +719,15 @@ class VCF_Reader( FileOrSequence ):
 class BAM_Reader( object ):
 
     def __init__( self, filename ):
+        global pysam
         self.filename = filename
-    
-    def seek( self ):
-        
+        try:
+           import pysam
+        except ImportError:
+           print "Please Install PySam to use the BAM_Reader Class (http://code.google.com/p/pysam/)"
+           raise
     
     def __iter__( self ):
         sf = pysam.Samfile(self.filename, "rb")
         for pa in sf:
-            yield HTSeq.SAM_Alignment.from_pysam_AlignedRead( pa, sf )
+            yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
