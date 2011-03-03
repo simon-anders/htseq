@@ -66,8 +66,8 @@ cdef class GenomicInterval:
    property strand:
       def __set__( self, strand ):
          strand = intern( strand )
-         if not( intern(strand) is strand_plus or intern(strand) is strand_minus or 
-               intern(strand) is strand_nostrand ):
+         if not( strand is strand_plus or strand is strand_minus or 
+               strand is strand_nostrand ):
             raise ValueError, "Strand must be'+', '-', or '.'."
          self._strand = strand
       def __get__( self ):
@@ -309,26 +309,110 @@ cdef class GenomicPosition( GenomicInterval ):
    def copy( self ):
       return GenomicPosition( self.chrom, self.pos, self.strand )
    
+
+cdef class NumpyChromVector( object ):
+
+   cdef public object array 
+   cdef public object iv
+   cdef public int offset
+
+   @classmethod 
+   def create( cls, GenomicInterval iv, str typecode ):
+      ncv = cls()
+      ncv.iv = iv
+      ncv.array = numpy.zeros( ( iv.length, ), typecode )
+      ncv.offset = iv.start
+      return ncv
+   
+   @classmethod 
+   def create_view( cls, NumpyChromVector vec, GenomicInterval iv ):
+      v = cls()
+      v.iv = iv
+      v.array = vec.array
+      v.offset = vec.offset
+      return v
+
+   def __getitem__( self, index ):
+      if isinstance( index, int ):
+         if index < self.iv.start or index >= self.iv.end:
+            raise IndexError
+         return self.array[ index - self.offset ]
+      elif isinstance( index, slice ):
+         iv = GenomicInterval( self.iv.chrom, index.start,
+            index.stop, self.iv.strand )
+         if not self.iv.contains( iv ):
+            raise IndexError
+         return NumpyChromVector.create_view( self, iv )
+      elif isinstance( index, GenomicInterval ):
+         if not self.iv.contains( index ):
+            raise IndexError
+         if self.iv.strand is strand_nostrand and \
+               index.strand is not strand_nostrand:
+            iv = iv.copy()
+            iv.strand = strand_nostrand
+         return NumpyChromVector.create_view( self, iv )
+      else:
+         raise TypeError, "Illegal index type"
+   
+   def __setitem__( self, index, value ):
+      if isinstance( index, int ):
+         self.array[ index - self.iv.start ] = value
+      elif isinstance( index, slice ):
+         self.array[ index.start - self.offset : 
+            index.stop - self.iv.start : index.step ] = value
+      elif isinstance( index, GenomicInterval ):
+         if index.chrom != self.iv.chrom:
+            raise KeyError, "Chromosome name mismatch."
+         if self.iv.strand is not strand_nostrand and \
+               self.iv.strand is not self.index.strand:
+            raise KeyError, "Strand mismatch."
+         self.array[ index.iv.start - self.iv.start, 
+            index.iv.end - self.iv.start ] = value
+      else:
+         raise TypeError, "Illegal index type"
+
+   def __iadd__( self, value ):
+      self.array[ self.iv.start - self.offset : self.iv.end - self.offset ].__iadd__( value )
+      return self
+      
+   def __iter__( self ):
+      return iter( self.array[ self.iv.start - self.offset : self.iv.end - self.offset ] )
    
 cdef class GenomicArray( object ):
    
-   cdef public dict step_vectors
+   cdef public dict chrom_vectors
    cdef readonly bint stranded
    cdef readonly str typecode
    cdef public bint auto_add_chroms
+   cdef readonly object make_new_chrom_vector
    
-   def __init__( self, object chroms, bint stranded=True, str typecode='d' ):
-      cdef str chrom
-      self.step_vectors = {}
+   def __init__( self, object chroms, bint stranded=True, str typecode='d',
+         str storage='step' ):
+      self.chrom_vectors = {}
       self.stranded = stranded
       self.typecode = typecode
       self.auto_add_chroms = chroms == "auto"
-      if self.auto_add_chroms:
+      if self.auto_add_chroms:      
          chroms = []
+         if storage != 'StepVector':
+            raise TypeError, "Automatic adding of chromosomes can " + \
+               " only be used with storage type 'StepVector'."
       elif isinstance( chroms, list ):
+         if storage != 'StepVector':
+            raise TypeError, "Indefinite-length chromosomes can " + \
+               " only be used with storage type 'StepVector'."
          chroms = dict( [ ( c, sys.maxint ) for c in chroms ] )
       elif not isinstance( chroms, dict ):
          raise TypeError, "'chroms' must be a list or a dict or 'auto'."
+      if storage == "step":
+         self.make_new_chrom_vector = None #StepChromVector
+      elif storage == "numpy":
+         self.make_new_chrom_vector = NumpyChromVector.create
+      elif storage == "memmap":
+         self.make_new_chrom_vector = None #NumpyMemmapChromVector
+      else:
+         raise ValueError, "unknown storage type"
+      
       for chrom in chroms:
          self.add_chrom( chrom, chroms[chrom] )
             
@@ -340,55 +424,54 @@ cdef class GenomicArray( object ):
             self.add_chrom( index.chrom )
          if isinstance( index, GenomicPosition ):
             if self.stranded:
-               return self.step_vectors[ index.chrom ][ index.strand ][ index.pos ]
+               return self.chrom_vectors[ index.chrom ][ index.strand ][ index.pos ]
             else:
-               return self.step_vectors[ index.chrom ][ index.pos ]
+               return self.chrom_vectors[ index.chrom ][ strand_nostrand ][ index.pos ]
          else:
             if self.stranded:
-               return self.step_vectors[ index.chrom ][ index.strand ][ index.start : index.end ]
+               return self.chrom_vectors[ index.chrom ][ index.strand ][ index.start : index.end ]
             else:
-               return self.step_vectors[ index.chrom ][ index.start : index.end ]
+               return self.chrom_vectors[ index.chrom ][ strand_nostrand ][ index.start : index.end ]
       else:
-         return self.step_vectors[ index ]
+         return self.chrom_vectors[ index ]
 
    def __setitem__( self, index, value ):
+      if isinstance( value, NumpyChromVector ):   #TODO test for mother class
+         if not isinstance( index, GenomicInterval ):
+            raise NotImplementedError
+         if self.chrom_vectors[ index.chrom ][ index.strand ].array is value.array and index == value.iv:
+            return
+         raise NotImplementedError
       if isinstance( index, GenomicInterval ):
          if self.stranded and index.strand not in ( strand_plus, strand_minus ):
             raise KeyError, "Non-stranded index used for stranded GenomicArray."
          if self.auto_add_chroms and index.chrom not in self.step_vectors:
             self.add_chrom( index.chrom )
-         if isinstance( index, GenomicPosition ):
-            if self.stranded:
-               self.step_vectors[ index.chrom ][ index.strand ][ index.pos ] = value
-            else:
-               self.step_vectors[ index.chrom ][ index.pos ] = value
+         if self.stranded:
+            self.chrom_vectors[ index.chrom ][ index.strand ][ index.start : index.end ] = value
          else:
-            if self.stranded:
-               self.step_vectors[ index.chrom ][ index.strand ][ index.start : index.end ] = value
-            else:
-               self.step_vectors[ index.chrom ][ index.start : index.end ] = value
+            self.chrom_vectors[ index.chrom ][ strand_nostrand ][ index.start : index.end ] = value
       else:
-         raise TypeError, "Only GenomicInterval and GenomicPosition objects " + \
-            "are supported for element replacement in GenomicArray objects."
+         raise TypeError, "Illegal index type."
             
-   def __richcmp__( self, GenomicArray other, int op ):
-      if op == 2:
-         return other is not None and \
-            self.stranded == other.stranded and self.step_vectors == other.step_vectors
-      elif op == 3:
-         return other is None or \
-            self.stranded != other.stranded or self.step_vectors != other.step_vectors
-      else:
-         raise NotImplemented
-   
    def add_chrom( self, chrom, length = sys.maxint, start_index = 0 ):
+      cdef GenomicInterval iv 
+      if length == sys.maxint:
+         iv = GenomicInterval( chrom, start_index, sys.maxint, "." )
+      else:
+         iv = GenomicInterval( chrom, start_index, start_index + length, "." )
       if self.stranded:
-         self.step_vectors[ chrom ] = {
-            strand_plus:  StepVector.StepVector( length, self.typecode, start_index ),
-            strand_minus: StepVector.StepVector( length, self.typecode, start_index ) }
+         self.chrom_vectors[ chrom ] = {}
+         iv.strand = "+"
+         self.chrom_vectors[ chrom ][ strand_plus ] = \
+            self.make_new_chrom_vector( iv, self.typecode )
+         iv = iv.copy()
+         iv.strand = "-"
+         self.chrom_vectors[ chrom ][ strand_minus ] = \
+            self.make_new_chrom_vector( iv, self.typecode )
       else:   
-         self.step_vectors[ chrom ] = StepVector.StepVector( length, self.typecode, start_index )
-   
+         self.step_vectors[ chrom ] = {
+            strand_nostrand: self.make_new_chrom_vector( iv, self.typecode ) }
    
    def add_value( self, value, iv ):
       if self.auto_add_chroms and iv.chrom not in self.step_vectors:
