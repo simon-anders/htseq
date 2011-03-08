@@ -1044,11 +1044,15 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
    @classmethod
    def from_pysam_AlignedRead( cls, read, samfile ):
       strand = "-" if read.is_reverse else "+"
-      chrom = samfile.getrname(read.tid)
-      iv = GenomicInterval( chrom, read.pos, read.aend, strand )
+      if read.tid != -1:
+          chrom = samfile.getrname(read.tid)
+          iv = GenomicInterval( chrom, read.pos, read.aend, strand )
+      else:
+          iv = None
+      
       seq = SequenceWithQualities( read.seq, read.qname, read.qual )
       a = SAM_Alignment( seq, iv )
-      a.cigar = build_cigar_list( [ (cigar_operation_codes[code], length) for (code, length) in read.cigar ] , read.pos, chrom, strand )
+      a.cigar = build_cigar_list( [ (cigar_operation_codes[code], length) for (code, length) in read.cigar ] , read.pos, chrom, strand ) if iv != None else []
       a.inferred_insert_size = read.isize
       a.aQual = read.mapq
       a.proper_pair = read.is_proper_pair
