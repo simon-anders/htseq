@@ -51,7 +51,7 @@ cdef class GenomicInterval:
    """
    
    def __init__( GenomicInterval self, str chrom, long start, long end, 
-         str strand ):
+         str strand = strand_nostrand ):
       """See the class docstring for the meaning of the slots. Note that 
       there is also a factory function, 'from_directional', to be used if
       you wish to specify start_d and length.

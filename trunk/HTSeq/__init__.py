@@ -300,7 +300,7 @@ class FastaReader( FileOrSequence ):
          else: 
             assert seq is not None, "FASTA file does not start with '>'."
             seq += line[:-1]
-      if seq:
+      if seq is not None:
          s = Sequence( seq, name )
          s.descr = descr
          yield s
@@ -321,6 +321,46 @@ class FastaReader( FileOrSequence ):
       if seqname is not None:
          seqlengths[ seqname ] = length
       return seqlengths
+      
+   @staticmethod   
+   def _import_pysam():
+      global pysam
+      try:
+         import pysam
+      except ImportError:
+         sys.stderr.write( "Please install the 'pysam' package to be able to use the Fasta indexing functionality." )
+         raise
+      
+   def build_index( self, force = False ):
+      self._import_pysam()
+      if not isinstance( self.fos, str ):
+         raise TypeError, "This function only works with FastaReader objects " + \
+            "connected to a fasta file via file name"
+      index_filename = self.fos + ".fai"
+      if os.access( index_filename, os.R_OK ):
+         if (not force) and os.stat( self.filename_or_sequence ).st_mtime <= \
+               os.stat( index_filename ).st_mtime:
+            # index is up to date
+            return
+      pysam.faidx( self.fos )
+      if not os.access( index_filename, os.R_OK ):
+         raise SystemError, "Building of Fasta index failed due to unknown error."
+      
+   def __getitem__( self, iv ):
+      if not isinstance( iv, GenomicInterval ):
+         raise TypeError, "GenomicInterval expected as key."
+      if not isinstance( self.fos, str ):
+         raise TypeError, "This function only works with FastaReader objects " + \
+            "connected to a fasta file via file name"
+      self._import_pysam()
+      fasta = pysam.faidx( self.fos, "%s:%d-%d" % ( iv.chrom, iv.start, iv.end-1 ) )
+      ans = list( FastaReader( fasta ) )
+      assert len( ans ) == 1
+      ans[0].name = str(iv)
+      if iv.strand != "-":
+         return ans[0]
+      else:
+         return ans[0].get_reverse_complement()
             
 class FastqReader( FileOrSequence ):
    """A Fastq object is associated with a FASTQ self.file. When an iterator
