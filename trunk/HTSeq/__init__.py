@@ -606,15 +606,10 @@ def pair_SAM_alignments( alignments ):
          for a2 in almnt_list:
             if a1.pe_which == a2.pe_which:
                continue
-            if not a1.aligned and not a2.mate_aligned:
-               break
-            if not a1.mate_aligned and not a2.aligned:
-               break
-            if a1.aligned and not a2.mate_aligned:
+            if a1.aligned != a2.mate_aligned or a1.mate_aligned != a2.aligned:
                continue
-            if a1.mate_aligned and not a2.aligned:
-               continue
-            assert a1.aligned and a2.aligned
+            if not (a1.aligned and a2.aligned):
+               break
             if a1.iv.chrom == a2.mate_start.chrom and a1.iv.start == a2.mate_start.pos and \
                   a2.iv.chrom == a1.mate_start.chrom and a2.iv.start == a1.mate_start.pos:
                break
