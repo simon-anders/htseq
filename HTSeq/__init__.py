@@ -9,7 +9,6 @@ from _HTSeq import *
 
 from _version import __version__
 
-#from vcf_reader import *
 
 #########################
 ## Utils
@@ -300,7 +299,7 @@ class FastaReader( FileOrSequence ):
          else: 
             assert seq is not None, "FASTA file does not start with '>'."
             seq += line[:-1]
-      if seq is not None:
+      if seq:
          s = Sequence( seq, name )
          s.descr = descr
          yield s
@@ -321,46 +320,6 @@ class FastaReader( FileOrSequence ):
       if seqname is not None:
          seqlengths[ seqname ] = length
       return seqlengths
-      
-   @staticmethod   
-   def _import_pysam():
-      global pysam
-      try:
-         import pysam
-      except ImportError:
-         sys.stderr.write( "Please install the 'pysam' package to be able to use the Fasta indexing functionality." )
-         raise
-      
-   def build_index( self, force = False ):
-      self._import_pysam()
-      if not isinstance( self.fos, str ):
-         raise TypeError, "This function only works with FastaReader objects " + \
-            "connected to a fasta file via file name"
-      index_filename = self.fos + ".fai"
-      if os.access( index_filename, os.R_OK ):
-         if (not force) and os.stat( self.filename_or_sequence ).st_mtime <= \
-               os.stat( index_filename ).st_mtime:
-            # index is up to date
-            return
-      pysam.faidx( self.fos )
-      if not os.access( index_filename, os.R_OK ):
-         raise SystemError, "Building of Fasta index failed due to unknown error."
-      
-   def __getitem__( self, iv ):
-      if not isinstance( iv, GenomicInterval ):
-         raise TypeError, "GenomicInterval expected as key."
-      if not isinstance( self.fos, str ):
-         raise TypeError, "This function only works with FastaReader objects " + \
-            "connected to a fasta file via file name"
-      self._import_pysam()
-      fasta = pysam.faidx( self.fos, "%s:%d-%d" % ( iv.chrom, iv.start, iv.end-1 ) )
-      ans = list( FastaReader( fasta ) )
-      assert len( ans ) == 1
-      ans[0].name = str(iv)
-      if iv.strand != "-":
-         return ans[0]
-      else:
-         return ans[0].get_reverse_complement()
             
 class FastqReader( FileOrSequence ):
    """A Fastq object is associated with a FASTQ self.file. When an iterator
@@ -548,7 +507,7 @@ class SAM_Reader( FileOrSequence ):
             # do something with the header line
             continue
          try:
-            algnt = SAM_Alignment.from_SAM_line( line )
+            algnt = SAM_Alignment( line )
          except ValueError, e:
             e.args = e.args + ( self.get_line_number_string(), )
             raise
@@ -606,15 +565,10 @@ def pair_SAM_alignments( alignments ):
          for a2 in almnt_list:
             if a1.pe_which == a2.pe_which:
                continue
-            if not a1.aligned and not a2.mate_aligned:
-               break
-            if not a1.mate_aligned and not a2.aligned:
-               break
-            if a1.aligned and not a2.mate_aligned:
+            if a1.aligned != a2.mate_aligned or a1.mate_aligned != a2.aligned:
                continue
-            if a1.mate_aligned and not a2.aligned:
-               continue
-            assert a1.aligned and a2.aligned
+            if not (a1.aligned and a2.aligned):
+               break
             if a1.iv.chrom == a2.mate_start.chrom and a1.iv.start == a2.mate_start.pos and \
                   a2.iv.chrom == a1.mate_start.chrom and a2.iv.start == a1.mate_start.pos:
                break
@@ -648,126 +602,3 @@ def pair_SAM_alignments( alignments ):
    for p in process_list( almnt_list ):
       yield p
 
-_re_vcf_meta_comment = re.compile( "^##([a-zA-Z]+)\=(.*)$" )
-
-_re_vcf_meta_descr = re.compile('ID=[^,]+,?|Number=[^,]+,?|Type=[^,]+,?|Description="[^"]+",?')
-
-_re_vcf_meta_types = re.compile( "[INFO|FILTER|FORMAT]" )
-
-_vcf_typemap = {
-    "Integer":int,
-    "Float":float,
-    "String":str,
-    "Flag":bool
-}
-
-class VariantCall( object ):
-    
-    def __init__( self, line, nsamples = 0, sampleids=[] ):
-        if nsamples == 0:
-            self.format = None
-            self.chrom, self.pos, self.id, self.ref, self.alt, self.qual, self.filter, self.info = line.rstrip("\n").split("\t", 7)
-        else:
-            lsplit = line.rstrip("\n").split("\t")
-            self.chrom, self.pos, self.id, self.ref, self.alt, self.qual, self.filter, self.info = lsplit[:8]
-            self.format = lsplit[8].split(":")
-            self.samples = {}
-            spos=9
-            for sid in sampleids:
-                self.samples[ sid ] = dict( ( name, value ) for (name, value) in itertools.izip( self.format, lsplit[spos].split(":") ) )
-                spos += 1
-        self.pos = GenomicPosition( self.chrom, int(self.pos) )
-        self.alt = self.alt.split(",")
-    
-    def __descr__( self ):
-        return "<VariantCall at %s, ref '%s', alt %s >" % (str(self.pos).rstrip("/."), self.ref, str(self.alt).strip("[]"))
-    
-    def __str__( self ):
-        return "%s:'%s'->%s" % (str(self.pos).rstrip("/."), self.ref, str(self.alt).strip("[]"))
-    
-    def unpack_info( self, infodict ):
-        tmp = {}
-        for token in self.info.split(";"):
-            if re.compile("=").search(token):
-                token = token.split("=")
-                if infodict.has_key( token[0] ):
-                    tmp[token[0]] = map( infodict[token[0]], token[1].split(",") )
-                else:
-                    tmp[token[0]] = token[1].split(",")
-                if len( tmp[ token[0] ] ) == 1:
-                    tmp[token[0]] = tmp[token[0]][0]
-            else: #Flag attribute found
-                tmp[token] = True
-        diff = set( infodict.keys() ).difference( set( tmp.keys() ) )
-        for key in diff:
-            if infodict[key] == bool:
-                tmp[key] = False
-        self.info = tmp
-
-class VCF_Reader( FileOrSequence ):
-
-    def __init__( self, filename_or_sequence ):
-        FileOrSequence.__init__( self, filename_or_sequence )
-        self.metadata = {}
-        self.info = {}
-        self.filters = {}
-        self.formats = {}
-        self.nsamples = 0
-        self.sampleids = []
-        
-    def make_info_dict( self ):
-        self.infodict = dict( ( key, _vcf_typemap[self.info[key]["Type"]] ) for key in self.info.keys() )
-    
-    def parse_meta( self ):
-        for line in FileOrSequence.__iter__( self ):
-            if line.startswith( '#' ):
-                if line.startswith( "##" ):
-                    mo = _re_vcf_meta_comment.match( line )
-                    if mo:
-                        value = mo.group(2)
-                        if mo.group(1) == "INFO":
-                            value = dict( e.rstrip(",").split("=",1) for e in _re_vcf_meta_descr.findall(value) )
-                            key = value["ID"]
-                            del value["ID"]
-                            self.info[ key ] = value
-                        elif mo.group(1) == "FILTER":
-                            value = dict( e.rstrip(",").split("=",1) for e in _re_vcf_meta_descr.findall(value) )
-                            key = value["ID"]
-                            del value["ID"]
-                            self.filters[ key ] = value
-                        elif mo.group(1) == "FORMAT":
-                            value = dict( e.rstrip(",").split("=",1) for e in _re_vcf_meta_descr.findall(value) )
-                            key = value["ID"]
-                            del value["ID"]
-                            self.formats[ key ] = value
-                        else:
-                            self.metadata[ mo.group(1) ] = mo.group(2)
-                else:
-                    self.sampleids = line.rstrip("\t\n").split("\t")[9:]
-                    self.nsamples = len( self.sampleids )
-                continue
-            else:
-                break
-    
-    def __iter__( self ):
-        for line in FileOrSequence.__iter__( self ):
-            if line == "\n" or line.startswith( '#' ):
-                continue
-            vc = VariantCall( line, self.nsamples, self.sampleids )
-            yield vc
-
-class BAM_Reader( object ):
-
-    def __init__( self, filename ):
-        global pysam
-        self.filename = filename
-        try:
-           import pysam
-        except ImportError:
-           print "Please Install PySam to use the BAM_Reader Class (http://code.google.com/p/pysam/)"
-           raise
-    
-    def __iter__( self ):
-        sf = pysam.Samfile(self.filename, "rb")
-        for pa in sf:
-            yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )

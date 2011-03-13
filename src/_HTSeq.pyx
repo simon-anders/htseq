@@ -51,7 +51,7 @@ cdef class GenomicInterval:
    """
    
    def __init__( GenomicInterval self, str chrom, long start, long end, 
-         str strand = strand_nostrand ):
+         str strand ):
       """See the class docstring for the meaning of the slots. Note that 
       there is also a factory function, 'from_directional', to be used if
       you wish to specify start_d and length.
@@ -628,7 +628,7 @@ cdef class SequenceWithQualities( Sequence ):
       self._qualstr = qualstr
       self._qualscale = qualscale
       self._qualarr = None
-      self._qualstr_phred = b''
+      self._qualstr_phred = ''
 
    cdef _fill_qual_arr( SequenceWithQualities self ):
       cdef int seq_len = len( self.seq )
@@ -661,9 +661,9 @@ cdef class SequenceWithQualities( Sequence ):
          if not ( newvalue.shape == ( len(self.seq), ) ) :
             raise TypeError, "assignment to qual with illegal shape"
          self._qualarr = newvalue
-         self._qualstr = b""
+         self._qualstr = ""
          self._qualscale = "none"
-         self._qualstr_phred = b""
+         self._qualstr_phred = ""
               
    def __repr__( self ):
       return "<%s object '%s'>" % ( self.__class__.__name__, self.name )
@@ -697,7 +697,7 @@ cdef class SequenceWithQualities( Sequence ):
       return self._qualstr_phred
       
 
-   def write_to_fastq_file( self, fastq_file ):
+   def write_to_fastq_file( self, file fastq_file ):
       if hasattr( self, "descr" ) and self.descr is not None:
          fastq_file.write( "@%s %s\n" % ( self.name, self.descr ) )
       else:
@@ -1027,8 +1027,6 @@ cdef _parse_SAM_optional_field_value( str field ):
       return int( field[5:], 16 )
    else:
       raise ValueError, "SAM optional field with illegal type letter '%s'" % field[2]
-
-cigar_operation_codes = [ 'M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X']
       
       
 cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
@@ -1040,41 +1038,18 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
     - cigar: a list of CigarOperatio objects, describing the alignment
     - tags: the extra information tags [not yet implemented]
    """
-   
-   @classmethod
-   def from_pysam_AlignedRead( cls, read, samfile ):
-      strand = "-" if read.is_reverse else "+"
-      if read.tid != -1:
-          chrom = samfile.getrname(read.tid)
-          iv = GenomicInterval( chrom, read.pos, read.aend, strand )
-      else:
-          iv = None
-      
-      seq = SequenceWithQualities( read.seq, read.qname, read.qual )
-      a = SAM_Alignment( seq, iv )
-      a.cigar = build_cigar_list( [ (cigar_operation_codes[code], length) for (code, length) in read.cigar ] , read.pos, chrom, strand ) if iv != None else []
-      a.inferred_insert_size = read.isize
-      a.aQual = read.mapq
-      a.proper_pair = read.is_proper_pair
-      a.not_primary_alignment = read.is_secondary
-      a.failed_platform_qc = read.is_qcfail
-      a.pcr_or_optical_duplicate = read.is_duplicate
-      a.original_sam_line = ""
-      if read.is_paired:
-         if read.is_proper_pair:
-            strand = "-" if read.mate_is_reverse else "+"
-            a.mate_start = GenomicPosition( samfile.getrname(read.mrnm), read.mpos, strand )
-            a.pe_which = "first" if read.is_read1 else "second" #TODO:check wheter that actually works as expected, what about 'unknown'?
-      return a
-         
-   @classmethod
-   def from_SAM_line( cls, line ):
+     
+   def __init__( self, line ):
       cdef str qname, flag, rname, pos, mapq, cigar, 
       cdef str mrnm, mpos, isize, seq, qual
       cdef list optional_fields
       cdef int posint, flagint
       cdef str strand
-            
+      
+      if line is None:
+         AlignmentWithSequenceReversal.__init__( self, None, None )
+         
+      
       fields = line.rstrip().split( "\t" )
       if len( fields ) < 10:
          raise ValueError, "SAM line does not contain at least 11 tab-delimited fields."
@@ -1090,7 +1065,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
         
       if flagint & 0x0004:     # flag "query sequence is unmapped" 
          iv = None
-         cigar = None
+         self.cigar = None
          if rname != "*":     # flag "query sequence is unmapped"      
             warnings.warn( "Malformed SAM line: RNAME != '*' although flag bit &0x0004 set" )
       else:
@@ -1101,22 +1076,22 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
             strand = "-"
          else:
             strand = "+"
-         cigar = parse_cigar( cigar, posint, rname, strand )
-         iv = GenomicInterval( rname, posint, cigar[-1].ref_iv.end, strand )   
+         self.cigar = parse_cigar( cigar, posint, rname, strand )
+         iv = GenomicInterval( rname, posint, self.cigar[-1].ref_iv.end, strand )   
             
-      alnmt = SAM_Alignment( SequenceWithQualities( seq.upper(), qname, qual ), iv )
+      AlignmentWithSequenceReversal.__init__( self,
+         SequenceWithQualities( seq.upper(), qname, qual ), iv )
          
-      alnmt.cigar = cigar
-      alnmt._optional_fields = optional_fields
-      alnmt.aQual = int( mapq )
-      alnmt.inferred_insert_size = int( isize )
-      alnmt.original_sam_line = line
+      self._optional_fields = optional_fields
+      self.aQual = int( mapq )
+      self.inferred_insert_size = int( isize )
+      self.original_sam_line = line
       
       if flagint & 0x0001:         # flag "read is paired in sequencing"
          if flagint & 0x0008:      # flag "mate is unmapped"
             if mrnm != "*":
                warnings.warn( "Malformed SAM line: MRNM != '*' although flag bit &0x0008 set" )
-            alnmt.mate_start = None
+            self.mate_start = None
          else:
             if mrnm == "*":
                raise ValueError, "Malformed SAM line: MRNM == '*' although flag bit &0x0008 cleared"               
@@ -1125,25 +1100,24 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
                strand = "-"
             else:
                strand = "+"           
-            alnmt.mate_start = GenomicPosition( mrnm, posint, strand )   
-            if alnmt.mate_start.chrom == "=":
-               alnmt.mate_start.chrom = alnmt.iv.chrom
+            self.mate_start = GenomicPosition( mrnm, posint, strand )   
+            if self.mate_start.chrom == "=":
+               self.mate_start.chrom = self.iv.chrom
          if flagint & 0x0040:
-            alnmt.pe_which = intern( "first" )
+            self.pe_which = intern( "first" )
          elif flagint & 0x0080:
-            alnmt.pe_which = intern( "second" )
+            self.pe_which = intern( "second" )
          else:
-            alnmt.pe_which = intern( "unknown" )
+            self.pe_which = intern( "unknown" )
       else:
-         alnmt.mate_start = None
-         alnmt.pe_which = intern( "not_paired_end" )
+         self.mate_start = None
+         self.pe_which = intern( "not_paired_end" )
         
-      alnmt.proper_pair = flagint & 0x0002 > 0
-      alnmt.not_primary_alignment = flagint & 0x0100 > 0
-      alnmt.failed_platform_qc = flagint & 0x0200 > 0
-      alnmt.pcr_or_optical_duplicate = flagint & 0x0400 > 0
+      self.proper_pair = flagint & 0x0002 > 0
+      self.not_primary_alignment = flagint & 0x0100 > 0
+      self.failed_platform_qc = flagint & 0x0200 > 0
+      self.pcr_or_optical_duplicate = flagint & 0x0400 > 0
 
-      return alnmt
 
    @property
    def paired_end( self ):
