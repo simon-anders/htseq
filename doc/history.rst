@@ -17,6 +17,10 @@ Patch versions:
 
   - bug fix: GFF files with empty attribute fiels are now read correctly
 
+* Version 0.4.7p2 (2011-03-13)
+
+  - fixed assertion error in pair_SAM_alignment, triggered by incorrect flags
+
 Version 0.4.6
 =============
 
