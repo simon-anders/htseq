@@ -1074,6 +1074,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       cdef list optional_fields
       cdef int posint, flagint
       cdef str strand
+      cdef list cigarlist
             
       fields = line.rstrip().split( "\t" )
       if len( fields ) < 10:
@@ -1101,12 +1102,12 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
             strand = "-"
          else:
             strand = "+"
-         cigar = parse_cigar( cigar, posint, rname, strand )
-         iv = GenomicInterval( rname, posint, cigar[-1].ref_iv.end, strand )   
+         cigarlist = parse_cigar( cigar, posint, rname, strand )
+         iv = GenomicInterval( rname, posint, cigarlist[-1].ref_iv.end, strand )   
             
       alnmt = SAM_Alignment( SequenceWithQualities( seq.upper(), qname, qual ), iv )
          
-      alnmt.cigar = cigar
+      alnmt.cigar = cigarlist
       alnmt._optional_fields = optional_fields
       alnmt.aQual = int( mapq )
       alnmt.inferred_insert_size = int( isize )

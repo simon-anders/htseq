@@ -534,15 +534,7 @@ class SAM_Reader( FileOrSequence ):
    contains short read alignments. It can generate an iterator of Alignment
    objects."""
 
-   def __init__( self, filename_or_sequence ):      
-      FileOrSequence.__init__( self, filename_or_sequence )
-      self.peeked = None      
-
    def __iter__( self ):
-      if self.peeked is not None and self.peeked != []:
-         for read in self.peeked:
-            yield read
-         self.peeked = None
       for line in FileOrSequence.__iter__( self ):
          if line.startswith( "@" ):
             # do something with the header line
@@ -554,16 +546,6 @@ class SAM_Reader( FileOrSequence ):
             raise
          yield algnt
        
-   def peek( self, num = 1 ):
-      i = 0
-      self.peeked = []
-      for read in self:
-         self.peeked.append( read )
-         i += 1
-         if i >= num:
-            break
-      return self.peeked
-
 class GenomicArrayOfSets( GenomicArray ):
 
    """A GenomicArrayOfSets is a specialization of GenomicArray that allows to store

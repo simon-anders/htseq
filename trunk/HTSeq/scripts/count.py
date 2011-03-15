@@ -77,10 +77,11 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    try:
       if sam_filename != "-":
          read_seq = HTSeq.SAM_Reader( sam_filename )
+         first_read = iter(read_seq).next()
       else:
-         read_seq = HTSeq.SAM_Reader( sys.stdin )      
-      iter( read_seq )
-      first_read = read_seq.peek( )[0]
+         read_seq = iter( HTSeq.SAM_Reader( sys.stdin ) )
+         first_read = read_seq.next()
+         read_seq = itertools.chain( [ first_read ], read_seq )
       pe_mode = first_read.paired_end
    except:
       sys.stderr.write( "Error occured when reading first line of sam file.\n" )
@@ -97,6 +98,8 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       nonunique = 0
       i = 0   
       for r in read_seq:
+         i += 1
+         print "looking at", r
          if not pe_mode:
             if not r.aligned:
                notaligned += 1
@@ -180,9 +183,8 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                   "'%s', to which it has been aligned, did not appear in the GFF file.\n" ) % 
                   ( rr.read.name, iv.chrom ) )
 
-         i += 1
          if i % 100000 == 0 and not quiet:
-            sys.stderr.write( "%d reads processed.\n" % i )
+            sys.stderr.write( "%d sam %s processed.\n" % ( i, "lines " if not pe_mode else "line pairs" ) )
 
    except:
       if not pe_mode:
@@ -192,7 +194,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       raise
 
    if not quiet:
-      sys.stderr.write( "%d reads processed.\n" % i )
+      sys.stderr.write( "%d sam %s processed.\n" % ( i, "lines " if not pe_mode else "line pairs" ) )
          
    if samoutfile is not None:
       samoutfile.close()
