@@ -21,6 +21,10 @@ Patch versions:
 
   - fixed assertion error in pair_SAM_alignment, triggered by incorrect flags
 
+* Version 0.4.7p3 (2011-03-15)
+
+  - fixed problem due to SAM_Alignment.peek (by removing the method)
+
 Version 0.4.6
 =============
 
