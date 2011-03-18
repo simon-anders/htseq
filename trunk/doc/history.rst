@@ -25,6 +25,11 @@ Patch versions:
 
   - fixed problem due to SAM_Alignment.peek (by removing the method)
 
+* Version 0.4.7p4 (2011-03-18)
+
+  - removed left-over debugging print statement
+
+
 Version 0.4.6
 =============
 

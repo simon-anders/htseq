@@ -99,7 +99,6 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
       i = 0   
       for r in read_seq:
          i += 1
-         print "looking at", r
          if not pe_mode:
             if not r.aligned:
                notaligned += 1
