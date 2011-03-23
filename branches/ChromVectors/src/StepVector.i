@@ -197,7 +197,7 @@ class StepVector( object ):
          raise ValueError, "unsupported typecode"
       obj = cls()
       obj._typecode = typecode
-      obj._swigobj = _StepVector_float() #swigclass( )    
+      obj._swigobj = swigclass( )    
       obj.start = start_index
       obj.stop = start_index + length
       return obj

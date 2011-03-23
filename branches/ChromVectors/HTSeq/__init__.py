@@ -533,23 +533,14 @@ class GenomicArrayOfSets( GenomicArray ):
    the present set, and the set is split if necessary.
    """
 
-   def __init__( self, chroms, stranded=True ):
-      GenomicArray.__init__( self, chroms, stranded, 'O' )
+   def __init__( self, chroms, stranded=True, storage='step', memmap_dir = "" ):
+      GenomicArray.__init__( self, chroms, stranded, 'O', storage, memmap_dir )
 
    def add_chrom( self, chrom, length = sys.maxint, start_index = 0 ):
       GenomicArray.add_chrom( self, chrom, length, start_index )
-      if self.stranded:
-         self.step_vectors[ chrom ][ "+" ][ : ] = set()
-         self.step_vectors[ chrom ][ "-" ][ : ] = set()
-      else:
-         self.step_vectors[ chrom ][ : ] = set()
-      
-   def add_value( self, value, iv ):
-      def _f( oldset ):
-         newset = oldset.copy()
-         newset.add( value )
-         return newset 
-      self.apply( _f, iv )
+      for cv in self.chrom_vectors[ chrom ].values():
+         cv[:] = set()
+         cv.is_vector_of_sets = True
       
        
 ###########################
@@ -607,6 +598,12 @@ def pair_SAM_alignments( alignments ):
          almnt_list = [ almnt ]
    for p in process_list( almnt_list ):
       yield p
+
+
+###########################
+##   variant calls
+###########################
+
 
 _re_vcf_meta_comment = re.compile( "^##([a-zA-Z]+)\=(.*)$" )
 

@@ -316,23 +316,28 @@ cdef class ChromVector( object ):
    cdef public object array 
    cdef public GenomicInterval iv
    cdef public int offset
+   cdef public bint is_vector_of_sets
 
    @classmethod 
    def create( cls, GenomicInterval iv, str typecode, str storage, str memmap_dir = "" ):
       ncv = cls()
       ncv.iv = iv
       if storage == "ndarray":
-         ncv.array = numpy.zeros( shape = ( iv.length, ), dtype = typecode )
-         ncv.offset = iv.start
+         if typecode != 'O':
+            ncv.array = numpy.zeros( shape = ( iv.length, ), dtype = typecode )
+         else:
+            ncv.array = numpy.empty( shape = ( iv.length, ), dtype = typecode )
+            ncv.array[:] = None
       elif storage == "memmap":
          ncv.array = numpy.memmap( shape = ( iv.length, ), dtype = typecode, 
             filename = os.path.join( memmap_dir, iv.chrom + iv.strand + ".nmm" ), mode='w+' )
-         ncv.offset = iv.start
       elif storage == "step":
          ncv.array = StepVector.StepVector.create( typecode = typecode )
-         ncv.offset = iv.start
       else:
          raise ValueError, "Illegal storage mode."
+      # TODO: Test whether offset works properly
+      ncv.offset = iv.start
+      ncv.is_vector_of_sets = False
       return ncv
    
    @classmethod 
@@ -341,16 +346,34 @@ cdef class ChromVector( object ):
       v.iv = iv
       v.array = vec.array
       v.offset = vec.offset
+      v.is_vector_of_sets = vec.is_vector_of_sets
       return v
 
    def __getitem__( self, index ):
+      cdef slice index_slice
+      cdef int index_int
+      cdef int start, stop
+      cdef GenomicInterval iv
       if isinstance( index, int ):
-         if index < self.iv.start or index >= self.iv.end:
+         index_int = index
+         if index_int < self.iv.start or index_int >= self.iv.end:
             raise IndexError
-         return self.array[ index - self.offset ]
+         return self.array[ index_int - self.offset ]
       elif isinstance( index, slice ):
-         iv = GenomicInterval( self.iv.chrom, index.start,
-            index.stop, self.iv.strand )
+         index_slice = index
+         if index_slice.start is not None:
+            start = index_slice.start
+            if start < self.iv.start:
+               raise IndexError, "start too small"
+         else:
+            start = self.iv.start
+         if index_slice.stop is not None:
+            stop = index_slice.stop
+            if stop > self.iv.end:
+               raise IndexError, "stop too large"
+         else:
+            stop = self.iv.end
+         iv = GenomicInterval( self.iv.chrom, start, stop, self.iv.strand )
          if not self.iv.contains( iv ):
             raise IndexError
          return ChromVector._create_view( self, iv )
@@ -366,6 +389,8 @@ cdef class ChromVector( object ):
          raise TypeError, "Illegal index type"
    
    def __setitem__( self, index, value ):
+      cdef slice index_slice
+      cdef int start, stop
       if isinstance( value, ChromVector ):       
          if self.array is value.array and value.iv.start == index.start and \
                value.iv.end == index.stop and ( index.step is None or index.step == 1 ):
@@ -375,8 +400,20 @@ cdef class ChromVector( object ):
       if isinstance( index, int ):
          self.array[ index - self.iv.start ] = value
       elif isinstance( index, slice ):
-         self.array[ index.start - self.offset : 
-            index.stop - self.iv.start : index.step ] = value
+         index_slice = index
+         if index_slice.start is not None:
+            start = index_slice.start
+            if start < self.iv.start:
+               raise IndexError, "start too small"
+         else:
+            start = self.iv.start
+         if index_slice.stop is not None:
+            stop = index_slice.stop
+            if stop > self.iv.end:
+               raise IndexError, "stop too large"
+         else:
+            stop = self.iv.end
+         self.array[ start - self.offset : stop - self.iv.start : index.step ] = value
       elif isinstance( index, GenomicInterval ):
          if index.chrom != self.iv.chrom:
             raise KeyError, "Chromosome name mismatch."
@@ -389,7 +426,14 @@ cdef class ChromVector( object ):
          raise TypeError, "Illegal index type"
 
    def __iadd__( self, value ):
-      self.array[ self.iv.start - self.offset : self.iv.end - self.offset ].__iadd__( value )
+      if not self.is_vector_of_sets:
+         self.array[ self.iv.start - self.offset : self.iv.end - self.offset ].__iadd__( value )
+      else:
+         def addval( x ):
+            y = x.copy()
+            y.add( value )
+            return y
+         self.apply( addval )
       return self
       
    def __iter__( self ):
@@ -400,6 +444,10 @@ cdef class ChromVector( object ):
    
    def steps( self ):
       return _HTSeq_internal.ChromVector_steps( self )
+      
+   def apply( self, fun ):
+      for iv, value in self.steps():
+         self.array[ iv.start - self.offset : iv.end - self.offset ] = fun( value )
          
    
 cdef class GenomicArray( object ):
@@ -489,7 +537,7 @@ cdef class GenomicArray( object ):
          self.chrom_vectors[ chrom ][ strand_minus ] = \
             ChromVector.create( iv, self.typecode, self.storage, self.memmap_dir )
       else:   
-         self.step_vectors[ chrom ] = {
+         self.chrom_vectors[ chrom ] = {
             strand_nostrand:  ChromVector.create( iv, self.typecode, self.storage ) }
    
    def __reduce__( self ):
@@ -519,16 +567,7 @@ cdef class GenomicArray( object ):
             f.write( "%s\t%d\t%d\t%f\n" % (chrom, start, stop, value) )    
       if not hasattr( file_or_filename, "write" ):
          f.close()
-    
-   def apply( self, func, iv = None ):
-      # TODO: Update this!
-      for siv, value in self.get_steps( iv ):
-         if self.stranded:
-             self.step_vectors[siv.chrom][siv.strand][siv.start:siv.end] = func( value )
-         else:
-             self.step_vectors[siv.chrom][siv.start:siv.end] = func( value )
-    
-   
+       
 def _GenomicArray_unpickle( stranded, typecode, step_vectors ):
    ga = GenomicArray( {}, stranded, typecode )
    ga.step_vectors = step_vectors
