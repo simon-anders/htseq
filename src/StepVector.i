@@ -383,7 +383,7 @@ class StepVector( object ):
          # TODO: Is it wise to create a list here?
     
    def __iadd__( self, value ):
-      self._swigobj.add_value( self.start, self.stop, value )
+      self._swigobj.add_value( self.start, self.stop-1, value )
       return self
     
    def apply( self, func, start = None, stop = None ):
