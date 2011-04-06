@@ -695,8 +695,13 @@ class VCF_Reader( FileOrSequence ):
     def make_info_dict( self ):
         self.infodict = dict( ( key, _vcf_typemap[self.info[key]["Type"]] ) for key in self.info.keys() )
     
-    def parse_meta( self ):
-        for line in FileOrSequence.__iter__( self ):
+    def parse_meta( self, header_filename = None ):
+        if header_filename == None:
+            the_iter = FileOrSequence.__iter__( self )
+        else:
+            the_iter = open( header_filename, "r" )
+        
+        for line in the_iter:
             if line.startswith( '#' ):
                 if line.startswith( "##" ):
                     mo = _re_vcf_meta_comment.match( line )
