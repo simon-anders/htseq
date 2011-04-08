@@ -351,8 +351,8 @@ cdef class ChromVector( object ):
 
    def __getitem__( self, index ):
       cdef slice index_slice
-      cdef int index_int
-      cdef int start, stop
+      cdef long int index_int
+      cdef long int start, stop
       cdef GenomicInterval iv
       if isinstance( index, int ):
          index_int = index
@@ -390,7 +390,7 @@ cdef class ChromVector( object ):
    
    def __setitem__( self, index, value ):
       cdef slice index_slice
-      cdef int start, stop
+      cdef long int start, stop
       if isinstance( value, ChromVector ):       
          if self.array is value.array and value.iv.start == index.start and \
                value.iv.end == index.stop and ( index.step is None or index.step == 1 ):
@@ -487,7 +487,7 @@ cdef class GenomicArray( object ):
       if isinstance( index, GenomicInterval ):
          if self.stranded and index.strand not in ( strand_plus, strand_minus ):
             raise KeyError, "Non-stranded index used for stranded GenomicArray."
-         if self.auto_add_chroms and index.chrom not in self.step_vectors:
+         if self.auto_add_chroms and index.chrom not in self.chrom_vectors:
             self.add_chrom( index.chrom )
          if isinstance( index, GenomicPosition ):
             if self.stranded:
@@ -503,16 +503,20 @@ cdef class GenomicArray( object ):
          return self.chrom_vectors[ index ]
 
    def __setitem__( self, index, value ):
+      cdef GenomicInterval index2
       if isinstance( value, ChromVector ): 
          if not isinstance( index, GenomicInterval ):
             raise NotImplementedError, "Required assignment signature not yet implemented."
-         if self.chrom_vectors[ index.chrom ][ index.strand ].array is value.array and index == value.iv:
+         index2 = index.copy()
+         if not self.stranded:
+            index2.strand = strand_nostrand
+         if self.chrom_vectors[ index2.chrom ][ index2.strand ].array is value.array and index2 == value.iv:
             return
          raise NotImplementedError, "Required assignment signature not yet implemented."
       if isinstance( index, GenomicInterval ):
          if self.stranded and index.strand not in ( strand_plus, strand_minus ):
             raise KeyError, "Non-stranded index used for stranded GenomicArray."
-         if self.auto_add_chroms and index.chrom not in self.step_vectors:
+         if self.auto_add_chroms and index.chrom not in self.chrom_vectors:
             self.add_chrom( index.chrom )
          if self.stranded:
             self.chrom_vectors[ index.chrom ][ index.strand ][ index.start : index.end ] = value
@@ -556,21 +560,17 @@ cdef class GenomicArray( object ):
          f.write( "track type=bedGraph\n" )
       else:
          f.write( "track type=bedGraph %s\n" % track_options )
-      for chrom in self.step_vectors:
-         if self.stranded:
-            sv = self.step_vectors[ chrom ][ strand ]
-         else:
-            sv = self.step_vectors[ chrom ]
-         for start, stop, value in sv.get_steps():
-            if start == -sys.maxint-1 or stop == sys.maxint:
+      for chrom in self.chrom_vectors:
+         for iv, value in self.chrom_vectors[ chrom ][ strand ].steps():
+            if iv.start == -sys.maxint-1 or iv.end == sys.maxint:
                continue
-            f.write( "%s\t%d\t%d\t%f\n" % (chrom, start, stop, value) )    
+            f.write( "%s\t%d\t%d\t%f\n" % (iv.chrom, iv.start, iv.end, value) )    
       if not hasattr( file_or_filename, "write" ):
          f.close()
        
-def _GenomicArray_unpickle( stranded, typecode, step_vectors ):
+def _GenomicArray_unpickle( stranded, typecode, chrom_vectors ):
    ga = GenomicArray( {}, stranded, typecode )
-   ga.step_vectors = step_vectors
+   ga.chrom_vectors = chrom_vectors
    return ga
    
    
