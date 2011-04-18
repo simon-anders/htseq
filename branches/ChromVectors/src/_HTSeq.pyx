@@ -83,12 +83,13 @@ cdef class GenomicInterval:
       return constr( *args )   
    
    def __repr__( GenomicInterval self ):
-      return "<%s object '%s', [%d,%d), strand '%s'>" % \
-         ( self.__class__.__name__, self.chrom, self.start, self.end, self.strand )
+      return "<%s object '%s', [%d,%s), strand '%s'>" % \
+         ( self.__class__.__name__, self.chrom, self.start, 
+           str(self.end) if self.end != sys.maxint else "Inf", self.strand )
          
    def __str__( GenomicInterval self ):
-         return "%s:[%d,%d)/%s" % \
-            ( self.chrom, self.start, self.end, self.strand )
+         return "%s:[%d,%s)/%s" % \
+            ( self.chrom, self.start, str(self.end) if self.end != sys.maxint else "Inf", self.strand )
 
    property length:
 
@@ -317,6 +318,7 @@ cdef class ChromVector( object ):
    cdef public GenomicInterval iv
    cdef public int offset
    cdef public bint is_vector_of_sets
+   cdef public str _storage
 
    @classmethod 
    def create( cls, GenomicInterval iv, str typecode, str storage, str memmap_dir = "" ):
@@ -335,6 +337,7 @@ cdef class ChromVector( object ):
          ncv.array = StepVector.StepVector.create( typecode = typecode )
       else:
          raise ValueError, "Illegal storage mode."
+      ncv._storage = storage
       # TODO: Test whether offset works properly
       ncv.offset = iv.start
       ncv.is_vector_of_sets = False
@@ -347,6 +350,7 @@ cdef class ChromVector( object ):
       v.array = vec.array
       v.offset = vec.offset
       v.is_vector_of_sets = vec.is_vector_of_sets
+      v._storage = vec._storage      
       return v
 
    def __getitem__( self, index ):
@@ -448,6 +452,9 @@ cdef class ChromVector( object ):
    def apply( self, fun ):
       for iv, value in self.steps():
          self.array[ iv.start - self.offset : iv.end - self.offset ] = fun( value )
+         
+   def __repr__( self ):
+      return "<%s object, %s, %s>" % ( self.__class__.__name__, str(self.iv), self._storage )
          
    
 cdef class GenomicArray( object ):
