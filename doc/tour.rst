@@ -19,7 +19,10 @@ functionality of HTSeq by performing a number of common analysis tasks:
 
   
 The following description assumes that the reader is familiar with Python and with HTS
-data.
+data. (For a good and not too lengthy introduction to Python, read the `Python Tutorial`
+on the Python web site.)
+
+.. _`Python Tutorial`: http://docs.python.org/tutorial/
   
 If you want to try out the examples on your own system, you can download the 
 used example files here: `HTSeq_example_data.tgz`_
@@ -178,177 +181,168 @@ at all, and a field called :attr:`iv <Alignment.iv>`
 the next section.
 
 
+Genomic intervals and genomic arrays
+====================================
+
+Genomic intervals
+-----------------
+
+At the end of the previous section, we looped through a SAM file. In the for loop,
+the :class:`SAM_Reader` object yields for each alignment line in the SAM file an
+object of class :class:`SAM_Alignment`. Let's have closer look at such an object,
+still found in the variable ``aln``:
+
+.. doctest::
+
+   >>> aln
+   <SAM_Alignment object: Read 'HWI-EAS225:1:11:76:63#0/1' aligned to IV:[246048,246084)/+>
+   
+Every alignment object has a slot ``read``, that contains a :class:`SequenceWithQualities` object as
+described above
+
+.. doctest::
+
+   >>> aln.read
+   <SequenceWithQualities object 'HWI-EAS225:1:11:76:63#0/1'>
+   >>> aln.read.name
+   'HWI-EAS225:1:11:76:63#0/1'
+   >>> aln.read.seq
+   'ACTGTAAATACTTTTCAGAAGAGATTTGTAGAATCC'
+   >>> aln.read.qual
+   array([33, 33, 33, 33, 31, 33, 30, 32, 33, 30, 29, 33, 32, 32, 32, 31, 32,
+          31, 29, 28, 30, 28, 30, 24, 28, 30, 28, 26, 24, 29, 24, 23, 23, 27,
+          25, 25])
+
+Furthermore, every alignment object has a slot ``iv`` (for "interval") that describes where
+the read was aligned to (if it was aligned). To hold this 
+information, an object of class :class:`GenomicInterval`
+is used that has slots as follows:
+
+.. doctest::
+
+   >>> aln.iv
+   <GenomicInterval object 'IV', [246048,246084), strand '+'>
+   >>> aln.iv.chrom
+   'IV'
+   >>> aln.iv.start
+   246048
+   >>> aln.iv.end
+   246084
+   >>> aln.iv.strand
+   '+'
+
+Note that all coordinates in HTSeq are zero-based (following Python convention), i.e.
+the first base of a chromosome has index 0. Also, all intervals are half-open, i.e.,
+the ``end`` position is not included. The strand can be one of ``'+'``, ``'-'``, 
+and ``'.'``, where the latter indicates that the strand is not defined or not of interest. 
+
+Apart from these slots, 
+a :class:`GenomicInterval` object has a number of convenience functions, see the reference. 
+
+Note that a SAM file may contain reads that could not be aligned. For these, the
+`iv` slot contains `None`. To test whether an alignment is present, you can also
+query the slot `aligned`, which is a Boolean.
+
+
+Genomic Arrays
+--------------
+
+The :class:`GenomicArray` data structure is a convenient way to store and
+retrieve information associated with a genomic position or genomic interval. In
+a GenomicArray, data (either simple scalar data like a number) or can be stored
+at a place identified by a GenomicInterval. We demonstrate with a toy example.
+
+Assume you have a genome with three chromosomes with the following lengths (in bp):
+
+.. doctest::
+
+   >>> chromlens = { 'chr1': 3000, 'chr2': 2000, 'chr1': 1000 }
+
+We wish to store integer data (typecode "i")
+
+.. doctest:: 
+
+   >>> ga = HTSeq.GenomicArray( chromlens, stranded=False, typecode="i" )
+
+Now, we can assign the value 5 to an interval:
+
+.. doctest:: 
+
+   >>> iv = HTSeq.GenomicInterval( "chr1", 100, 120, "." )
+   >>> ga[iv] = 5
+   
+We may want to add the value 3 to an interval overlapping with the previous one:
+
+   >>> iv = HTSeq.GenomicInterval( "chr1", 110, 135, "." )
+   >>> ga[iv] += 3
+
+.. doctest:: 
+
+To see the effect of this, we read out an interval encompassing the region that 
+we changed. To display the data, we convert to a list:
+   
+.. doctest:: 
+   
+   >>> iv = HTSeq.GenomicInterval( "chr1", 90, 140, "." )
+   >>> list( ga[iv] )  #doctest: +NORMALIZE_WHITESPACE   
+   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 
+    0, 0, 0, 0]
+   
+It would be wasteful to store all these repeats of the same value as it
+is displayed here. Hence, GenomicArray objects use by default so-called
+StepVectors that store the data internally in "steps" of constant value. 
+Often, reading out the data that way is useful, too:
+
+.. doctest:: 
+
+   >>> for iv2, value in ga[iv].steps():
+   ...    print iv2, value
+   ... 
+   chr1:[90,100)/. 0
+   chr1:[100,110)/. 5
+   chr1:[110,120)/. 8
+   chr1:[120,135)/. 3
+   chr1:[135,140)/. 0
+
+If the steps become very small, storing them instead of just the unrolled data may
+become inefficient. In this case, GenomicArrays should be instantiated with
+storage mode ``ndarray`` to get a normal numpy array as backend, or with storage
+mode ``memmap`` to use a file/memory-mapped numpy array (see reference for details).
+
+In the following section, we demonstrate how a GenomicArray can be used to 
+calculate a coverage vector. In the section after that, we see how a GenomicArray
+with type code 'O' (which stands for 'object', i.e., any kind of data, not just 
+numbers) is useful to organize metadata.
+
 
 Calculating coverage vectors
 ============================
 
 By a "coverage vector", we mean a vector (one-dimensional array) of the length of
 a chromosome, where each element counts how many reads cover the corresponding
-base pair in their alignment. As chromosomes can be very long, it would be very 
-inefficient to hold a coverage vector in memory by reserving space for each base
-pair. Rather, we take advantage of the fact that the value of the coverage vector
-usually stays constant (often it is just zero) over stretches of varying length,
-which we call steps. A :class:`StepVector <StepVector.StepVector>` is 
-a data structure defined for this purpose.
+base pair in their alignment. A GenomicArray can conveniently bundle the
+coverage vectors for all the chromosomes in a genome.
 
-It works as follows: Let's define a :class:`StepVector <StepVector.StepVector>` of length 30::
+Hence, we start by defining a :class:`GenomicArray`:
 
-   >>> sv = HTSeq.StepVector.StepVector( 30 )
+   >>> cvg = HTSeq.GenomicArray( "auto", stranded=True, typecode='i' )
    
-Initially, it has value 0 everywhere. We set the positions 7 to 15 to the value 120::
-
-   >>> sv[ 7:15 ] = 120
-
-Internally, ``sv`` now does not hold 30 numbers, but 3 steps, as follows::
-
-   >>> list( sv.get_steps() )
-   [(0, 7, 0.0), (7, 15, 120.0), (15, 30, 0.0)]
-
-Each step is a triple, giving start, end and value of the step. If we now add the
-value 100 to the positions 10 to 20, the steps get split accordingly::
-
-   >>> sv.add_value( 100, 10, 20 )
-   >>> list( sv.get_steps() )
-   [(0, 7, 0.0), (7, 10, 120.0), (10, 15, 220.0), (15, 20, 100.0), (20, 30, 0.0)]
-   
-If you iterate over a **StepVector** object, it behaves like a list:
-
-.. doctest::
-
-   >>> list( sv )   #doctest:+NORMALIZE_WHITESPACE
-   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 120.0, 120.0, 120.0, 220.0, 220.0, 220.0, 
-   220.0, 220.0, 100.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
-   0.0, 0.0, 0.0, 0.0, 0.0]
-   
-You can also take parts of a :class:`StepVector`, which produces a new, 
-shorter, :class:`StepVector`.
-
-.. doctest::
-
-   >>> sv[6:12]   # doctest: +ELLIPSIS
-   <StepVector object, type 'd', index range 6:12, 3 step(s)>
-   >>> sv[6:12].get_steps()        #doctest:+ELLIPSIS
-   <generator object ...>
-   >>> list( sv[6:12].get_steps() )
-   [(6, 7, 0.0), (7, 10, 120.0), (10, 12, 220.0)]
-   >>> list( sv[6:12] )
-   [0.0, 120.0, 120.0, 120.0, 220.0, 220.0]
-   
-In practice, you will not work with **StepVector** objects directly, but rather with objects
-of class :class:`GenomicArray`. These hold several step vectors, either one for each chromosome   
-("non-stranded genomic array") or one for each strand, i.e., two per chromosome
-("stranded genomic array"). To specify the locations of steps on a :class:`GenomicArray`, objects
-of class :class:`GenomicInterval` are used, which are instantiated by specifying chromosome
-name, start, end, and position::
-
-   >>> iv = HTSeq.GenomicInterval( "II", 100234, 100789, "+" )
-   >>> iv
-   <GenomicInterval object 'II', [100234,100789), strand '+'>
-   >>> print iv
-   II:[100234,100789)/+
-   
-A :class:`GenomicInterval` is a simple data structure with four slots::
-   
-   >>> iv.chrom
-   'II'
-   >>> iv.start
-   100234
-   >>> iv.end
-   100789
-   >>> iv.strand
-   '+'
-   
-Two notes: :attr:`chrom <GenomicInterval.chrom>` does not 
-have to be chromosome, it could also be a contig name,
-or any other identifier. ``strand`` can be ``+``, ``-``, or ``.``, where the latter
-means "no strand", to be used whenever specifying a strand would be meaning-less.
-
-A :class:`GenomicInterval` has some more features, e.g., to calculate overlaps etc. 
-See the reference documentation for these.
-
-In order to calculate the coverage vectors for our yeast RNA-Seq data, we first need
-a list of all the chromosomes in yeast::
-
-   >>> yeast_chroms = [ "2-micron", "MT", "I", "II", "III", "IV", "V", "VI", "VII",
-   ...    "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI" ]
-
-Now, we define a :class:`GenomicArray`:
-
-   >>> cvg = HTSeq.GenomicArray( yeast_chroms, stranded=True, typecode='i' )
-   
-As we specified ``stranded=True``, there are now two 
-:class:`StepVector <StepVector.StepVector>` objects for each
+Instead of listing all chromosomes, we instruct the GenomicArray to add chromosome
+vectors as needed, by specifiyng ``"auto"``. As we set ``stranded=True``, there are now two 
+chromosome vectors for each
 chromosome, all holding integer values (``typecode='i'``). They all have an
 "infinte" length as we did not specify the actual lengths of the chromosomes.
 
-.. doctest::
-
-   >>> import pprint
-   >>> pprint.pprint( cvg.step_vectors )  #doctest:+NORMALIZE_WHITESPACE
-    {'2-micron': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-                  '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'I': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'II': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'III': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'IV': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'IX': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'MT': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'V': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'VI': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'VII': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'VIII': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-              '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'X': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-           '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'XI': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'XII': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'XIII': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-              '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'XIV': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'XV': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-            '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>},
-     'XVI': {'+': <StepVector object, type 'i', index range 0:inf, 1 step(s)>,
-             '-': <StepVector object, type 'i', index range 0:inf, 1 step(s)>}}
-
-The integer values are all initialized to 0. We may put them to a value, say 100,
-at the genomic interval ``iv`` defined above::
-
-   >>> cvg[ iv ] = 100
- 
-If we want to add a value, we use::
-
-   >>> cvg.add_value( 50, iv )
-   
-To see the effect, let's make the interval slightly longer and then look at the steps::
-
-   >>> iv.start -= 30
-   >>> iv.end += 100
-   >>> pprint.pprint( list( cvg.get_steps( iv ) ) )
-   [(<GenomicInterval object 'II', [100204,100234), strand '+'>, 0),
-    (<GenomicInterval object 'II', [100234,100789), strand '+'>, 150),
-    (<GenomicInterval object 'II', [100789,100889), strand '+'>, 0)]
-
-With these tools, we can now calculate the coverage vector very easily. We just iterate
+To build the coverage vectors, we now simply iterate
 through all the reads and add the value 1 at the interval to which each read was aligned
 to::
 
    >>> alignment_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
-   >>> cvg = HTSeq.GenomicArray( yeast_chroms, stranded=True, typecode='i' )
+   >>> cvg = HTSeq.GenomicArray( "auto", stranded=True, typecode='i' )
    >>> for alngt in alignment_file:
    ...    if alngt.aligned:
-   ...       cvg.add_value( 1, alngt.iv )
+   ...       cvg[ alngt.iv ] += 1
 
 We can plot an excerpt of this with:   
 
@@ -441,7 +435,7 @@ To deal with this data, we will use a :class:`GenomicArray`. A GenomicArray can 
 not only numerical data but also arbitrary Python objects (with `typecode` `'O'`).
 Hence, we can assign those features that correspond to exons, to steps in the GenomicArray::
 
-   >>> exons = HTSeq.GenomicArray( yeast_chroms, stranded=False, typecode='O' )
+   >>> exons = HTSeq.GenomicArray( "auto", stranded=False, typecode='O' )
    >>> for feature in gtf_file:
    ...    if feature.type == "exon":
    ...       exons[ feature.iv ] = feature
@@ -449,13 +443,15 @@ Hence, we can assign those features that correspond to exons, to steps in the Ge
 Now, we can ask what exons occur in a certain interval::
 
    >>> iv = HTSeq.GenomicInterval( "II", 120000, 125000, "." )
-   >>> pprint.pprint( list( exons.get_steps( iv ) ) )
-   [(<GenomicInterval object 'II', [120000,121877), strand '.'>,
-     <GenomicFeature: exon 'YBL052C' at II: 121876 -> 119382 (strand '-')>),
-    (<GenomicInterval object 'II', [121877,122755), strand '.'>, None),
+   >>> list( exons[iv].steps() ) #doctest:+NORMALIZE_WHITESPACE
+   [(<GenomicInterval object 'II', [120000,121877), strand '.'>, 
+         <GenomicFeature: exon 'YBL052C' at II: 121876 -> 119382 (strand '-')>),
+    (<GenomicInterval object 'II', [121877,122755), strand '.'>, 
+         None),
     (<GenomicInterval object 'II', [122755,124762), strand '.'>,
-     <GenomicFeature: exon 'YBL051C' at II: 124761 -> 122756 (strand '-')>),
-    (<GenomicInterval object 'II', [124762,125000), strand '.'>, None)]
+         <GenomicFeature: exon 'YBL051C' at II: 124761 -> 122756 (strand '-')>),
+    (<GenomicInterval object 'II', [124762,125000), strand '.'>, 
+         None)]
 
 However, our RNA-Seq experiment was not strand-specific, i.e., we do not know whether
 the reads came from the plus or the minus strand. This is why we defined the GenomicArray
@@ -468,17 +464,17 @@ The proper solution is to store not just single features at an interval but sets
 features which are present there. A specialization of :class:`GenomicArray`, 
 :class:`GenomicArrayOfSets` is offered to simplify this::
 
-   >>> exons = HTSeq.GenomicArrayOfSets( yeast_chroms, stranded=False )
+   >>> exons = HTSeq.GenomicArrayOfSets( "auto", stranded=False )
 
 We populate the array again with the feature data. This time, we use the 
-:meth:`add_value <GenomicArrayOfSets.add_value>`
-method, which adds an object without overwriting what might already be there. Instead,
+``+=``, which, for a GenomicArrayOfSets, does not mean numerical addition,
+but adds an object without overwriting what might already be there. Instead,
 it uses sets to deal with overlaps. (Also, we only store the gene name this time, as this
 will be more convenient later).
  
    >>> for feature in gtf_file:
    ...    if feature.type == "exon":
-   ...       exons.add_value( feature.name, feature.iv )
+   ...       exons[ feature.iv ] += feature.name
 
 Assume we have a read covering this interval::
 
@@ -487,10 +483,11 @@ Assume we have a read covering this interval::
 Its left half covers two genes (YCL058C, YCL058W-A), but its right half only
 YCL058C because YCL058W-A end in the middle of the read::
 
-   >>> pprint.pprint( list( exons.get_steps( iv ) ) )
+   >>> list( exons[iv].steps() )   #doctest:+NORMALIZE_WHITESPACE
    [(<GenomicInterval object 'III', [23850,23925), strand '.'>,
-     set(['YCL058C', 'YCL058W-A'])),
-    (<GenomicInterval object 'III', [23925,23950), strand '.'>, set(['YCL058C']))]
+        set(['YCL058C', 'YCL058W-A'])),
+    (<GenomicInterval object 'III', [23925,23950), strand '.'>, 
+        set(['YCL058C']))]
 
 Assuming the transcription boundaries in our GTF file to be correct, we may conclude
 that this read is from the gene that appears in both steps and not from the one that
@@ -500,7 +497,7 @@ names for each step, and we have to find the intersection of all these. This can
 coded as follows::
 
    >>> intersection_set = None
-   >>> for step_set in exons.get_steps( iv, values_only=True ):
+   >>> for iv2, step_set in exons[iv].steps():
    ...    if intersection_set is None:
    ...       intersection_set = step_set.copy()
    ...    else:
@@ -509,9 +506,8 @@ coded as follows::
    >>> print intersection_set
    set(['YCL058C'])
 
-Here, we have used the ``values_only`` option of :meth:`GenomicArray.get_steps`, as we are not
-interested in the intervals, only in the sets. When we look at the first step, we make a
-copy of the step's (in order to not disturb the values stored in ``exons``.) For the following
+When we look at the first step, we make a
+copy of the steps (in order to not disturb the values stored in ``exons``.) For the following
 steps, we use the **intersection_update**
 method Python's standard **set** class, which performs a set intersection in 
 place. Afterwards, we have a set with precisely one element. Getting this one 
@@ -535,7 +531,7 @@ Now, we can finally count::
    >>> for alnmt in sam_file:
    ...    if alnmt.aligned:
    ...       intersection_set = None
-   ...       for step_set in exons.get_steps( alnmt.iv, values_only=True ):
+   ...       for iv2, step_set in exons[ alnmt.iv ].steps():
    ...           if intersection_set is None:
    ...              intersection_set = step_set.copy()
    ...           else:

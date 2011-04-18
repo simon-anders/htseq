@@ -26,8 +26,6 @@
    class step_vector_for_python : public step_vector<T>
    {
      public:
-      step_vector_for_python( long int length, 
-         long int min_index_=0 );
       step_vector_pystyle_iterator<T> get_all_values_pystyle( ) const;
       step_vector_pystyle_iterator<T> get_values_pystyle( long int from ) const;
       int num_values( ) const;
@@ -40,12 +38,6 @@
     : current( first ), last( last_ ) 
    {
    }
-
-   template< class T >
-   step_vector_for_python<T>::step_vector_for_python( long int length, 
-         long int min_index_ )
-    : step_vector<T>( length, min_index_ )
-   {}
 
    template< class T >
    step_vector_pystyle_iterator<T> step_vector_for_python<T>::get_all_values_pystyle( ) const
@@ -111,12 +103,12 @@ class step_vector_pystyle_iterator
    step_vector_pystyle_iterator<T> * __iter__( );   
 };
 
-#define TRY_CATCH_INDEX \
+#define TRY_CATCH_INDEX                                                    \
    try {                                                                   \
       $action                                                              \
    } catch (std::out_of_range &e) {                                        \
       SWIG_exception(SWIG_IndexError, e.what() );                          \
-   } catch (type_error_non_arith &e) {                                               \
+   } catch (type_error_non_arith &e) {                                     \
       SWIG_exception(SWIG_TypeError, "Illegal arithmetic operation" );     \
    }
 
@@ -126,9 +118,9 @@ class step_vector_pystyle_iterator
 template< class T >
 class step_vector_for_python {
   public: 
-   long int min_index;
-   long int max_index;
-   step_vector( long int length, long int min_index_=0 );
+   static const long int min_index;
+   static const long int max_index;
+   step_vector_for_python( );
    void set_value( long int from, long int to, T value );
    void add_value( long int from, long int to, T value );
    step_vector_pystyle_iterator<T> get_all_values_pystyle( ) const;  
@@ -178,7 +170,8 @@ class StepVector( object ):
 
    """
 
-   def __init__( self, length = sys.maxint, typecode = 'd', start_index = 0 ):
+   @classmethod
+   def create( cls, length = sys.maxint, typecode = 'd', start_index = 0 ):
       """Construct a StepVector of the given length, with indices starting
       at the given start_index and counting up to (but not including)
       start_index + length.
@@ -202,9 +195,13 @@ class StepVector( object ):
          swigclass = _StepVector_obj
       else:
          raise ValueError, "unsupported typecode"
-      self._typecode = typecode
-      self._swigobj = swigclass( length, start_index )    
-   
+      obj = cls()
+      obj._typecode = typecode
+      obj._swigobj = swigclass( )    
+      obj.start = start_index
+      obj.stop = start_index + length
+      return obj
+     
    def __setitem__( self, index, value ):
       """To set element i of StepVector sv to the value v, write
          sv[i] = v
@@ -216,18 +213,34 @@ class StepVector( object ):
       item individually in a loop from i to j will result in the value v being
       stored many times.
       """
+      if isinstance( value, StepVector ):
+         if self._swigobj is value._swigobj and \
+               value.start == index.start and value.stop == index.stop:
+            return
+         else:
+            raise NotImplemented, "Stepvector-to-Stepvector assignment still missing"
       if isinstance( index, slice ):
          if index.step is not None and index.step != 1:
              raise ValueError, "Striding slices (i.e., step != 1) are not supported"
-         start = index.start if index.start is not None else self.start_index()
-         stop = index.stop if index.stop is not None else ( start + len(self) )
+         if index.start is None:
+            start = self.start
+         else:
+            if index.start < self.start:
+               raise IndexError, "start too small"
+            start = index.start
+         if index.stop is None:
+            stop = self.stop
+         else:
+            if index.stop > self.stop:
+               raise IndexError, "stop too large"
+            stop = index.stop
          self._swigobj.set_value( start, stop-1, value )
          # Note the "-1": The C++ object uses closed intervals, but we follow
          # Python convention here and use half-open ones.
       else:
          self._swigobj.set_value( index, index, value )
     
-   def get_steps( self, start=None, stop=None, values_only = False ):
+   def get_steps( self, values_only = False, merge_steps=True ):
       """To get a succinct representation of the StepVector's content, call
       the 'get_steps' method. It returns an iterator that generates triples
       of values. Each triple contains one step, giving first the start index
@@ -241,19 +254,16 @@ class StepVector( object ):
       boundaries. Then, set 'values_only' to true, and the iterator generates
       only the values insted of the triples.
       """
-      if start is None:
-         startvals = self._swigobj.get_all_values_pystyle( )
-         pair = startvals.next()
-         prevstart, prevval = pair.first, pair.second
-      else:
-         startvals = self._swigobj.get_values_pystyle( start )
-         prevstart = start
-         prevval = startvals.next().second
+      startvals = self._swigobj.get_values_pystyle( self.start )
+      prevstart = self.start
+      prevval = startvals.next().second
       for pair in startvals:
          stepstart, value = pair.first, pair.second
-         if stop is not None and stepstart >= stop:
+         if merge_steps and value == prevval:
+            continue
+         if self.stop is not None and stepstart >= self.stop:
             if not values_only:
-               yield prevstart, stop, prevval
+               yield prevstart, self.stop, prevval
             else:
                yield prevval
             return
@@ -264,10 +274,7 @@ class StepVector( object ):
          prevstart, prevval = stepstart, value
       else:
          if not values_only:
-            if stop is None: 
-               yield prevstart, self._swigobj.max_index+1, prevval
-            else:
-               yield prevstart, min( stop, self._swigobj.max_index+1), prevval
+            yield prevstart, min( self.stop, self._swigobj.max_index+1), prevval
          else:
             yield prevval
 
@@ -275,22 +282,29 @@ class StepVector( object ):
       """Given a StepVector sv, writing sv[i] returns sv's element i (where i
       is an integer). 
       
-      If you use a slice, i.e., 'sv[i:j]', you get a new StepVector which
-      contains the elements from i to j. Beware that this performs a (shallow) 
-      copy, i.e., if you need performance, using the 'get_steps' method may
-      be preferable.
-      
-      Calling 'list' on a StepVector returned by 'sv[i:j]' is a convenient way
-      to get a part of a Stepvector as an ordinary list, e.g., for inspection.      
+      If you use a slice, i.e., 'sv[i:j]', you get a view on the StepVector,
+      i.e., the same data, but changed boundaries.
       """
       if isinstance( index, slice ):
          if index.step is not None and index.step != 1:
              raise ValueError, "Striding slices (i.e., step != 1) are not supported"
-         start = index.start if index.start is not None else self.start_index()
-         stop = index.stop if index.stop is not None else ( start + len(self) )
-         res = StepVector( stop - start, self._typecode, start )
-         for stepstart, stepstop, value in self.get_steps( start, stop ):
-            res[ stepstart : stepstop ] = value
+         if index.start is None:
+            start = self.start
+         else:
+            if index.start < self.start:
+               raise IndexError, "start too small"
+            start = index.start
+         if index.stop is None:
+            stop = self.stop
+         else:
+            if index.stop > self.stop:
+               raise IndexError, "stop too large"
+            stop = index.stop
+         res = self.__class__()
+         res._typecode = self.typecode
+         res._swigobj = self._swigobj
+         res.start = start
+         res.stop = stop
          return res
       else:
          return self._swigobj.get_values_pystyle( index ).next().second
@@ -306,14 +320,14 @@ class StepVector( object ):
             yield value
        
    def __repr__( self ):
-      if self.start_index() == -sys.maxint - 1:
+      if self.start == -sys.maxint - 1:
          start_s = "-inf"
       else:
-         start_s = str( self.start_index() )
-      if len(self) == sys.maxint:
+         start_s = str( self.start )
+      if self.stop == sys.maxint:
          stop_s = "inf"
       else:
-         stop_s = str( self.start_index() + len(self) )
+         stop_s = str( self.stop )
       return "<%s object, type '%s', index range %s:%s, %d step(s)>" % (
          self.__class__.__name__, self.typecode(), start_s,
          stop_s, self.num_steps() )
@@ -322,24 +336,17 @@ class StepVector( object ):
       "Returns the typecode."
       return self._typecode
       
-   def start_index( self ):
-      "Returns the start index."
-      return self._swigobj.min_index
-      
    def __len__( self ):
       """The length of a StepVector is defined by its index range, not by
       the number of steps.
       """
-      return self._swigobj.max_index - self._swigobj.min_index + 1
+      return self.stop - self.start
       
    def num_steps( self ):
       """Returns the number of steps, i.e., the number of triples that get_steps
       returns.
       """
       return self._swigobj.num_values()
-      
-   def __copy__( self ):
-      return self[:]
       
    def __eq__( self, other ):
       """StepVectors can be compared for equality. This is conceptually done
@@ -373,17 +380,14 @@ class StepVector( object ):
    def __reduce__( self ):
       return ( _StepVector_unpickle, ( len(self), self.typecode(),
          self.start_index(), list( self.get_steps() ) ) )
+         # TODO: Is it wise to create a list here?
     
-   def add_value( self, value, start=None, stop=None ):
-      """Adds the given value to the vector elements given by start and stop.
-      If they are missing, the beginning and/or end of the vector is taken.
-      """
-      self._swigobj.add_value( 
-         start if start is not None else self._swigobj.min_index,
-         stop-1 if stop is not None else self._swigobj.max_index,
-         value )
+   def __iadd__( self, value ):
+      self._swigobj.add_value( self.start, self.stop-1, value )
+      return self
     
    def apply( self, func, start = None, stop = None ):
+      # TODO: check!
       for stepstart, stepstop, value in self.get_steps( start, stop ):
          self[ stepstart : stepstop ] = func( value )
       
