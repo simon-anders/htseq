@@ -3,7 +3,7 @@
 
 #include <map>
 #include <stdexcept>
-#include <limits>
+#include <climits>
 #include <iostream>  //for now only
 
 template< class T >
@@ -11,10 +11,10 @@ class step_vector {
   protected:
    std::map< long int, T > m;
   public: 
-   long int min_index;
-   long int max_index;
+   static const long int min_index = LONG_MIN;
+   static const long int max_index = LONG_MAX;
    typedef typename std::map< long int, T >::const_iterator const_iterator;
-   step_vector( long int length, long int min_index_=0 );
+   step_vector( );
    const T operator[]( long int i ) const;
    void set_value( long int from, long int to, T value );
    void add_value( long int from, long int to, T value );
@@ -25,9 +25,7 @@ class step_vector {
 };
 
 template< class T >
-step_vector<T>::step_vector( long int length, long int min_index_ ) 
- : min_index( min_index_ ),
-   max_index( min_index_ + length - 1 )
+step_vector<T>::step_vector( ) 
 {
    m[ min_index ] =  T();
 }
@@ -35,10 +33,6 @@ step_vector<T>::step_vector( long int length, long int min_index_ )
 template< class T >
 const T step_vector<T>::operator[]( long int i ) const
 {
-   if( i > max_index ) 
-      throw std::out_of_range( "Index too large in step_vector." );
-   if( i < min_index ) 
-      throw std::out_of_range( "Index too small in step_vector." );
    const_iterator it = m.upper_bound( i );
    it--;
    return it->second;
@@ -49,10 +43,6 @@ void step_vector<T>::set_value( long int from, long int to, T value )
 {
    if( from > to )
       throw std::out_of_range( "Indices reversed in step_vector." );
-   if( to > max_index )
-      throw std::out_of_range( "Index too large in step_vector." );
-   if( from < min_index )
-      throw std::out_of_range( "Index too small in step_vector." );
 
    // Unless the new step extends to the end, we need to insert a new
    // value afterwards unless the step to the right has the same value
@@ -107,10 +97,6 @@ void step_vector<T>::add_value( long int from, long int to, T value )
 {
    if( from > to )
       throw std::out_of_range( "Indices reversed in step_vector." );
-   if( to > max_index )
-      throw std::out_of_range( "Index too large in step_vector." );
-   if( from < min_index )
-      throw std::out_of_range( "Index too small in step_vector." );
    
    if( to < max_index ) {
       T next_value = (*this)[to+1];
@@ -140,10 +126,6 @@ void step_vector<T>::apply_to_values( long int from, long int to,
 {
    if( from > to )
       throw std::out_of_range( "Indices reversed in step_vector." );
-   if( to > max_index )
-      throw std::out_of_range( "Index too large in step_vector." );
-   if( from < min_index )
-      throw std::out_of_range( "Index too small in step_vector." );
    
    if( to < max_index ) {
       T next_value = (*this)[to+1];
@@ -188,22 +170,5 @@ typename step_vector<T>::const_iterator step_vector<T>::end( ) const
    return m.end();
 }   
 
-
-//==================== extra stuff for Python =============
-
-
-
-      
-                  
-/*
-void test()
-{
-   step_vector_for_python<double> sv( 100 );
-   sv.get_all_values_pystyle();
-   step_vector_for_python<double>::const_iterator it1 = sv.begin();
-   step_vector_for_python<double>::const_iterator it2 = sv.end();
-   step_vector_pystyle_iterator<double>( it1, it2 );
-}
-*/
 
 #endif //_STEP_VECTOR_H_
