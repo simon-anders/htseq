@@ -661,7 +661,7 @@ class VariantCall( object ):
     
     def unpack_info( self, infodict ):
         tmp = {}
-        for token in self.info.split(";"):
+        for token in self.info.strip(";").split(";"):
             if re.compile("=").search(token):
                 token = token.split("=")
                 if infodict.has_key( token[0] ):
@@ -745,6 +745,15 @@ class BAM_Reader( object ):
         except ImportError:
            print "Please Install PySam to use the BAM_Reader Class (http://code.google.com/p/pysam/)"
            raise
+    
+    def __getitem__( self, iv ):
+        if not isinstance( iv, GenomicInterval ):
+           raise TypeError, "Use a HTSeq.GenomicInterval to access regions within .bam-file!"
+        sf = pysam.Samfile( self.filename, "rb" )
+        if not sf._hasIndex():
+           raise ValueError, "The .bam-file has no index, random-access is disabled!"
+        for pa in sf.fetch( iv.chrom, iv.start, iv.end ):
+            yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
     
     def __iter__( self ):
         sf = pysam.Samfile(self.filename, "rb")
