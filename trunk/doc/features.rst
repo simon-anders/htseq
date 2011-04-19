@@ -153,4 +153,98 @@ and each describes one line of a GFF file. See Section :ref:`tour` for an exampl
    This is the function that :class:`GFF_Reader` uses to parse the attribute column. (See :attr:`GenomicFeature.attr`.)
    It returns a dict, or, if requested, a pair of the dict and the first value.
 
+``VCF_Reader`` and ``VariantCall``
+=====================================
 
+VCF is a text file format (most likely stored in a compressed manner). It contains meta-information lines, a header line, and then data lines each containing information about a position in the genome.
+
+There is an option whether to contain genotype information on samples for each position or not.
+
+See the definitions at
+
+.. _VCF: http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-40
+.. _VCF (for structural variants): http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/VCF%20%28Variant%20Call%20Format%29%20version%204.0/encoding-structural-variants
+
+As usual, there is a parser class, called **VCF_Reader**, that can generate an
+iterator of objects describing the structural variant calls. These objects are of type :class`VariantCall`
+and each describes one line of a VCF file. See Section :ref:`tour` for an example.
+
+.. class:: VCF_Reader( filename_or_sequence )
+
+   As a subclass of :class:`FileOrSequence`, VCF_Reader can be initialized either
+   with a file name or with an open file or another sequence of lines.
+   
+   When requesting an iterator, it generates objects of type :class:`VariantCall`.
+      
+      .. attribute:: GFF_Reader.metadata
+      
+         GFF_Reader skips all lines starting with a single '#' as this marks
+         a comment. However, lines starying with '##' contain meta data (at least
+         accoring to the Sanger Institute's version of the GFF standard.) Such meta
+         data has the format ``##key value``. When a metadata line is encountered,
+         it is added to the ``metadata`` dictionary.
+      
+      .. function:: parse_meta( header_filename = None )
+      
+         The VCF_Reader normally does not parse the meta-information and also the :class:`VariantCall` does not contain
+         unpacked metainformation. The function parse_meta reads the header information either from the 
+         attached :class:`FileOrSequence` or from a file connection being opened to a provided header_filename.
+
+      .. function:: make_info_dict( )
+      
+         This function will parse the info string and create the attribute :attribute:`infodict` which contains a dict 
+         with key:value-pairs containig the type-information for each entry of the :class:`VariantCall`'s info field.
+  
+.. class:: VariantCall( line, nsamples = 0, sampleids=[]  )
+
+   A VariantCall object always contains the following attributes:
+   
+      .. attribute:: VariantCall.alt
+         
+         The alternative base(s) of the :class:`VariantCall`'. This is an array containing all called alternatives.
+         
+      .. attribute:: VariantCall.chrom
+         
+         The Chromosome on which the :class:`VariantCall`' lies.
+         
+      .. attribute:: VariantCall.filter
+         
+         This specifies if the :class:`VariantCall`' passed all the filters given in the .vcf-header (value=PASS) or 
+         contains a list of filters that failed (the filter-id's are specified in the header also).
+         
+      .. attribute:: VariantCall.format
+         
+         Contains the format string specifying which per-sample information is stored
+         in :attribute:`VariantCall.samples`.
+         
+      .. attribute:: VariantCall.id
+         
+         The id of the :class:`VariantCall`', if it has been found in any database, for unknown variants this will be 
+         ".".
+         
+      .. attribute:: VariantCall.info
+         
+         This will contain either the string version of the info field for this :class:`VariantCall`' or a dict with the 
+         parsed and processed info-string.
+         
+      .. attribute:: VariantCall.pos
+         
+         A :class:`HTSeq.GenomicPosition` that specifies the position of the :class:`VariantCall`'.
+         
+      .. attribute:: VariantCall.qual
+         
+         The quality of the :class:`VariantCall`'.
+         
+      .. attribute:: VariantCall.ref
+         
+         The reference base(s) of the :class:`VariantCall`'.
+
+      .. attribute:: VariantCall.samples
+         
+         A dict mapping sample-id's to subdicts which use the :attribute:`VariantCall.format` as 
+         keys to store the per-sample information.
+         
+      .. function:: VariantCall.unpack_info( infodict )
+         
+         This function parses the info-string and replaces it with a dict rperesentation if the infodict of the 
+         originating VCF_Reader is provided.
