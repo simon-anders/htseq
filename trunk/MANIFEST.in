@@ -1,5 +1,5 @@
 include src/step_vector.h
 include VERSION
-recursive-exclude example_data *
-recursive-exclude test *
+prune example_data
+prune test
 exclude todo.txt
