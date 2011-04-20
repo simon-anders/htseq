@@ -157,36 +157,12 @@ fragment extends beyond the read, to a length of about 200 bp (the fragment size
 which Barski et al. selected). Maybe we get a better picture by calculating
 the coverage not from the reads but from the *fragments*, i.e., the reads extended
 to fragment size. For this, we just one
-line, to extend the read to 200 bp. Using this, we now put the whole script together::
+line, to extend the read to 200 bp. Using this, we now put the whole script together:
 
-   import HTSeq
-   import numpy
-   from matplotlib import pyplot
+.. literalinclude:: tss1.py 
 
-   bamfile = HTSeq.BAM_Reader( "SRR001432_head.bam" )
-   gtffile = HTSeq.GFF_Reader( "Homo_sapiens.GRCh37.56_chrom1.gtf" )
-   halfwinwidth = 3000
-   fragmentsize = 200
-
-   coverage = HTSeq.GenomicArray( "auto", stranded=False, typecode="i" )
-   for almnt in bamfile:
-      if almnt.aligned:
-         almnt.iv.length = fragmentsize
-         coverage[ almnt.iv ] += 1
-
-   tsspos = set()
-   for feature in gtffile:
-      if feature.type == "exon" and feature.attr["exon_number"] == "1":
-         tsspos.add( feature.iv.start_d_as_pos )
-
-   profile = numpy.zeros( 2*halfwinwidth, dtype='i' )      
-   for p in tsspos:
-      window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
-      wincvg = numpy.fromiter( coverage[window], dtype='i', count=2*halfwinwidth )
-      if p.strand == "+":
-         profile += wincvg
-      else:
-         profile += wincvg[::-1]
+The script produces a ``profile`` variable whhich we can plot by adding these lines
+to it::
 
    pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )
    pyplot.show()
@@ -281,40 +257,12 @@ get extended into the wrong direction, such that ``start_in_windows`` and
 need to be added to deal with these cases, and then, our new script gives the 
 same result as the previous one. 
 
-Here is the complete code::
+Here is the complete code:
 
-   import HTSeq
-   import numpy
-   from matplotlib import pyplot
+.. literalinclude:: tss2.py 
 
-   sortedbamfile = HTSeq.BAM_Reader( "SRR001432_head_sorted.bam" )
-   gtffile = HTSeq.GFF_Reader( "Homo_sapiens.GRCh37.56_chrom1.gtf" )
-   halfwinwidth = 3000
-   fragmentsize = 200
+As before, to get a plot, add::
 
-   tsspos = set()
-   for feature in gtffile:
-      if feature.type == "exon" and feature.attr["exon_number"] == "1":
-         tsspos.add( feature.iv.start_d_as_pos )
-
-   profile = numpy.zeros( 2*halfwinwidth, dtype='i' )   
-   for p in tsspos:
-      window = HTSeq.GenomicInterval( p.chrom, 
-          p.pos - halfwinwidth - fragmentsize, p.pos + halfwinwidth + fragmentsize, "." )
-      for almnt in sortedbamfile[ window ]:
-         almnt.iv.length = fragmentsize
-         if p.strand == "+":
-            start_in_window = almnt.iv.start - p.pos + halfwinwidth 
-            end_in_window   = almnt.iv.end   - p.pos + halfwinwidth 
-         else:
-            start_in_window = p.pos + halfwinwidth - almnt.iv.end
-            end_in_window   = p.pos + halfwinwidth - almnt.iv.start
-         start_in_window = max( start_in_window, 0 )
-         end_in_window = min( end_in_window, 2*halfwinwidth )
-         if start_in_window >= 2*halfwinwidth or end_in_window < 0:
-            continue
-         profile[ start_in_window : end_in_window ] += 1
-   
    pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )
    pyplot.show()
 
@@ -396,41 +344,12 @@ For each of the values for ``p`` in ``s``, we calculate values for ``start_in_wi
 and ``stop_in_window``, as before, and then add ones in the ``profile`` vector
 at the appropriate places. 
 
-Putting all this together leads to this script::
+Putting all this together leads to this script:
    
-   import HTSeq
-   import numpy
-   from matplotlib import pyplot
-
-   bamfile = HTSeq.BAM_Reader( "SRR001432_head.bam" )
-   gtffile = HTSeq.GFF_Reader( "Homo_sapiens.GRCh37.56_chrom1.gtf" )
-   halfwinwidth = 3000
-   fragmentsize = 200
-
-   tsspos = HTSeq.GenomicArrayOfSets( "auto", stranded=False )
-   for feature in gtffile:
-      if feature.type == "exon" and feature.attr["exon_number"] == "1":
-         p = feature.iv.start_d_as_pos
-         window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
-         tsspos[ window ] += p
-
-   profile = numpy.zeros( 2*halfwinwidth, dtype="i" )
-   for almnt in bamfile:
-      if almnt.aligned:
-         almnt.iv.length = fragmentsize
-         s = set()
-         for step_iv, step_set in tsspos[ almnt.iv ].steps():
-            s |= step_set
-         for p in s:
-            if p.strand == "+":
-               start_in_window = almnt.iv.start - p.pos + halfwinwidth
-               end_in_window   = almnt.iv.end   - p.pos + halfwinwidth
-            else:
-               start_in_window = p.pos + halfwinwidth - almnt.iv.end
-               end_in_window   = p.pos + halfwinwidth - almnt.iv.start
-            start_in_window = max( start_in_window, 0 )
-            end_in_window = min( end_in_window, 2*halfwinwidth )
-            profile[ start_in_window : end_in_window ] += 1
+.. literalinclude:: tss3.py
+   
+Again, to get a plot, add::
 
    pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )
    pyplot.show()
+   
