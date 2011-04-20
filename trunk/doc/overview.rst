@@ -37,6 +37,12 @@ Documentation overview
   demonstrates typical analysis steps with explicit examples. Read this first, and 
   then see the Reference for details.
   
+* :ref:`tss`
+
+  This chapter explains typical usage patterns for HTSeq by explaining in detail 
+  three different solutions to the same programming task.
+
+
 * Reference documentation
 
   The various classes of `HTSeq` are described here.

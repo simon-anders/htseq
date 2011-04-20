@@ -205,7 +205,7 @@ mention these possibilities as they may be useful when working with the full cov
 is required. Here, however, we can do otherwise.
 
 Using indexed BAM files
-=======================
+-----------------------
 
 We do not need the coverage everythere. We only need it close to the TSSs. We can
 sort our BAM file by position (``samtools sort``) and index it (``samtools index``)
@@ -224,13 +224,19 @@ Then, we can simply get a list of all reads within this interval as follows:
 
    >>> sortedbamfile = HTSeq.BAM_Reader( "SRR001432_head_sorted.bam" )
    >>> for almnt in sortedbamfile[ window ]:
-   ...     print almnt   #doctest:+ELLIPSIS
+   ...     print almnt   #doctest:+ELLIPSIS +NORMALIZE_WHITESPACE
    <SAM_Alignment object: Paired-end Read 'SRR001432.90270 USI-EAS21_0008_3445:8:3:245:279 length=25' aligned to 1:[145437532,145437557)/->
     ...
-    ...
    <SAM_Alignment object: Paired-end Read 'SRR001432.205754 USI-EAS21_0008_3445:8:5:217:355 length=25' aligned to 1:[145440975,145441000)/->
+      
+Let's have a closer look at the last alignment. As before, we first extent the read to fragment size::
+
+   >>> fragmentsize = 200
+   >>> almnt.iv.length = fragmentsize
+   >>> almnt
+   <SAM_Alignment object: Paired-end Read 'SRR001432.205754 USI-EAS21_0008_3445:8:5:217:355 length=25' aligned to 1:[145440800,145441000)/->
    
-Let's have a closer look at the last alignment. It has been aligned to the "-"
+The read has been aligned to the "-"
 strand, and hence, we should look at its distance to the *end* of the window
 (i.e., ``p.pos``, the position of the TSS, plus half the window width)
 to see where it should be added to the ``profile`` vector::
@@ -238,7 +244,7 @@ to see where it should be added to the ``profile`` vector::
    >>> start_in_window = p.pos + halfwinwidth - almnt.iv.end
    >>> end_in_window   = p.pos + halfwinwidth - almnt.iv.start
    >>> print start_in_window, end_in_window
-   1814 1839
+   1814 2014
 
 To account for this read, we should add ones in the profile vector along
 the indicated interval.
@@ -247,7 +253,7 @@ Using this, we can go through the set of all TSS positions (in the ``tsspos``
 set variable that we created above) and for each TSS position, loop through
 all aligned reads close to it. Here is this double loop::
 
-   >>> profileB = numpy.zeros( 2*halfwinwidth, dtype='i' )   
+   >>> profile = numpy.zeros( 2*halfwinwidth, dtype='i' )   
    ... for p in tsspos:
    ...    window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
    ...    for almnt in sortedbamfile[ window ]:
@@ -258,7 +264,7 @@ all aligned reads close to it. Here is this double loop::
    ...       else:
    ...          start_in_window = p.pos + halfwinwidth - almnt.iv.end
    ...          end_in_window   = p.pos + halfwinwidth - almnt.iv.start
-   ...       profileB[ start_in_window : end_in_window ] += 1
+   ...       profile[ start_in_window : end_in_window ] += 1
 
 This loop now runs a good deal faster than our first attempt, and has a much
 smaller memory footprint.
@@ -314,7 +320,7 @@ Here is the complete code::
 
    
 Streaming through all reads
-===========================
+---------------------------
 
 The previous solution requires sorting and indexing the BAM file. For large amounts
 of data, this may be a burden, and hence, we show a third solution that does not
@@ -329,11 +335,15 @@ easy access, we denote each winow with an :class:`GenomicPosition` object
 giving its midpoint, i.e., the actual TSS position, as follows::
 
    >>> tssarray = HTSeq.GenomicArrayOfSets( "auto", stranded=False )
-   ... for feature in gtffile:
+   >>> for feature in gtffile:
    ...    if feature.type == "exon" and feature.attr["exon_number"] == "1":
    ...       p = feature.iv.start_d_as_pos
    ...       window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
    ...       tssarray[ window ] += p
+
+   >>> len( list( tssarray.chrom_vectors["1"]["."].steps() ) )
+   30085
+
 
 As before, ``p`` is the position of the TSS, and ``window`` is the interval 
 around it. 
@@ -342,47 +352,46 @@ To demonstrate how this data structure can be used, we take a specific read that
 we selected as a good example::
 
    >>> for almnt in bamfile:
-   ...     if almnt.read.name.startswith( "SRR001432.1369 " ):
+   ...     if almnt.read.name.startswith( "SRR001432.700 " ):
    ...         break
    >>> almnt
-   <SAM_Alignment object: Paired-end Read 'SRR001432.100508 USI-EAS21_0008_3445:8:3:340:120 length=25' aligned to 1:[235530417,235530442)/+>
+   <SAM_Alignment object: Paired-end Read 'SRR001432.700 USI-EAS21_0008_3445:8:1:35:294 length=25' aligned to 1:[169677855,169677880)/->
 
-As before, we extent the read to fragment size::
+Again, we extent the read to fragment size::
 
    >>> almnt.iv.length = fragmentsize
    >>> almnt
-   <SAM_Alignment object: Paired-end Read 'SRR001432.1369 USI-EAS21_0008_3445:8:1:834:437 length=25' aligned to 1:[156695201,156695226)/+>
+   <SAM_Alignment object: Paired-end Read 'SRR001432.700 USI-EAS21_0008_3445:8:1:35:294 length=25' aligned to 1:[169677680,169677880)/->
    
-To see which windows the read covers, we subset the ``tssarray`` and ask for steps:
+To see which windows the read covers, we subset the ``tssarray`` and ask for steps
+that the fragment in ``almnt`` covers:
 
-   >>> print "Fragment with alignment", almnt.iv, "touches these steps in tssarray:"
-   ... for step_iv, step_set in tssarray[ almnt.iv ].steps():
-   ...    print "   Step", iv, ", contained by these windows:"
+   >>> for step_iv, step_set in tssarray[ almnt.iv ].steps():
+   ...    print "Step", step_iv, ", contained by these windows:"
    ...    for p in step_set:
-   ...        print "      Window around TSS at", p
-   Fragment with alignment 1:[156695201,156695226)/+ touches these steps in tssarray:
-      Step 1:[156695220,156695226)/. , contained by these windows:
-         Window around TSS at 1:156697177/-
-         Window around TSS at 1:156695658/-
-      Step 1:[156695220,156695226)/. , contained by these windows:
-         Window around TSS at 1:156697177/-
-         Window around TSS at 1:156695658/-
-         Window around TSS at 1:156698220/-
-  
+   ...        print "   Window around TSS at", p
+   Step 1:[169677680,169677838)/. , contained by these windows:
+      Window around TSS at 1:169677780/-
+      Window around TSS at 1:169679672/-
+   Step 1:[169677838,169677880)/. , contained by these windows:
+      Window around TSS at 1:169680838/-
+      Window around TSS at 1:169679672/-
+      Window around TSS at 1:169677780/-
+
 As is typical for GenomicArrayOfSets, some TSSs appear in more than one step. To make
 sure that we don't count them twice, we take the union of all the step sets (with 
 the operator ``|=``, which means in-place union when used for Python sets):
   
 .. doctest::  
   
-  >>> s = set()
-  ... for step_iv, step_set in tssarray[ almnt.iv ].steps():
-  ...    s |= step_set
-  ... s  ##doctest:+NORMALIZE_WHITESPACE
-  set( [<GenomicPosition object '1':156697177, strand '-'>, 
-        <GenomicPosition object '1':156695658, strand '-'>, 
-        <GenomicPosition object '1':156698220, strand '-'>] )
- 
+   >>> s = set()
+   >>> for step_iv, step_set in tssarray[ almnt.iv ].steps():
+   ...    s |= step_set
+   >>> s  ##doctest:+NORMALIZE_WHITESPACE
+   set([<GenomicPosition object '1':169680838, strand '-'>, 
+        <GenomicPosition object '1':169677780, strand '-'>, 
+        <GenomicPosition object '1':169679672, strand '-'>])
+  
 For each of the values for ``p`` in ``s``, we calculate values for ``start_in_window`` 
 and ``stop_in_window``, as before, and then add ones in the ``profile`` vector
 at the appropriate places. 
