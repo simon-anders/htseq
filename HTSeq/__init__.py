@@ -740,22 +740,26 @@ class BAM_Reader( object ):
     def __init__( self, filename ):
         global pysam
         self.filename = filename
+        self.sf = None  # This one is only used by __getitem__
         try:
            import pysam
         except ImportError:
            print "Please Install PySam to use the BAM_Reader Class (http://code.google.com/p/pysam/)"
            raise
     
-    def __getitem__( self, iv ):
-        if not isinstance( iv, GenomicInterval ):
-           raise TypeError, "Use a HTSeq.GenomicInterval to access regions within .bam-file!"
-        sf = pysam.Samfile( self.filename, "rb" )
-        if not sf._hasIndex():
-           raise ValueError, "The .bam-file has no index, random-access is disabled!"
-        for pa in sf.fetch( iv.chrom, iv.start, iv.end ):
-            yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
-    
     def __iter__( self ):
         sf = pysam.Samfile(self.filename, "rb")
         for pa in sf:
             yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
+
+    def __getitem__( self, iv ):
+        if not isinstance( iv, GenomicInterval ):
+           raise TypeError, "Use a HTSeq.GenomicInterval to access regions within .bam-file!"        
+        if self.sf is None:
+           self.sf = pysam.Samfile( self.filename, "rb" )
+           if not self.sf._hasIndex():
+              raise ValueError, "The .bam-file has no index, random-access is disabled!"
+        for pa in self.sf.fetch( iv.chrom, iv.start+1, iv.end ):
+            yield SAM_Alignment.from_pysam_AlignedRead( pa, self.sf )
+    
+               
