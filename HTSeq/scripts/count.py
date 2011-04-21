@@ -36,7 +36,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    else:
       samoutfile = None
       
-   features = HTSeq.GenomicArrayOfSets( [], stranded )     
+   features = HTSeq.GenomicArrayOfSets( "auto", stranded )     
    counts = {}
 
    # Try to open samfile to fail early in case it is not there
@@ -47,8 +47,6 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    i = 0
    try:
       for f in gff:
-         if f.iv.chrom not in features.step_vectors.keys():
-            features.add_chrom( f.iv.chrom )
          if f.type == feature_type:
             try:
                feature_id = f.attr[ id_attribute ]
@@ -59,7 +57,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                sys.exit( "Feature %s at %s does not have strand information but you are "
                   "running htseq-count in stranded mode. Use '--stranded=no'." % 
                   ( f.name, f.iv ) )
-            features.add_value( feature_id, f.iv )
+            features[ f.iv ] += feature_id
             counts[ f.attr[ id_attribute ] ] = 0
          i += 1
          if i % 100000 == 0 and not quiet:
@@ -146,9 +144,9 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
             if overlap_mode == "union":
                fs = set()
                for iv in iv_seq:
-                  if iv.chrom not in features.step_vectors:
+                  if iv.chrom not in features.chrom_vectors:
                      raise UnknownChrom
-                  for fs2 in features.get_steps( iv, values_only=True ):
+                  for iv2, fs2 in features[ iv ].steps():
                      fs = fs.union( fs2 )
             elif overlap_mode == "intersection-strict" or overlap_mode == "intersection-nonempty":
                fs = None
