@@ -165,6 +165,9 @@ A ``GenomicArray`` is a collection of :class:`ChromVector` objects, either one o
 for each chromosome of a genome. It allows to access the data in these 
 transparently via :class:`GenomicInterval` objects.
 
+**Note: ``GenomicArray``'s interface changed significantly in version 0.5.0. Please
+see the Version History page.**
+
 Instantiation
    .. class:: GenomicArray( chroms, stranded=True, typecode='d', storage='step', memmap_dir='' )
 
