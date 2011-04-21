@@ -137,7 +137,7 @@ to get the profile::
    ...    else:
    ...       profile += wincvg[::-1]
 
-Note that we add the window coverage reversed ("`[::-1]`") if the gene was on the minus
+Note that we add the window coverage reversed ("``[::-1]``") if the gene was on the minus
 strand.
 
 Using matplotlib, we can plot this:

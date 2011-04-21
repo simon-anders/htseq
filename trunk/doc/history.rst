@@ -4,6 +4,48 @@
 Version history
 ***************
 
+Version 0.5.0
+=============
+
+2011-04-21
+
+- refactoring of GenomicArray class:
+
+  - field ``step_vectors`` replaced with ``chrom_vector``. These now contain
+    dicts of dicts of ``ChromVector`` objects rather than ``StepVector`` ones.
+    
+  - ``chrom_vectors`` is now always a dict of dict, even for unstranded GenomicArrays
+    to make it easier to loop over them. (The inner dict has either keys ``"+"``
+    and ``"-"``, or just one key, ``"."``.)
+    
+  - The new ``ChromVector`` class wraps the actual vector and supports three different
+    storage modes: ``step``, ``ndarray`` and ``memmap``, the latter two being numpy
+    arrays, without and with memory mapping.
+    
+  - The ``GenomicArray`` constructor now take two new arguments, one for the storage
+    class, one for the memmap directory (if needed).
+    
+  - The ``add_value`` methods had been replaced with an ``__iadd__`` method, to
+    enable the ``+=`` semantics.
+    
+  - Similarily, ``+=`` for ``GenomicArrayOfSets`` adds an element to the sets.
+  
+  - Instead of ``get_steps``, now use ``steps``.
+  
+  
+- new parser class ``VCF_Reader`` and record class ``VariantCall``
+
+- new parser class ``BAM_Reader``, to add BAM support (including indexed random access)
+  (requires PySam to be installed)
+
+- new documentation page :ref:`tss`
+
+- ``Fasta_Reader`` now allows indexed access to Fasta files (requires Pysam to be 
+  installed)
+  
+- peek function removed  
+
+
 Version 0.4.7
 =============
 
