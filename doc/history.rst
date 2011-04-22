@@ -45,6 +45,12 @@ Version 0.5.0
   
 - peek function removed  
 
+Patch Versions:
+
+- v0.5.0p1  (2011-04-22):
+
+  - build was incomplete; fixed
+
 
 Version 0.4.7
 =============
