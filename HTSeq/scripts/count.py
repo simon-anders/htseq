@@ -151,9 +151,9 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
             elif overlap_mode == "intersection-strict" or overlap_mode == "intersection-nonempty":
                fs = None
                for iv in iv_seq:
-                  if iv.chrom not in features.step_vectors:
+                  if iv.chrom not in features.chrom_vectors:
                      raise UnknownChrom
-                  for fs2 in features.get_steps( iv, values_only=True ):
+                  for iv2, fs2 in features[ iv ].steps():
                      if len(fs2) > 0 or overlap_mode == "intersection-strict":
                         if fs is None:
                            fs = fs2.copy()

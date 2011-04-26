@@ -51,6 +51,13 @@ Patch Versions:
 
   - build was incomplete; fixed
 
+- v0.5.0p2 (2011-04-22):
+
+  - build was still faulty; new try
+
+- v0.5.0p3 (2011-04-26)
+
+  - fixed regression bug in htseq-count
 
 Version 0.4.7
 =============
