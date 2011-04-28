@@ -118,9 +118,11 @@ With matplotlib, we can see that this vector is, in effect, not all zero:
 
 .. doctest::
 
-   >>> from matplotlib import pyplot
+   >>> from matplotlib import 
    >>> pyplot.plot( wincvg )    #doctest: +SKIP
    >>> pyplot.show()            #doctest: +SKIP
+
+.. image:: tss_fig1.png
 
 To sum up the profile, we initialize a numpy vector of the size of our window with zeroes::
 
@@ -147,6 +149,9 @@ Using matplotlib, we can plot this:
    >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )  #doctest: +SKIP
    >>> pyplot.show()  #doctest: +SKIP
 
+.. image:: tss_fig2.png
+
+
 We can see clearly that the reads concentrate around the TSS, with a prominent peak 
 a bit downstream (if you use matplotlib's interactive zoom, you can easily see that
 the peak is at 153 bp) and a dip upstream, at -79 bp.
@@ -166,6 +171,8 @@ to it::
 
    pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )
    pyplot.show()
+
+.. image:: tss_fig3.png
 
 The plot looks much smoother with the extended fragments.
 
@@ -229,7 +236,7 @@ Using this, we can go through the set of all TSS positions (in the ``tsspos``
 set variable that we created above) and for each TSS position, loop through
 all aligned reads close to it. Here is this double loop::
 
-   >>> profile = numpy.zeros( 2*halfwinwidth, dtype='i' )   
+   >>> profileB = numpy.zeros( 2*halfwinwidth, dtype='i' )   
    ... for p in tsspos:
    ...    window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
    ...    for almnt in sortedbamfile[ window ]:
@@ -240,13 +247,22 @@ all aligned reads close to it. Here is this double loop::
    ...       else:
    ...          start_in_window = p.pos + halfwinwidth - almnt.iv.end
    ...          end_in_window   = p.pos + halfwinwidth - almnt.iv.start
-   ...       profile[ start_in_window : end_in_window ] += 1
+   ...       profileB[ start_in_window : end_in_window ] += 1
 
 This loop now runs a good deal faster than our first attempt, and has a much
 smaller memory footprint.
 
-We can plot the profiles obtained from our two methods on top of each other
-and notice that they are equal, except for the boundaries. This artifact arose
+We can plot the profiles obtained from our two methods on top of each other:
+
+.. doctest::
+
+   >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile, ls="-", color="blue" )
+   >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profileB, ls="--", color="red" )
+   >>> pyplot.show()
+
+.. image:: tss_fig4.png
+
+We notice that they are equal, except for the boundaries. This artifact arose
 because we extend reads to fragment length: A read which is just outside 
 the ``window`` will not be found by our new loop even though if may reach into our
 profile window after extension to fragment length. Therefore, we should make the
@@ -266,6 +282,7 @@ As before, to get a plot, add::
    pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )
    pyplot.show()
 
+You will now get the same plot as we got with the first method.
    
 Streaming through all reads
 ---------------------------
@@ -348,7 +365,7 @@ Putting all this together leads to this script:
    
 .. literalinclude:: tss3.py
    
-Again, to get a plot, add::
+Again, to get a plot (which will look the same as before), add::
 
    pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )
    pyplot.show()
