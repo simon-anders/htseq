@@ -4,6 +4,14 @@
 Version history
 ***************
 
+Version 0.5.1
+=============
+
+2011-05-03
+
+- added steps methdo to GenomicArray
+
+
 Version 0.5.0
 =============
 

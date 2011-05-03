@@ -29,3 +29,10 @@ def ChromVector_steps( cv ):
          yield ( HTSeq.GenomicInterval( cv.iv.chrom, start, stop, cv.iv.strand ), value )
    else:
       raise SystemError, "Unknown array type."
+      
+def GenomicArray_steps( ga ):
+   for a in ga.chrom_vectors.values():
+      for cv in a.values():
+         for iv, val in cv.steps():
+            yield iv, val
+

@@ -118,7 +118,7 @@ With matplotlib, we can see that this vector is, in effect, not all zero:
 
 .. doctest::
 
-   >>> from matplotlib import 
+   >>> from matplotlib import pyplot
    >>> pyplot.plot( wincvg )    #doctest: +SKIP
    >>> pyplot.show()            #doctest: +SKIP
 
@@ -167,10 +167,12 @@ line, to extend the read to 200 bp. Using this, we now put the whole script toge
 .. literalinclude:: tss1.py 
 
 The script produces a ``profile`` variable whhich we can plot by adding these lines
-to it::
+to it:
 
-   pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )
-   pyplot.show()
+.. doctest::
+
+   pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )  #doctest: +SKIP
+   pyplot.show()  #doctest: +SKIP
 
 .. image:: tss_fig3.png
 
@@ -256,9 +258,9 @@ We can plot the profiles obtained from our two methods on top of each other:
 
 .. doctest::
 
-   >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile, ls="-", color="blue" )
-   >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profileB, ls="--", color="red" )
-   >>> pyplot.show()
+   >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile, ls="-", color="blue" )   #doctest: +SKIP
+   >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profileB, ls="--", color="red" )   #doctest: +SKIP
+   >>> pyplot.show()   #doctest: +SKIP
 
 .. image:: tss_fig4.png
 
@@ -277,10 +279,12 @@ Here is the complete code:
 
 .. literalinclude:: tss2.py 
 
-As before, to get a plot, add::
+As before, to get a plot, add:
 
-   pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )
-   pyplot.show()
+.. doctest::
+
+   pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )   #doctest: +SKIP
+   pyplot.show()   #doctest: +SKIP
 
 You will now get the same plot as we got with the first method.
    
@@ -365,8 +369,10 @@ Putting all this together leads to this script:
    
 .. literalinclude:: tss3.py
    
-Again, to get a plot (which will look the same as before), add::
+Again, to get a plot (which will look the same as before), add:
 
-   pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )
-   pyplot.show()
+.. doctest::
+
+   pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )  #doctest: +SKIP
+   pyplot.show()  #doctest: +SKIP
    
