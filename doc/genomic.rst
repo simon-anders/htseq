@@ -259,16 +259,32 @@ Data access
    
       >>> ga[ HTSeq.GenomicPosition( "chr1", 300, "+" ) ]
       20.0
+
+   .. method:: ChromVector.steps( self )
       
    To read an interval, use a ``GenomicInterval`` object as index, and
    obtain a ``ChromVector`` with a sub-view::
    
-      >>> v = ga[ HTSeq.GenomicInterval( "chr1", 250, 450, "+" ) ]
+      >>> iv = HTSeq.GenomicInterval( "chr1", 250, 450, "+" )
+      >>> v = ga[ iv ]
       >>> v
       <ChromVector object, chr1:[250,450)/+, step>
       >>> list( v.steps() )  #doctest:+NORMALIZE_WHITESPACE
       [(<GenomicInterval object 'chr1', [250,400), strand '+'>, 20.0), 
        (<GenomicInterval object 'chr1', [400,450), strand '+'>, 0.0)]
+       
+   Note that you get ( interval, value ) pairs , i.e., you can conveniently cycle
+   through them with::
+   
+      >>> for iv, value in ga[ iv ].steps():
+      ...    print iv, value
+      chr1:[250,400)/+ 20.0
+      chr1:[400,450)/+ 0.0
+      
+   .. method:: GenomicArray.steps( self )
+ 
+    You can get all steps from all chromosomes by calling the arrays own ``steps``
+    method.
 
          
 Modifying values

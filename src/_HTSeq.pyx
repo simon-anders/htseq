@@ -574,6 +574,10 @@ cdef class GenomicArray( object ):
             f.write( "%s\t%d\t%d\t%f\n" % (iv.chrom, iv.start, iv.end, value) )    
       if not hasattr( file_or_filename, "write" ):
          f.close()
+         
+   def steps( self ):
+      return _HTSeq_internal.GenomicArray_steps( self )
+      
        
 def _GenomicArray_unpickle( stranded, typecode, chrom_vectors ):
    ga = GenomicArray( {}, stranded, typecode )
