@@ -570,7 +570,7 @@ class GenomicArrayOfSets( GenomicArray ):
 ###########################
                 
                 
-def pair_SAM_alignments( alignments ):
+def pair_SAM_alignments( alignments, bundle=False ):
 
    def process_list( almnt_list ):
       while len( almnt_list ) > 0:
@@ -609,12 +609,19 @@ def pair_SAM_alignments( alignments ):
       if almnt.read.name == current_name:
          almnt_list.append( almnt )
       else:
-         for p in process_list( almnt_list ):
-            yield p
+         if bundle:
+            yield list( process_list( almnt_list ) )
+         else:
+            for p in process_list( almnt_list ):
+               yield p
          current_name = almnt.read.name
          almnt_list = [ almnt ]
    for p in process_list( almnt_list ):
-      yield p
+         if bundle:
+            yield list( process_list( almnt_list ) )
+         else:
+            for p in process_list( almnt_list ):
+               yield p
 
 
 ###########################
