@@ -11,8 +11,8 @@ class step_vector {
   protected:
    std::map< long int, T > m;
   public: 
-   static const long int min_index = LONG_MIN;
-   static const long int max_index = LONG_MAX;
+   static const long int min_index;
+   static const long int max_index;
    typedef typename std::map< long int, T >::const_iterator const_iterator;
    step_vector( );
    const T operator[]( long int i ) const;
@@ -23,6 +23,12 @@ class step_vector {
    const_iterator begin( ) const;
    const_iterator end( ) const;
 };
+
+template< class T >
+const long int step_vector<T>::min_index = LONG_MIN;
+
+template< class T >
+const long int step_vector<T>::max_index = LONG_MAX;
 
 template< class T >
 step_vector<T>::step_vector( ) 

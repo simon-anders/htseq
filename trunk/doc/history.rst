@@ -9,7 +9,14 @@ Version 0.5.1
 
 2011-05-03
 
-- added steps methdo to GenomicArray
+- added steps method to GenomicArray
+
+Patch versions:
+
+* v0.5.1p1 (2011-05-11):
+
+  - fixed a bug in step_vector.h causing linkage failure under GCC 4.2
+
 
 
 Version 0.5.0
