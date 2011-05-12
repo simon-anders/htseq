@@ -101,12 +101,12 @@ The package contains the following source files:
    imports ``_HTSeq`` in its own namespace, so that, for the user, it does not matter
    whether an object is defined here or in ``_HTSeq.pyx``.
    
-``src/_HTSeq.pyx``:
+``src/HTSeq/_HTSeq.pyx``:
    The core of HTSeq. All classes with perfomance-critical methods are defined here.
    For most of it, this file looks as a normal Python file. Only where performance
    is critical, type annotation has been added. See the Cython manual for details.
    
-``src/_HTSeq.pxd``:
+``src/HTSeq/_HTSeq.pxd``:
    The "header file" for ``_HTSeq.pyx``. It contains the type annotation for all the
    fields of the classes defined in ``_HTSeq.pyx``. If a user would want to write her
    own Cython code, she could use Cython's ``cimport`` directive to import this header

@@ -46,7 +46,7 @@ Representation and string conversion
    The **__repr__** method gives name and length::
    
       >>> myseq
-      <_HTSeq.Sequence object 'my_sequence' (length 8)>
+      <Sequence object 'my_sequence' (length 8)>
 
    The **__str__** method returns just the sequence:
 

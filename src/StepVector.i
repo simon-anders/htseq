@@ -378,9 +378,14 @@ class StepVector( object ):
       return not ( self == other )
       
    def __reduce__( self ):
-      return ( _StepVector_unpickle, ( len(self), self.typecode(),
-         self.start_index(), list( self.get_steps() ) ) )
-         # TODO: Is it wise to create a list here?
+      if self.__class__ is not StepVector:
+         raise NotImplemented, "Attempting to pickle a subclass of StepVector without redefined __reduce__."
+      return ( 
+         _StepVector_unpickle, 
+         ( self.stop - self.start, self._typecode, self.start ),
+         None,
+         None,
+         ( ( slice( start, stop ), val ) for start, stop, val in self.get_steps() ) )
     
    def __iadd__( self, value ):
       self._swigobj.add_value( self.start, self.stop-1, value )
@@ -391,10 +396,7 @@ class StepVector( object ):
       for stepstart, stepstop, value in self.get_steps( start, stop ):
          self[ stepstart : stepstop ] = func( value )
       
-def _StepVector_unpickle( length, typecode, start_index, steps ):
-   sv = StepVector( length, typecode, start_index )
-   for start, stop, value in steps:
-      sv[ start:stop ] = value
-   return sv
-      
+def _StepVector_unpickle( length, typecode, start ):
+   return StepVector.create( length, typecode, start )
+    
 %}

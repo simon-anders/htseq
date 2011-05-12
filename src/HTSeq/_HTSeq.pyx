@@ -456,6 +456,19 @@ cdef class ChromVector( object ):
    def __repr__( self ):
       return "<%s object, %s, %s>" % ( self.__class__.__name__, str(self.iv), self._storage )
          
+   def __reduce__( self ):
+      assert self.__class__ is ChromVector
+      return( _ChromVector_unpickle, 
+         ( self.array, self.iv, self.offset, self.is_vector_of_sets, self._storage ) )
+         
+def _ChromVector_unpickle( array, iv, offset, is_vector_of_sets, _storage ):
+   cv = ChromVector()
+   cv.array =  array 
+   cv.iv = iv
+   cv.offset = offset
+   cv.is_vector_of_sets = is_vector_of_sets
+   cv._storage = _storage
+   return cv
    
 cdef class GenomicArray( object ):
    
@@ -631,7 +644,7 @@ cdef class Sequence( object ):
       return self.seq
       
    def __repr__( self ):
-      return "<%s.%s object '%s' (length %d)>" % ( self.__class__.__module__,
+      return "<%s object '%s' (length %d)>" % ( 
          self.__class__.__name__, self.name, len( self.seq ) )
 
    def __len__( self ):
