@@ -17,6 +17,10 @@ Patch versions:
 
   - fixed a bug in step_vector.h causing linkage failure under GCC 4.2
 
+* v0.5.1p2 (2011-05-12):
+
+  - fixed pickling
+
 
 
 Version 0.5.0
