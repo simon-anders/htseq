@@ -162,8 +162,8 @@ There is an option whether to contain genotype information on samples for each p
 
 See the definitions at
 
-.. _VCF: http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-40
-.. _VCF (for structural variants): http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/VCF%20%28Variant%20Call%20Format%29%20version%204.0/encoding-structural-variants
+.. `1000genomes Project VCF <http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-40>_`
+.. `1000genomes Project VCF for structural variants <http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/VCF%20%28Variant%20Call%20Format%29%20version%204.0/encoding-structural-variants>_'
 
 As usual, there is a parser class, called **VCF_Reader**, that can generate an
 iterator of objects describing the structural variant calls. These objects are of type :class`VariantCall`
@@ -176,19 +176,14 @@ and each describes one line of a VCF file. See Section :ref:`tour` for an exampl
    
    When requesting an iterator, it generates objects of type :class:`VariantCall`.
       
-      .. attribute:: GFF_Reader.metadata
+      .. attribute:: VCF_Reader.metadata
       
-         GFF_Reader skips all lines starting with a single '#' as this marks
-         a comment. However, lines starying with '##' contain meta data (at least
-         accoring to the Sanger Institute's version of the GFF standard.) Such meta
-         data has the format ``##key value``. When a metadata line is encountered,
-         it is added to the ``metadata`` dictionary.
+         VCF_Reader skips all lines starting with a single '#' as this marks
+         a comment. However, lines starying with '##' contain meta data (Information about filters, and the fields in the 'info'-column).
       
       .. function:: parse_meta( header_filename = None )
       
-         The VCF_Reader normally does not parse the meta-information and also the :class:`VariantCall` does not contain
-         unpacked metainformation. The function parse_meta reads the header information either from the 
-         attached :class:`FileOrSequence` or from a file connection being opened to a provided header_filename.
+         The VCF_Reader normally does not parse the meta-information and also the :class:`VariantCall` does not contain unpacked metainformation. The function parse_meta reads the header information either from the attached :class:`FileOrSequence` or from a file connection being opened to a provided 'header-filename'. This is important if you want to access sample-specific information for the :class`VariantCall`s in your .vcf-file.
 
       .. function:: make_info_dict( )
       
@@ -201,11 +196,11 @@ and each describes one line of a VCF file. See Section :ref:`tour` for an exampl
    
       .. attribute:: VariantCall.alt
          
-         The alternative base(s) of the :class:`VariantCall`'. This is an array containing all called alternatives.
+         The alternative base(s) of the :class:`VariantCall`'. This is a list containing all called alternatives.
          
       .. attribute:: VariantCall.chrom
          
-         The Chromosome on which the :class:`VariantCall`' lies.
+         The Chromosome on which the :class:`VariantCall`' was called.
          
       .. attribute:: VariantCall.filter
          
@@ -248,3 +243,19 @@ and each describes one line of a VCF file. See Section :ref:`tour` for an exampl
          
          This function parses the info-string and replaces it with a dict rperesentation if the infodict of the 
          originating VCF_Reader is provided.
+
+Example Workflow for reading the dbSNP in VCF-format (obtained from `dbSNP <ftp://ftp.ncbi.nih.gov/snp/organisms/human_9606/VCF/v4.0/00-All.vcf.gz>_`):
+
+.. doctest::
+
+    >>> import HTSeq #doctest:+NORMALIZE_WHITESPACE
+    vcfr = HTSeq.VCF_Reader( "00-All.vcf.gz" )
+    vcfr.parse_meta()
+    vcfr.make_info_dict()
+    for vc in vcfr:
+    ...    print vc,
+    1:10327:'T'->'C'
+    1:10433:'A'->'AC'
+    1:10439:'AC'->'A'
+    1:10440:'C'->'A'
+
