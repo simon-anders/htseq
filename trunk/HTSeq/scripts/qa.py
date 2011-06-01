@@ -36,8 +36,8 @@ def main():
 	 " Laboratory (EMBL). (c) 2010. Released under the terms of the GNU General " +
 	 " Public License v3. Part of the 'HTSeq' framework, version %s." % HTSeq.__version__ )
    optParser.add_option( "-t", "--type", type="choice", dest="type",
-      choices = ("sam", "solexa-export", "fastq", "solexa-fastq"),
-      default = "sam", help="type of read_file (one of: sam [default], " +
+      choices = ("sam", "bam", "solexa-export", "fastq", "solexa-fastq"),
+      default = "sam", help="type of read_file (one of: sam [default], bam, " +
 	 "solexa-export, fastq, solexa-fastq)" )
    optParser.add_option( "-o", "--outfile", type="string", dest="outfile",
       help="output filename (default is <read_file>.pdf)" )
@@ -64,6 +64,9 @@ def main():
 
    if opts.type == "sam":
       readfile = HTSeq.SAM_Reader( readfilename )
+      isAlnmntFile = True
+   elif opts.type == "bam":
+      readfile = HTSeq.BAM_Reader( readfilename )
       isAlnmntFile = True
    elif opts.type == "solexa-export":
       readfile = HTSeq.SolexaExportReader( readfilename )
