@@ -200,14 +200,14 @@ def main():
       pyplot.subplot( 223 )
       pyplot.pcolor( qual_arr_U_n.T ** gamma, cmap=pyplot.cm.Greens,
 	  norm=pyplot.normalize( 0, 1 ) )
-      pyplot.axis( (0, readlen-1, 0, max_qual ) )
+      pyplot.axis( (0, readlen-1, 0, max_qual+1 ) )
       pyplot.xlabel( "position in read" )
       pyplot.ylabel( "base-call quality score" )
 
       pyplot.subplot( 224 )
       pyplot.pcolor( qual_arr_A_n.T ** gamma, cmap=pyplot.cm.Greens,
 	   norm=pyplot.normalize( 0, 1 ) )
-      pyplot.axis( (0, readlen-1, 0, max_qual ) )
+      pyplot.axis( (0, readlen-1, 0, max_qual+1 ) )
       pyplot.xlabel( "position in read" )
 
    else:
@@ -220,7 +220,7 @@ def main():
       pyplot.subplot( 212 )
       pyplot.pcolor( qual_arr_U_n.T ** gamma, cmap=pyplot.cm.Greens,
 	  norm=pyplot.normalize( 0, 1 ) )
-      pyplot.axis( (0, readlen-1, 0, max_qual ) )
+      pyplot.axis( (0, readlen-1, 0, max_qual+1 ) )
       pyplot.xlabel( "position in read" )
       pyplot.ylabel( "base-call quality score" )
 

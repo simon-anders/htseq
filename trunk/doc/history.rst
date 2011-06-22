@@ -21,7 +21,9 @@ Patch versions:
 
   - fixed pickling
 
+* v0.5.1p3 (2011-05-22):
 
+  - fixed quality plot in htseq-qa (top pixel row, for quality score 40, was cut off)
 
 Version 0.5.0
 =============
