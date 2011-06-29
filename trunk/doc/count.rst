@@ -117,7 +117,7 @@ Options
    `<mode>` are ``union``, ``intersection-strict`` and ``intersection-nonempty``
    (default: ``union``)
 
-.. cmdoption:: -s <yes or no>, --stranded=<yes, no, or reverse>
+.. cmdoption:: -s <yes, no or reverse>, --stranded=<yes, no, or reverse>
 
    whether the data is from a strand-specific assay (default: ``yes``)
    
