@@ -117,9 +117,16 @@ Options
    `<mode>` are ``union``, ``intersection-strict`` and ``intersection-nonempty``
    (default: ``union``)
 
-.. cmdoption:: -s <yes or no>, --stranded=<yes or no>
+.. cmdoption:: -s <yes or no>, --stranded=<yes, no, or reverse>
 
    whether the data is from a strand-specific assay (default: ``yes``)
+   
+   For stranded=no, a read is considered overlapping with a feature regardless
+   of whether it is mapped to the same or the opposite strand as the feature.
+   For stranded=yes and single-end reads, the read has to be mapped to the same
+   strand as the feature. For paired-end reads, the first
+   read has to be on the same strand and the second read on the opposite strand.
+   For stranded=reverse, these rules are reversed.
 
 .. cmdoption:: -a <minaqual>, --a=<minaqual>
 
@@ -143,6 +150,7 @@ Options
    for RNA-SEq and Ensembl GTF files, is ``gene_id``. 
 
 .. cmdoption:: -o <samout>, --samout=<samout>
+
    write out all SAM alignment records into an output SAM
    file called <samout>, annotating each line with its
    assignment to a feature or a special counter

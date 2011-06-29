@@ -48,6 +48,8 @@ def main():
       help="the gamma factor for the contrast adjustment of the quality score plot" )
    optParser.add_option( "-n", "--nosplit", action="store_true", dest="nosplit",
       help="do not split reads in unaligned and aligned ones" )
+   optParser.add_option( "-m", "--maxqual", type="int", dest="maxqual", default=40,
+      help="the maximum quality score that appears in the data (default: 40)" )
 
    if len( sys.argv ) == 1:
       optParser.print_help()
@@ -102,7 +104,7 @@ def main():
 	 if len( r ) > readlen:
             readlen = len( r )
 
-   max_qual = 40
+   max_qual = opts.maxqual
    gamma = opts.gamma
 
 

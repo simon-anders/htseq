@@ -105,6 +105,10 @@ Options
    do not split reads in unaligned and aligned ones, i.e., produce
    a one-column plot
 
+.. cmdoption:: -m, --maxqual
+
+   the maximum quality score that appears in the data (default: 40)
+
 .. cmdoption:: -h, --help
 
    Show a usage summary and exit

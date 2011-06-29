@@ -4,6 +4,22 @@
 Version history
 ***************
 
+Version 0.5.3
+=============
+
+2011-06-29
+
+- added the '--stranded=reverse' option to htseq-count
+
+
+Version 0.5.2
+=============
+
+2011-06-24
+
+- added the '--maxqual' option to htseq-qa
+
+
 Version 0.5.1
 =============
 

@@ -36,7 +36,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    else:
       samoutfile = None
       
-   features = HTSeq.GenomicArrayOfSets( "auto", stranded )     
+   features = HTSeq.GenomicArrayOfSets( "auto", stranded != "no" )     
    counts = {}
 
    # Try to open samfile to fail early in case it is not there
@@ -53,7 +53,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
             except KeyError:
                sys.exit( "Feature %s does not contain a '%s' attribute" % 
                   ( f.name, id_attribute ) )
-            if stranded and f.iv.strand == ".":
+            if stranded != "no" and f.iv.strand == ".":
                sys.exit( "Feature %s at %s does not have strand information but you are "
                   "running htseq-count in stranded mode. Use '--stranded=no'." % 
                   ( f.name, f.iv ) )
@@ -113,15 +113,25 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                lowqual += 1
                write_to_samout( r, "too_low_aQual" )
                continue
-            iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" )
+            if stranded != "reverse":
+               iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" )
+            else:
+               iv_seq = ( invert_strand( co.ref_iv ) for co in r.cigar if co.type == "M" )            
          else:
             if r[0] is not None and r[0].aligned:
-               iv_seq = ( co.ref_iv for co in r[0].cigar if co.type == "M" )
+               if stranded != "reverse":
+                  iv_seq = ( co.ref_iv for co in r[0].cigar if co.type == "M" )
+               else:
+                  iv_seq = ( invert_strand( co.ref_iv ) for co in r[0].cigar if co.type == "M" )
             else:
                iv_seq = tuple()
             if r[1] is not None and r[1].aligned:            
-               iv_seq = itertools.chain( iv_seq, 
-                  ( invert_strand( co.ref_iv ) for co in r[1].cigar if co.type == "M" ) )
+               if stranded != "reverse":
+                  iv_seq = itertools.chain( iv_seq, 
+                     ( invert_strand( co.ref_iv ) for co in r[1].cigar if co.type == "M" ) )
+               else:
+                  iv_seq = itertools.chain( iv_seq, 
+                     ( co.ref_iv for co in r[1].cigar if co.type == "M" ) )
             else:
                if ( r[0] is None ) or not ( r[0].aligned ):
                   write_to_samout( r, "not_aligned" )
@@ -228,8 +238,10 @@ def main():
          "(choices: union, intersection-strict, intersection-nonempty; default: union)" )
          
    optParser.add_option( "-s", "--stranded", type="choice", dest="stranded",
-      choices = ( "yes", "no" ), default = "yes",
-      help = "whether the data is from a strand-specific assay (default: yes)" )
+      choices = ( "yes", "no", "reverse" ), default = "yes",
+      help = "whether the data is from a strand-specific assay. Specify 'yes', " +
+         "'no', or 'reverse' (default: yes). " +
+         "'reverse' means 'yes' with reversed strand interpretation" )
       
    optParser.add_option( "-a", "--minaqual", type="int", dest="minaqual",
       default = 0,
@@ -266,7 +278,7 @@ def main():
       
    warnings.showwarning = my_showwarning
    try:
-      count_reads_in_features( args[0], args[1], opts.stranded == "yes", 
+      count_reads_in_features( args[0], args[1], opts.stranded, 
          opts.mode, opts.featuretype, opts.idattr, opts.quiet, opts.minaqual,
          opts.samout )
    except:
