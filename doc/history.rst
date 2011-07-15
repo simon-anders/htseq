@@ -12,6 +12,13 @@ Version 0.5.3
 - added the '--stranded=reverse' option to htseq-count
 
 
+Patch versions:
+
+* v0.5.3p1 (2011-07-15):
+
+  - fix a bug in pair_sam_Alignment (many thanks for Justin Powell for
+    finding the bug and suggesting a patch)
+
 Version 0.5.2
 =============
 
