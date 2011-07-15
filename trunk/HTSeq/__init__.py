@@ -616,12 +616,11 @@ def pair_SAM_alignments( alignments, bundle=False ):
                yield p
          current_name = almnt.read.name
          almnt_list = [ almnt ]
-   for p in process_list( almnt_list ):
-         if bundle:
-            yield list( process_list( almnt_list ) )
-         else:
-            for p in process_list( almnt_list ):
-               yield p
+   if bundle:
+      yield list( process_list( almnt_list ) )
+   else:
+      for p in process_list( almnt_list ):
+         yield p
 
 
 ###########################
