@@ -23,6 +23,11 @@ Patch versions:
 
   - fixed a bug (and a documentation bug) in trim_left/right_end_with_quals
 
+* v0.5.3p3 (2011-09-15)
+
+  - p2 was built improperly
+
+
 Version 0.5.2
 =============
 
