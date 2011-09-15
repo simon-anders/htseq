@@ -906,7 +906,7 @@ cdef class SequenceWithQualities( Sequence ):
          num_mismatches = 0
          for j in xrange( i ):
             if seq_cstr[ j ] != pat_cstr[ patlen - i + j ]:
-               sum_mm_qual += qual_array[ seqlen - 1 - i + j ]
+               sum_mm_qual += qual_array[ j ]
                if sum_mm_qual > max_mm_qual:
                   break
          else:
@@ -934,7 +934,7 @@ cdef class SequenceWithQualities( Sequence ):
          sum_mm_qual = 0
          for j in xrange( i ):
             if seq_cstr[ seqlen - i + j ] != pat_cstr[ j ]:
-               sum_mm_qual += qual_array[ seqlen - 1 - i + j ]
+               sum_mm_qual += qual_array[ seqlen - i + j ]
                if sum_mm_qual > max_mm_qual:
                   break
          else:
