@@ -446,29 +446,31 @@ cdef class ChromVector( object ):
    def values( self ):
       return iter( self.array[ self.iv.start - self.offset : self.iv.end - self.offset ] )
    
-   def steps( self ):
-      return _HTSeq_internal.ChromVector_steps( self )
+   def steps( self, reverse=False ):
+      return _HTSeq_internal.ChromVector_steps( self, reverse )
       
    def apply( self, fun ):
       for iv, value in self.steps():
          self.array[ iv.start - self.offset : iv.end - self.offset ] = fun( value )
          
    def __repr__( self ):
-      return "<%s object, %s, %s>" % ( self.__class__.__name__, str(self.iv), self._storage )
+      return "<%s object, %s, mode '%s'>" % ( self.__class__.__name__, str(self.iv), self._storage )
          
    def __reduce__( self ):
-      assert self.__class__ is ChromVector
-      return( _ChromVector_unpickle, 
-         ( self.array, self.iv, self.offset, self.is_vector_of_sets, self._storage ) )
-         
+      assert self.__class__ == ChromVector
+      return ( _ChromVector_unpickle, ( self.array, self.iv, self.offset, 
+         self.is_vector_of_sets, self._storage ) )
+      
 def _ChromVector_unpickle( array, iv, offset, is_vector_of_sets, _storage ):
    cv = ChromVector()
-   cv.array =  array 
+   cv.array = array
    cv.iv = iv
    cv.offset = offset
    cv.is_vector_of_sets = is_vector_of_sets
    cv._storage = _storage
-   return cv
+   
+_ChromVector_unpickle.__module__ = "HTSeq._HTSeq"   
+         
    
 cdef class GenomicArray( object ):
    
@@ -563,9 +565,9 @@ cdef class GenomicArray( object ):
       else:   
          self.chrom_vectors[ chrom ] = {
             strand_nostrand:  ChromVector.create( iv, self.typecode, self.storage ) }
-   
+            
    def __reduce__( self ):
-      return ( _GenomicArray_unpickle, ( self.stranded, self.typecode, self.chrom_vectors ) )
+      return ( self.__class__, _GenomicArray_unpickle, ( self.stranded, self.typecode, self.chrom_vectors ) )
       
    def write_bedgraph_file( self, file_or_filename, strand=".", track_options="" ):
       if ( not self.stranded ) and strand != ".":
@@ -591,14 +593,27 @@ cdef class GenomicArray( object ):
    def steps( self ):
       return _HTSeq_internal.GenomicArray_steps( self )
       
+   def steps_from( self, GenomicPosition p, decreasing=False ):
+      cdef GenomicInterval iv 
+      cdef long end
+      if not decreasing:
+         end = self.chrom_vectors[ p.chrom ][ "." if not self.stranded else "+" ].iv.end   
+         iv = GenomicInterval( p.chrom, p.pos, end, p.strand )
+         return self[iv].steps()
+      else:
+         start = self.chrom_vectors[ p.chrom ][ "." if not self.stranded else "+" ].iv.start
+         iv = GenomicInterval( p.chrom, start, p.pos, p.strand )
+         return self[iv].steps( reverse=True )
+      
        
-def _GenomicArray_unpickle( stranded, typecode, chrom_vectors ):
-   ga = GenomicArray( {}, stranded, typecode )
+def _GenomicArray_unpickle( class_, stranded, typecode, chrom_vectors ):
+   ga = class_( {}, stranded, typecode )
    ga.chrom_vectors = chrom_vectors
    return ga
    
+_GenomicArray_unpickle.__module__ = "HTSeq._HTSeq"   
    
-   
+
 ###########################
 ##   Sequences
 ###########################
@@ -906,7 +921,7 @@ cdef class SequenceWithQualities( Sequence ):
          num_mismatches = 0
          for j in xrange( i ):
             if seq_cstr[ j ] != pat_cstr[ patlen - i + j ]:
-               sum_mm_qual += qual_array[ seqlen - 1 - i + j ]
+               sum_mm_qual += qual_array[ j ]
                if sum_mm_qual > max_mm_qual:
                   break
          else:
@@ -934,7 +949,7 @@ cdef class SequenceWithQualities( Sequence ):
          sum_mm_qual = 0
          for j in xrange( i ):
             if seq_cstr[ seqlen - i + j ] != pat_cstr[ j ]:
-               sum_mm_qual += qual_array[ seqlen - 1 - i + j ]
+               sum_mm_qual += qual_array[ seqlen - i + j ]
                if sum_mm_qual > max_mm_qual:
                   break
          else:
