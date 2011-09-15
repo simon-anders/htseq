@@ -303,14 +303,14 @@ Counting quality values
    
 Trimming reads
 
-   .. method:: SequenceWithQualities.trim_left_end_with_quals( pattern, max_mm_qual_per_base = 5. )
-               SequenceWithQualities.trim_right_end_with_quals( pattern, max_mm_qual_per_base = 5. )
+   .. method:: SequenceWithQualities.trim_left_end_with_quals( pattern, max_mm_qual = 5 )
+               SequenceWithQualities.trim_right_end_with_quals( pattern, max_mm_qual = 5 )
                
    These methods work as :meth:`Sequence.trim_left_end` and :meth:`Sequence.trim_right_end`
    (which are, of course, avilable for ``SequenceWithQualities`` objects, too). The difference
    is, that for the ``_with_quals`` trimming methods, the maximum amount of allowed mismatch is
-   specified as the maximum value that the sum of the quality scores of the mismatched bases,
-   divided by the length of the match, may take.
+   specified as the maximum value that the sum of the quality scores of the mismatched bases
+   may take.
    
    *TODO*: Add example
 

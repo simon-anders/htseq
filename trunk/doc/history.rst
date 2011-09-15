@@ -18,6 +18,10 @@ Patch versions:
 
   - fix a bug in pair_sam_Alignment (many thanks for Justin Powell for
     finding the bug and suggesting a patch)
+    
+* v0.5.3p2 (2011-09-15)
+
+  - fixed a bug (and a documentation bug) in trim_left/right_end_with_quals
 
 Version 0.5.2
 =============
