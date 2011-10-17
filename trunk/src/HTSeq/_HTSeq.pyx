@@ -1183,7 +1183,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
    @classmethod
    def from_pysam_AlignedRead( cls, read, samfile ):
       strand = "-" if read.is_reverse else "+"
-      if read.tid != -1:
+      if not read.is_unmapped:
           chrom = samfile.getrname(read.tid)
           iv = GenomicInterval( chrom, read.pos, read.aend, strand )
       else:
