@@ -747,6 +747,7 @@ class BAM_Reader( object ):
         global pysam
         self.filename = filename
         self.sf = None  # This one is only used by __getitem__
+        self.record_no = -1
         try:
            import pysam
         except ImportError:
@@ -755,9 +756,17 @@ class BAM_Reader( object ):
     
     def __iter__( self ):
         sf = pysam.Samfile(self.filename, "rb")
+        self.record_no = 0
         for pa in sf:
             yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
-
+            self.record_no += 1
+    
+    def get_line_number_string( self ):
+        if self.record_no == -1:
+            return "unopened file %s" % ( self.filename )
+        else:
+            return "record #%d in file %s" % ( self.record_no, self.filename )
+    
     def __getitem__( self, iv ):
         if not isinstance( iv, GenomicInterval ):
            raise TypeError, "Use a HTSeq.GenomicInterval to access regions within .bam-file!"        
