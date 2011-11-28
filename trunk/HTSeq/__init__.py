@@ -643,21 +643,55 @@ _vcf_typemap = {
 
 class VariantCall( object ):
     
-    def __init__( self, line, nsamples = 0, sampleids=[] ):
+    def __init__( self, chrom = None, pos = None, identifier = None, ref = None, alt = None, qual = None, filtr = None, info = None ):
+        self.chrom  = chrom
+        self.pos    = pos
+        self.id     = identifier
+        self.ref    = ref
+        self.alt    = alt
+        self.qual   = qual
+        self.filter = filtr
+        self.info   = info
+    
+    @classmethod
+    def fromdict( cls, dictionary ):
+        ret = cls()
+        ret.chrom   = dictionary["chrom"]
+        ret.pos     = dictionary["pos"]
+        ret.id      = dictionary["id"]
+        ret.ref     = dictionary["ref"]
+        ret.alt     = dictionary["alt"]
+        ret.qual    = dictionary["qual"]
+        ret.filter  = dictionary["filter"]
+        ret.info    = dictionary["info"]
+    
+    @classmethod
+    def fromline( cls, line, nsamples = 0, sampleids = [] ):
+        ret = cls()
         if nsamples == 0:
-            self.format = None
-            self.chrom, self.pos, self.id, self.ref, self.alt, self.qual, self.filter, self.info = line.rstrip("\n").split("\t", 7)
+            ret.format = None
+            ret.chrom, ret.pos, ret.id, ret.ref, ret.alt, ret.qual, ret.filter, ret.info = line.rstrip("\n").split("\t", 7)
         else:
             lsplit = line.rstrip("\n").split("\t")
-            self.chrom, self.pos, self.id, self.ref, self.alt, self.qual, self.filter, self.info = lsplit[:8]
-            self.format = lsplit[8].split(":")
-            self.samples = {}
+            ret.chrom, ret.pos, ret.id, ret.ref, ret.alt, ret.qual, ret.filter, ret.info = lsplit[:8]
+            ret.format = lsplit[8].split(":")
+            ret.samples = {}
             spos=9
             for sid in sampleids:
-                self.samples[ sid ] = dict( ( name, value ) for (name, value) in itertools.izip( self.format, lsplit[spos].split(":") ) )
+                ret.samples[ sid ] = dict( ( name, value ) for (name, value) in itertools.izip( ret.format, lsplit[spos].split(":") ) )
                 spos += 1
-        self.pos = GenomicPosition( self.chrom, int(self.pos) )
-        self.alt = self.alt.split(",")
+        ret.pos = GenomicPosition( ret.chrom, int(ret.pos) )
+        ret.alt = ret.alt.split(",")
+        return ret
+    
+    def infoline( self ):
+        if self.info.__class__ == dict:
+            return ";".join(map((lambda key: str(key) + "=" + str(self.info[key])), self.info ))
+        else:
+            return self.info
+    
+    def to_line( self ):
+        return "\t".join( map( str, [ self.chrom, self.pos, self.id, self.ref, self.alt, self.qual, self.filter, self.infoline ] ) )
     
     def __descr__( self ):
         return "<VariantCall at %s, ref '%s', alt %s >" % (str(self.pos).rstrip("/."), self.ref, str(self.alt).strip("[]"))
@@ -738,7 +772,7 @@ class VCF_Reader( FileOrSequence ):
         for line in FileOrSequence.__iter__( self ):
             if line == "\n" or line.startswith( '#' ):
                 continue
-            vc = VariantCall( line, self.nsamples, self.sampleids )
+            vc = VariantCall.fromline( line, self.nsamples, self.sampleids )
             yield vc
 
 class BAM_Reader( object ):
