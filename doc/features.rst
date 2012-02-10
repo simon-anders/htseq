@@ -142,11 +142,11 @@ and each describes one line of a GFF file. See Section :ref:`tour` for an exampl
 
    In order to write a GFF file from a sequence of features, this method is provided:
    
-   .. method GenomicFeature.get_gff_line( with_equal_sign=False )
+      .. method:: GenomicFeature.get_gff_line( with_equal_sign=False )
    
-      Returns a line to describe the feature in the GFF format. This works even if the optional 
-      attributes given above are missing. Call this for each of your ``GenomicFeature`` objects
-      and write the lines into a file to get a GFF file.
+         Returns a line to describe the feature in the GFF format. This works even if the optional 
+         attributes given above are missing. Call this for each of your ``GenomicFeature`` objects
+         and write the lines into a file to get a GFF file.
       
 .. function:: parse_GFF_attribute_string( attrStr, extra_return_first_value=False )      
 
