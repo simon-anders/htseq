@@ -691,7 +691,7 @@ class VariantCall( object ):
             return self.info
     
     def to_line( self ):
-        return "\t".join( map( str, [ self.chrom, self.pos, self.id, self.ref, self.alt, self.qual, self.filter, self.infoline ] ) )
+        return "\t".join( map( str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join( self.alt ), self.qual, self.filter, self.infoline() ] ) )
     
     def __descr__( self ):
         return "<VariantCall at %s, ref '%s', alt %s >" % (str(self.pos).rstrip("/."), self.ref, str(self.alt).strip("[]"))
