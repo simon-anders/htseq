@@ -386,7 +386,7 @@ cdef class ChromVector( object ):
             raise IndexError
          if self.iv.strand is strand_nostrand and \
                index.strand is not strand_nostrand:
-            iv = iv.copy()
+            iv = self.iv.copy()
             iv.strand = strand_nostrand
          return ChromVector._create_view( self, iv )
       else:
