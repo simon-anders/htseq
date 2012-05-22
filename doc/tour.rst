@@ -388,10 +388,10 @@ These file are in the `GTF format`_, a tightening of the `GFF format`_. HTSeq of
    <GenomicFeature: CDS 'R0010W' at 2-micron: 251 -> 1520 (strand '+')>
    <GenomicFeature: start_codon 'R0010W' at 2-micron: 251 -> 254 (strand '+')>
    <GenomicFeature: stop_codon 'R0010W' at 2-micron: 1520 -> 1523 (strand '+')>
-   <GenomicFeature: exon 'R0020C' at 2-micron: 3007 -> 1887 (strand '-')>
-   <GenomicFeature: CDS 'R0020C' at 2-micron: 3007 -> 1890 (strand '-')>
-   <GenomicFeature: start_codon 'R0020C' at 2-micron: 3007 -> 3006 (strand '-')>
-   <GenomicFeature: stop_codon 'R0020C' at 2-micron: 1888 -> 1887 (strand '-')>
+   <GenomicFeature: exon 'R0020C' at 2-micron: 3007 -> 1885 (strand '-')>
+   <GenomicFeature: CDS 'R0020C' at 2-micron: 3007 -> 1888 (strand '-')>
+   <GenomicFeature: start_codon 'R0020C' at 2-micron: 3007 -> 3004 (strand '-')>
+   <GenomicFeature: stop_codon 'R0020C' at 2-micron: 1888 -> 1885 (strand '-')>
    <GenomicFeature: exon 'R0030W' at 2-micron: 3270 -> 3816 (strand '+')>
    <GenomicFeature: CDS 'R0030W' at 2-micron: 3270 -> 3813 (strand '+')>
 
@@ -445,13 +445,13 @@ Now, we can ask what exons occur in a certain interval::
    >>> iv = HTSeq.GenomicInterval( "II", 120000, 125000, "." )
    >>> list( exons[iv].steps() ) #doctest:+NORMALIZE_WHITESPACE
    [(<GenomicInterval object 'II', [120000,121877), strand '.'>, 
-         <GenomicFeature: exon 'YBL052C' at II: 121876 -> 119382 (strand '-')>),
+        <GenomicFeature: exon 'YBL052C' at II: 121876 -> 119380 (strand '-')>), 
     (<GenomicInterval object 'II', [121877,122755), strand '.'>, 
-         None),
-    (<GenomicInterval object 'II', [122755,124762), strand '.'>,
-         <GenomicFeature: exon 'YBL051C' at II: 124761 -> 122756 (strand '-')>),
+        None), 
+    (<GenomicInterval object 'II', [122755,124762), strand '.'>, 
+        <GenomicFeature: exon 'YBL051C' at II: 124761 -> 122754 (strand '-')>), 
     (<GenomicInterval object 'II', [124762,125000), strand '.'>, 
-         None)]
+        None)]    
 
 However, our RNA-Seq experiment was not strand-specific, i.e., we do not know whether
 the reads came from the plus or the minus strand. This is why we defined the GenomicArray

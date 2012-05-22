@@ -48,7 +48,7 @@ cdef class GenomicInterval:
         this is the same as 'start' except when strand == '-', in which 
         case it is end-1.
       end_d: The "directional end": Usually, the same as 'end', but for 
-        strand=='-1', it is start+1.
+        strand=='-1', it is start-1.
    """
    
    def __init__( GenomicInterval self, str chrom, long start, long end, 
@@ -132,7 +132,7 @@ cdef class GenomicInterval:
          if self._strand is not strand_minus:
             return self.end
          else:
-            return self.start + 1
+            return self.start - 1
             
    property start_as_pos:
       def __get__( GenomicInterval self ):
@@ -386,7 +386,7 @@ cdef class ChromVector( object ):
             raise IndexError
          if self.iv.strand is strand_nostrand and \
                index.strand is not strand_nostrand:
-            iv = self.iv.copy()
+            iv = index.copy()   # Is this correct now?
             iv.strand = strand_nostrand
          return ChromVector._create_view( self, iv )
       else:
@@ -759,18 +759,23 @@ cdef class SequenceWithQualities( Sequence ):
         name      - The sequence name or ID
         qualstr   - The quality string. Must have the same length as seq
         qualscale - The encoding scale of the quality string. Must be one of
-                      "phred", "solexa", "solexa-old" )
+                      "phred", "solexa", "solexa-old", or "noquals" )
       """
-      if len( seq ) != len( qualstr ):
-         raise ValueError, "'seq' and 'qualstr' do not have the same length."
       Sequence.__init__( self, seq, name )
-      self._qualstr = qualstr
+      if qualscale != "noquals":
+         if len( seq ) != len( qualstr ):
+            raise ValueError, "'seq' and 'qualstr' do not have the same length."
+         self._qualstr = qualstr
+      else:
+         self._qualstr = b''
       self._qualscale = qualscale
       self._qualarr = None
       self._qualstr_phred = b''
 
    cdef _fill_qual_arr( SequenceWithQualities self ):
       cdef int seq_len = len( self.seq )
+      if self._qualscale == "missing":
+         raise ValueError, "Quality string missing."
       if seq_len != len( self._qualstr ):
          raise ValueError, "Quality string has not the same length as sequence."
       cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qualarr = numpy.empty( ( seq_len, ), numpy.int )
@@ -822,6 +827,8 @@ cdef class SequenceWithQualities( Sequence ):
       cdef int i
       cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array
       if qualstr_phred_cstr[0] == 0:
+         if self._qualscale == "noquals":
+            raise ValueError, "Quality string missing" 
          if self._qualscale == "phred":
             self._qualstr_phred = self._qualstr
          else:
@@ -1189,7 +1196,10 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       else:
           iv = None
       
-      seq = SequenceWithQualities( read.seq, read.qname, read.qual )
+      if read.qual != "*":
+         seq = SequenceWithQualities( read.seq, read.qname, read.qual )
+      else:
+         seq = SequenceWithQualities( read.seq, read.qname, read.qual, "noquals" )
       a = SAM_Alignment( seq, iv )
       a.cigar = build_cigar_list( [ (cigar_operation_codes[code], length) for (code, length) in read.cigar ] , read.pos, chrom, strand ) if iv != None else []
       a.inferred_insert_size = read.isize
@@ -1214,6 +1224,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       cdef int posint, flagint
       cdef str strand
       cdef list cigarlist
+      cdef SequenceWithQualities swq
             
       fields = line.rstrip().split( "\t" )
       if len( fields ) < 10:
@@ -1230,7 +1241,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
         
       if flagint & 0x0004:     # flag "query sequence is unmapped" 
          iv = None
-         cigar = None
+         cigarlist = None
          if rname != "*":     # flag "query sequence is unmapped"      
             warnings.warn( "Malformed SAM line: RNAME != '*' although flag bit &0x0004 set" )
       else:
@@ -1244,7 +1255,12 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          cigarlist = parse_cigar( cigar, posint, rname, strand )
          iv = GenomicInterval( rname, posint, cigarlist[-1].ref_iv.end, strand )   
             
-      alnmt = SAM_Alignment( SequenceWithQualities( seq.upper(), qname, qual ), iv )
+      if qual != "*":
+         swq = SequenceWithQualities( seq.upper(), qname, qual )
+      else:
+         swq = SequenceWithQualities( seq.upper(), qname, "", "noquals" )
+
+      alnmt = SAM_Alignment( swq, iv )
          
       alnmt.cigar = cigarlist
       alnmt._optional_fields = optional_fields

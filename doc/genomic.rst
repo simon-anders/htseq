@@ -72,7 +72,7 @@ Attributes
    .. attribute:: GenomicInterval.end_d
 
       The "directional end": The same as ``end``, unless ``strand=='-'``, 
-      in which case it is ``start+1``. This convention allows to go from
+      in which case it is ``start-1``. This convention allows to go from
       ``start_d`` to ``end_d`` (not including, as usual in Python, the last
       value) and get all bases in "reading" direction.
       

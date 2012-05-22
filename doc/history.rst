@@ -27,6 +27,12 @@ Patch versions:
 
   - p2 was built improperly
 
+* v0.5.3p4 (2012-05-22)
+
+  - corrected bug in 'end_d': now it is start-1 rather than start+1 if strand=='-'.
+
+  - SAM_Alignment can now deal with "*" in basecall quality field
+
 
 Version 0.5.2
 =============
