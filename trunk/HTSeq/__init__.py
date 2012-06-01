@@ -825,4 +825,27 @@ class BAM_Reader( object ):
         for pa in self.sf.fetch( iv.chrom, iv.start+1, iv.end ):
             yield SAM_Alignment.from_pysam_AlignedRead( pa, self.sf )
     
+    def get_header_dict( self ):
+       sf = pysam.Samfile(self.filename, "rb")
+       return sf.header
+    
                
+class BAM_Writer( object ):
+   def __init__( self, filename, template = None, referencenames = None, referencelengths = None, text = None, header = None ):
+      self.filename = filename
+      self.template = template
+      self.referencenames = referencenames
+      self.referencelengths = referencelengths
+      self.text = text
+      self.header = header
+      self.sf = pysam.Samfile( self.filename, mode="wb", template = self.template, referencenames = self.referencenames, referencelengths = self.referencelengths, text = self.text, header = self.header )
+      
+   @classmethod
+   def from_BAM_Reader( cls, fn, br ):
+      return BAM_Writer( filename = fn, header = br.get_header_dict() )
+   
+   def write( self, alnmt):
+      self.sf.write( alnmt.to_pysam_AlignedRead( self.sf ) )
+   
+   def close( self ):
+      self.sf.close()
