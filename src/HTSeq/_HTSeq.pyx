@@ -8,7 +8,7 @@ import itertools
 import collections
 import cStringIO
 import warnings
-
+import pysam
 import numpy
 cimport numpy
 
@@ -1175,8 +1175,8 @@ cdef _parse_SAM_optional_field_value( str field ):
       raise ValueError, "SAM optional field with illegal type letter '%s'" % field[2]
 
 cigar_operation_codes = [ 'M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X']
-      
-      
+cigar_operation_code_dict = dict( [ (x,i) for i,x in enumerate( cigar_operation_codes ) ] )
+
 cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
 
    """When reading in a SAM file, objects of the class SAM_Alignment
@@ -1186,7 +1186,21 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
     - cigar: a list of CigarOperatio objects, describing the alignment
     - tags: the extra information tags [not yet implemented]
    """
-   
+
+   def to_pysam_AlignedRead( self, sf ):
+      a = pysam.AlignedRead()
+      a.seq = self.read.seq
+      a.qual = self.read.qualstr
+      a.qname = self.read.name
+      a.cigar = [ (cigar_operation_code_dict[c.type], c.size) for c in self.cigar ]
+      a.flag = self.flag
+      a.pos = self.iv.start
+      a.tid = sf.gettid( self.iv.chrom )
+      a.isize = self.inferred_insert_size
+      a.mapq = self.aQual
+      a.tags = self.optional_fields
+      return a
+
    @classmethod
    def from_pysam_AlignedRead( cls, read, samfile ):
       strand = "-" if read.is_reverse else "+"
@@ -1195,7 +1209,6 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
           iv = GenomicInterval( chrom, read.pos, read.aend, strand )
       else:
           iv = None
-      
       if read.qual != "*":
          seq = SequenceWithQualities( read.seq, read.qname, read.qual )
       else:
@@ -1204,11 +1217,13 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       a.cigar = build_cigar_list( [ (cigar_operation_codes[code], length) for (code, length) in read.cigar ] , read.pos, chrom, strand ) if iv != None else []
       a.inferred_insert_size = read.isize
       a.aQual = read.mapq
+      a.flag = read.flag
       a.proper_pair = read.is_proper_pair
       a.not_primary_alignment = read.is_secondary
       a.failed_platform_qc = read.is_qcfail
       a.pcr_or_optical_duplicate = read.is_duplicate
       a.original_sam_line = ""
+      a.optional_fields = read.tags
       if read.is_paired:
          if read.is_proper_pair:
             strand = "-" if read.mate_is_reverse else "+"
@@ -1238,7 +1253,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       if seq.count( "." ) > 0:
          raise ValueError, "Sequence in SAM file contains '.', which is not supported."
       flagint = int( flag )
-        
+      
       if flagint & 0x0004:     # flag "query sequence is unmapped" 
          iv = None
          cigarlist = None
@@ -1261,9 +1276,9 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          swq = SequenceWithQualities( seq.upper(), qname, "", "noquals" )
 
       alnmt = SAM_Alignment( swq, iv )
-         
+      alnmt.flag = flagint   
       alnmt.cigar = cigarlist
-      alnmt._optional_fields = optional_fields
+      alnmt.optional_fields = [ ( field[:2], _parse_SAM_optional_field_value( field ) ) for field in optional_fields ]
       alnmt.aQual = int( mapq )
       alnmt.inferred_insert_size = int( isize )
       alnmt.original_sam_line = line
@@ -1301,79 +1316,66 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
 
       return alnmt
 
-   @property
+   property flag:
+      def __get__( self ):
+         return self._flag
+      def __set__( self, value ):
+         self._flag = value
+   
    def paired_end( self ):
       return self.pe_which != "not_paired_end"
-
+   
    @property
    def mate_aligned( self ):
       return self.mate_start is not None
-         
+   
    def get_sam_line( self ):
-       
       cdef str cigar = ""
-      cdef int flag = 0
       cdef GenomicInterval query_start, mate_start
       cdef CigarOperation cop
-       
-      if self.pe_which != "not_paired_end":
-         self.flag |= 0x0001
-         if self.proper_pair:
-            self.flag |= 0x0002
-         if self.pe_which == "first":
-            self.flag |= 0x0040
-         elif self.pe_which == "second":
-            self.flag |= 0x0080
-         if self.pe_which != "unknown":
-            raise ValueError, "Illegal value in field 'pe_which'"
-       
+             
       if self.aligned:
          query_start = self.iv
-         if self.iv.strand == "-":
-            flag |= 0x0010
       else:
          query_start = GenomicPosition( "*", -1 )
-         flag |= 0x0004
           
       if self.mate_start is not None:
          mate_start = self.mate_start
-         if self.mate_start.strand == "-":
-            flag |= 0x0020
       else:
          mate_start = GenomicPosition( "*", -1 )
-         if self.paired_end:
-            flag |= 0x0008
-          
-      if self.proper_pair:
-         flag |= 0x0002
-      if self.not_primary_alignment:
-         flag |= 0x0100
-      if self.failed_platform_qc: 
-         flag |= 0x0200
-      if self.pcr_or_optical_duplicate:
-         flag |= 0x0400
-          
+                
       if self.cigar is not None:
          for cop in self.cigar:
             cigar += str(cop.size) + cop.type
       else:
          cigar = "*"
        
-      return '\t'.join( ( self.read.name, str(flag), query_start.chrom, 
+      return '\t'.join( ( self.read.name, str(self.flag), query_start.chrom, 
           str(query_start.start+1), str(self.aQual), cigar, mate_start.chrom, 
           str(mate_start.pos+1), str(self.inferred_insert_size), 
            self.read_as_aligned.seq, self.read_as_aligned.qualstr,
-           ' '.join( self._optional_fields ) ) )      
+           ' '.join( self.raw_optional_fields() ) ) )      
 
    def optional_field( SAM_Alignment self, str tag ):
-      cdef str field
-      for field in self._optional_fields:
-         if field[:2] == tag:
-            return _parse_SAM_optional_field_value( field )
-      raise KeyError, "SAM optional field tag %s not found" % tag
-
-   def optional_fields( SAM_Alignment self ):
-      cdef str field
-      return dict( [ ( field[:2], _parse_SAM_optional_field_value( field ) ) 
-         for field in self._optional_fields ] )
-
+      res = [ p for p in self.optional_fields if p[0] == tag ]
+      if len(res) == 1:
+         return res[0]
+      else:
+         raise KeyError, "SAM optional field tag %s not found" % tag
+   
+   def raw_optional_fields( self ):
+      res = []
+      for op in self.optional_fields:
+         if op[1].__class__ == str:
+            if len(op[1]) == 1:
+               tc = "A"
+            else:
+               tc = "Z"
+         elif op[1].__class__ == int:
+            tc = "i"
+         elif op[1].__class__ == float:
+            tc = "j"
+         else:
+            tc = "H"
+         res.append( ":".join( [ op[0], tc, str(op[1]) ] ) )
+      return res

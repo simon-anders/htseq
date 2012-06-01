@@ -768,6 +768,20 @@ class VCF_Reader( FileOrSequence ):
             else:
                 break
     
+    def meta_info( self, header_filename = None ):
+       ret = []
+       if header_filename == None:
+          the_iter = FileOrSequence.__iter__( self )
+       else:
+          the_iter = open( header_filename, "r" )
+       
+       for line in the_iter:
+          if line.startswith( '#' ):
+             ret.append( line )
+          else:
+             break
+       return ret
+    
     def __iter__( self ):
         for line in FileOrSequence.__iter__( self ):
             if line == "\n" or line.startswith( '#' ):
