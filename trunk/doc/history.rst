@@ -27,12 +27,12 @@ Patch versions:
 
   - p2 was built improperly
 
-* v0.5.3p4 (2012-05-22)
+* v0.5.3p5 (2012-05-29)
 
-  - corrected bug in 'end_d': now it is start-1 rather than start+1 if strand=='-'.
+  - added 'to_line' function to VariantCall objects and 'meta_info' function to VCF_Reader objects to print VCF-lines / -headers respectively
 
-  - SAM_Alignment can now deal with "*" in basecall quality field
-
+* v0.5.3p5b (2012-06-01)
+  - added 'flag' field to SAM_Alignment objects and fixed 'get_sam_line' function of those
 
 Version 0.5.2
 =============
