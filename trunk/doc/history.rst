@@ -34,6 +34,9 @@ Patch versions:
 * v0.5.3p5b (2012-06-01)
   - added 'flag' field to SAM_Alignment objects and fixed 'get_sam_line' function of those
 
+* v0.5.3p6 (2012-06-11)
+  - fixed mix-up between patches p3, p4 and p5
+
 Version 0.5.2
 =============
 
