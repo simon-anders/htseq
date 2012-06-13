@@ -1190,7 +1190,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       try:
          import pysam
       except ImportError:
-         print "Please Install PySam to use this functionality (http://code.google.com/p/pysam/)"  
+         sys.stderr.write( "Please Install PySam to use this functionality (http://code.google.com/p/pysam/)" )
          raise
       
       a = pysam.AlignedRead()
@@ -1327,7 +1327,6 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       def __set__( self, value ):
          self._flag = value
    
-   @property
    def paired_end( self ):
       return self.pe_which != "not_paired_end"
    
