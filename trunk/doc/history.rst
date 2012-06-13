@@ -37,6 +37,9 @@ Patch versions:
 * v0.5.3p6 (2012-06-11)
   - fixed mix-up between patches p3, p4 and p5
 
+* v0.5.3p6b (2012-06-13)
+  - switched global pysam import to on-demand version
+
 Version 0.5.2
 =============
 
