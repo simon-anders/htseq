@@ -832,6 +832,13 @@ class BAM_Reader( object ):
                
 class BAM_Writer( object ):
    def __init__( self, filename, template = None, referencenames = None, referencelengths = None, text = None, header = None ):
+      try:
+         import pysam
+      except ImportError:
+         print "Please Install PySam to use the BAM_Writer Class (http://code.google.com/p/pysam/)"
+         
+         raise
+      
       self.filename = filename
       self.template = template
       self.referencenames = referencenames

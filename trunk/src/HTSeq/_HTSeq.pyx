@@ -8,7 +8,6 @@ import itertools
 import collections
 import cStringIO
 import warnings
-import pysam
 import numpy
 cimport numpy
 
@@ -1188,6 +1187,12 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
    """
 
    def to_pysam_AlignedRead( self, sf ):
+      try:
+         import pysam
+      except ImportError:
+         print "Please Install PySam to use this functionality (http://code.google.com/p/pysam/)"  
+         raise
+      
       a = pysam.AlignedRead()
       a.seq = self.read.seq
       a.qual = self.read.qualstr
