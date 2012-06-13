@@ -799,7 +799,7 @@ class BAM_Reader( object ):
         try:
            import pysam
         except ImportError:
-           print "Please Install PySam to use the BAM_Reader Class (http://code.google.com/p/pysam/)"
+           sys.stderr.write( "Please Install PySam to use the BAM_Reader Class (http://code.google.com/p/pysam/)" )
            raise
     
     def __iter__( self ):
@@ -835,8 +835,7 @@ class BAM_Writer( object ):
       try:
          import pysam
       except ImportError:
-         print "Please Install PySam to use the BAM_Writer Class (http://code.google.com/p/pysam/)"
-         
+         sys.stderr.write( "Please Install PySam to use the BAM_Writer Class (http://code.google.com/p/pysam/)" )
          raise
       
       self.filename = filename
