@@ -1327,6 +1327,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       def __set__( self, value ):
          self._flag = value
    
+   @property
    def paired_end( self ):
       return self.pe_which != "not_paired_end"
    
@@ -1359,14 +1360,17 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
           str(query_start.start+1), str(self.aQual), cigar, mate_start.chrom, 
           str(mate_start.pos+1), str(self.inferred_insert_size), 
            self.read_as_aligned.seq, self.read_as_aligned.qualstr,
-           ' '.join( self.raw_optional_fields() ) ) )      
+           '\t'.join( self.raw_optional_fields() ) ) )      
 
    def optional_field( SAM_Alignment self, str tag ):
       res = [ p for p in self.optional_fields if p[0] == tag ]
       if len(res) == 1:
-         return res[0]
+         return res[0][1]
       else:
-         raise KeyError, "SAM optional field tag %s not found" % tag
+         if len(res) == 0:
+            raise KeyError, "SAM optional field tag %s not found" % tag
+         else:
+            raise ValueError, "SAM optional field tag %s not unique" % tag
    
    def raw_optional_fields( self ):
       res = []

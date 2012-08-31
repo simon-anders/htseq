@@ -40,6 +40,9 @@ Patch versions:
 * v0.5.3p7 (2012-06-13)
   - switched global pysam import to on-demand version
 
+* v0.5.3p9ur1 (2012-08-31)
+  - corrected get_sam_line: tab isntead of space between optional fields
+
 Version 0.5.2
 =============
 
