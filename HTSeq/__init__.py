@@ -809,6 +809,13 @@ class BAM_Reader( object ):
             yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
             self.record_no += 1
     
+    def fetch( self, reference = None, start = None, end = None, region = None ):
+        sf = pysam.Samfile(self.filename, "rb")
+        self.record_no = 0
+        for pa in sf.fetch( reference, start, end, region ):
+            yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
+            self.record_no += 1
+    
     def get_line_number_string( self ):
         if self.record_no == -1:
             return "unopened file %s" % ( self.filename )
