@@ -180,6 +180,27 @@ at all, and a field called :attr:`iv <Alignment.iv>`
 (for "interval") that shows where the read was aligned to. We use this information in
 the next section.
 
+Reading and writing BAM files
+=============================
+
+HTSeq now exposes the samtools API trough pysam, enabling you to read and write BAM files.
+A simple example of the usage is given here:
+
+.. doctest::
+   
+   >>> bam_reader = HTSeq.BAM_Reader( "SRR001432_head_sorted.bam" )
+   >>> count = 0
+   >>> for a in bam_reader: #printing 10 reads
+   ...    print a
+   ...	  count += 1
+   ...	  if count > 10:
+   ...	     break
+
+   >>> bam_writer = HTSeq.BAM_Writer.from_BAM_Reader( "region.bam", bam_writer ) #set-up BAM_Writer with same header as reader
+   >>> for a in bam_reader.fetch( region = "1:249000000-249200000" ): #fetching reads in a region
+   ...    print "Writing Alignment", a, "to file", bam_writer.filename
+   ...	  bam_writer.write( a )
+   >>> bam_writer.close()
 
 Genomic intervals and genomic arrays
 ====================================

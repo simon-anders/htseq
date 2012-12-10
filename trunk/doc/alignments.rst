@@ -64,16 +64,17 @@ Depending on the format of your alignment file, choose from the following parser
 
 .. class:: BowtieReader( filename_or_sequence )
            SAM_Reader( filename_or_sequence )
+           BAM_Reader( filename_or_sequence )
            SolexaExportReader( filename_or_sequence )
-          
-   All of these are derived from :class:`FileOrSequence`. When asked for an iterator,
-   they yield ``Alignment`` objects of types :class:`BowtieAlignment`, :class:`SAM_Alignment`,
-   or :class:`SolexaExportAlignment`. See below for their properties.
+           
+All of these are derived from :class:`FileOrSequence`. When asked for an iterator,
+they yield ``Alignment`` objects of types :class:`BowtieAlignment`, :class:`SAM_Alignment`,
+or :class:`SolexaExportAlignment`. See below for their properties.
    
-   Adding support for a new format is very easy. Ask me if you need something and
-   I can probably add it right-away.
-   Alternatively, you can convert your format to the SAM format. The SAMtools_
-   contain Perl skripts to convert nearly all common formats.
+Adding support for a new format is very easy. Ask me if you need something and
+I can probably add it right-away.
+Alternatively, you can convert your format to the SAM format. The SAMtools_
+contain Perl skripts to convert nearly all common formats.
    
 .. _SAMtools: http://samtools.sourceforge.net/
 
@@ -81,8 +82,7 @@ Depending on the format of your alignment file, choose from the following parser
       
       Peek into a SAM file or connection, reporting the first ``num`` records.
       If you then call an iterator on the ``SAM_Reader``, the record will
-      be yielded again.
-   
+      be yielded again.   
 
              
 ``Alignment`` and ``AlignmentWithSequenceReversal``
