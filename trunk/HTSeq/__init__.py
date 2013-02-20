@@ -220,9 +220,9 @@ class GFF_Reader( FileOrSequence ):
             strand, frame, attributeStr ) = line.split( "\t", 8 )   
          ( attr, name ) = parse_GFF_attribute_string( attributeStr, True )
          if self.end_included:
-            iv = GenomicInterval( seqname, int(start)-1, int(end)-1, strand )
-         else:
             iv = GenomicInterval( seqname, int(start)-1, int(end), strand )
+         else:
+            iv = GenomicInterval( seqname, int(start)-1, int(end)-1, strand )
          f = GenomicFeature( name, feature, iv )
          if score != ".":
             score = float( score )
