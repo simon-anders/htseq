@@ -1197,13 +1197,23 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       a.seq = self.read.seq
       a.qual = self.read.qualstr
       a.qname = self.read.name
-      a.cigar = [ (cigar_operation_code_dict[c.type], c.size) for c in self.cigar ]
       a.flag = self.flag
-      a.pos = self.iv.start
-      a.tid = sf.gettid( self.iv.chrom )
-      a.isize = self.inferred_insert_size
-      a.mapq = self.aQual
       a.tags = self.optional_fields
+      if self.aligned:
+         a.cigar = [ (cigar_operation_code_dict[c.type], c.size) for c in self.cigar ]
+         a.pos = self.iv.start
+         a.tid = sf.gettid( self.iv.chrom )
+         a.isize = self.inferred_insert_size
+         a.mapq = self.aQual
+      else:
+         a.pos  = -1
+         a.tid  = -1
+      if self.mate_aligned:
+         a.mrnm = sf.gettid( self.mate_start.chrom )
+         a.mpos = sf.gettid( self.mate_start.start )
+      else:
+         a.mrnm = -1
+         a.mpos = -1
       return a
 
    @classmethod

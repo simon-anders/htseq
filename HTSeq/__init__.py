@@ -829,10 +829,19 @@ class BAM_Reader( object ):
     def fetch( self, reference = None, start = None, end = None, region = None ):
         sf = pysam.Samfile(self.filename, "rb")
         self.record_no = 0
-        for pa in sf.fetch( reference, start, end, region ):
-            yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
-            self.record_no += 1
-    
+        try:
+           for pa in sf.fetch( reference, start, end, region ):
+              yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
+              self.record_no += 1
+        except ValueError as e:
+           if e.message == "fetch called on bamfile without index":
+              print "Error: ", e.message
+              print "Your bam index file is missing or wrongly named, convention is that file 'x.bam' has index file 'x.bam.bai'!"
+           else:
+              raise
+        except:
+           raise
+
     def get_line_number_string( self ):
         if self.record_no == -1:
             return "unopened file %s" % ( self.filename )
