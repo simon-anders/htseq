@@ -32,7 +32,7 @@ cdef class GenomicInterval:
    are calculated from the other:
      
       chrom: The name of a sequence (i.e., chromosome, contig, or 
-         the like). If 'genome' is given, it should know 'chrom'.
+         the like). 
       start: The start of the interval. Even on the reverse strand,
          this is always the smaller of the two values 'start' and 'end'.
          Note that all positions should be given as 0-based value!
