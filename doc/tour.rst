@@ -183,25 +183,30 @@ the next section.
 Reading and writing BAM files
 =============================
 
-HTSeq now exposes the samtools API trough pysam, enabling you to read and write BAM files.
+HTSeq exposes the samtools API trough pysam, enabling you to read and write BAM files.
 A simple example of the usage is given here:
 
 .. doctest::
    
    >>> bam_reader = HTSeq.BAM_Reader( "SRR001432_head_sorted.bam" )
-   >>> count = 0
-   >>> for a in bam_reader: #printing 10 reads
+   >>> for a in itertools.islice( bam_reader, 5 ):  # printing first 5 reads
    ...    print a
-   ...	  count += 1
-   ...	  if count > 10:
-   ...	     break
+   <SAM_Alignment object: Paired-end Read 'SRR001432.165255 USI-EAS21_0008_3445:8:4:718:439 length=25' aligned to 1:[29267,29292)/->
+   <SAM_Alignment object: Paired-end Read 'SRR001432.238475 USI-EAS21_0008_3445:8:6:888:446 length=25' aligned to 1:[62943,62968)/->
+   <SAM_Alignment object: Paired-end Read 'SRR001432.116075 USI-EAS21_0008_3445:8:3:657:64 length=25' aligned to 1:[86980,87005)/->
+   <SAM_Alignment object: Paired-end Read 'SRR001432.159692 USI-EAS21_0008_3445:8:4:618:821 length=25' aligned to 1:[91360,91385)/->
+   <SAM_Alignment object: Paired-end Read 'SRR001432.249247 USI-EAS21_0008_3445:8:6:144:741 length=25' aligned to 1:[97059,97084)/->
+    
+[*FIXME*] The following is currently broken, likely due to a bug in pysam.    
 
-   >>> bam_writer = HTSeq.BAM_Writer.from_BAM_Reader( "region.bam", bam_writer ) #set-up BAM_Writer with same header as reader
-   >>> for a in bam_reader.fetch( region = "1:249000000-249200000" ): #fetching reads in a region
-   ...    print "Writing Alignment", a, "to file", bam_writer.filename
-   ...	  bam_writer.write( a )
-   >>> bam_writer.close()
-
+.. doctest::
+    
+   >>> bam_writer = HTSeq.BAM_Writer.from_BAM_Reader( "region.bam", bam_reader ) #set-up BAM_Writer with same header as reader #doctest: +SKIP
+   >>> for a in bam_reader.fetch( region = "1:249000000-249200000" ): #fetching reads in a region #doctest: +SKIP
+   ...    print "Writing Alignment", a, "to file", bam_writer.filename 
+   ...	  bam_writer.write( a ) 
+   >>> bam_writer.close() #doctest: +SKIP
+ 
 Genomic intervals and genomic arrays
 ====================================
 
@@ -604,10 +609,12 @@ If our variant calls are in a `VCF`_-file we can use the :class:`VCF_Reader` to 
 
     .. _`VCF`: http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-40
  
-    >>> vcfr = HTSeq.VCF_Reader( "00-All.vcf.gz" )
-    >>> vcfr.parse_meta()
-    >>> vcfr.make_info_dict()
-    >>> for vc in vcfr:
+*FIXME*: We need to include this example file!
+ 
+    >>> vcfr = HTSeq.VCF_Reader( "00-All.vcf.gz" ) #doctest: +SKIP
+    >>> vcfr.parse_meta() #doctest: +SKIP
+    >>> vcfr.make_info_dict() #doctest: +SKIP
+    >>> for vc in vcfr: #doctest: +SKIP
     ...     print list( exons[vc.pos] )
 
 

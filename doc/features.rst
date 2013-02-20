@@ -248,14 +248,14 @@ Example Workflow for reading the dbSNP in VCF-format (obtained from `dbSNP <ftp:
 
 .. doctest::
 
-    >>> import HTSeq #doctest:+NORMALIZE_WHITESPACE
-    vcfr = HTSeq.VCF_Reader( "00-All.vcf.gz" )
-    vcfr.parse_meta()
-    vcfr.make_info_dict()
-    for vc in vcfr:
+    >>> vcfr = HTSeq.VCF_Reader( "00-All.vcf.gz" ) #doctest: +SKIP
+    >>> vcfr.parse_meta() #doctest: +SKIP
+    >>> vcfr.make_info_dict() #doctest: +SKIP
+    >>> for vc in vcfr: #doctest: +SKIP
     ...    print vc,
     1:10327:'T'->'C'
     1:10433:'A'->'AC'
     1:10439:'AC'->'A'
     1:10440:'C'->'A'
 
+*FIXME* The example above is not run, as the example file is still missing!
