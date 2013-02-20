@@ -4,13 +4,13 @@ import numpy
 
 def GenomicInterval_xrange( gi, step ):
    for pos in xrange( gi.start, gi.end, step ):
-      yield HTSeq.GenomicPosition( gi.chrom, pos, gi.strand, gi.genome )
+      yield HTSeq.GenomicPosition( gi.chrom, pos, gi.strand )
       
 def GenomicInterval_xranged( gi, step ):
    if gi.strand == "-":
       step *= -1
    for pos in xrange( gi.start_d, gi.end_d, step ):
-      yield HTSeq.GenomicPosition( gi.chrom, pos, gi.strand, gi.genome ) 
+      yield HTSeq.GenomicPosition( gi.chrom, pos, gi.strand ) 
                    
 def ChromVector_steps( cv ):
    if isinstance( cv.array, numpy.ndarray ):
