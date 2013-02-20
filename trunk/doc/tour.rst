@@ -191,11 +191,11 @@ A simple example of the usage is given here:
    >>> bam_reader = HTSeq.BAM_Reader( "SRR001432_head_sorted.bam" )
    >>> for a in itertools.islice( bam_reader, 5 ):  # printing first 5 reads
    ...    print a
-   <SAM_Alignment object: Paired-end Read 'SRR001432.165255 USI-EAS21_0008_3445:8:4:718:439 length=25' aligned to 1:[29267,29292)/->
-   <SAM_Alignment object: Paired-end Read 'SRR001432.238475 USI-EAS21_0008_3445:8:6:888:446 length=25' aligned to 1:[62943,62968)/->
-   <SAM_Alignment object: Paired-end Read 'SRR001432.116075 USI-EAS21_0008_3445:8:3:657:64 length=25' aligned to 1:[86980,87005)/->
-   <SAM_Alignment object: Paired-end Read 'SRR001432.159692 USI-EAS21_0008_3445:8:4:618:821 length=25' aligned to 1:[91360,91385)/->
-   <SAM_Alignment object: Paired-end Read 'SRR001432.249247 USI-EAS21_0008_3445:8:6:144:741 length=25' aligned to 1:[97059,97084)/->
+   <SAM_Alignment object: Read 'SRR001432.165255 USI-EAS21_0008_3445:8:4:718:439 length=25' aligned to 1:[29267,29292)/->
+   <SAM_Alignment object: Read 'SRR001432.238475 USI-EAS21_0008_3445:8:6:888:446 length=25' aligned to 1:[62943,62968)/->
+   <SAM_Alignment object: Read 'SRR001432.116075 USI-EAS21_0008_3445:8:3:657:64 length=25' aligned to 1:[86980,87005)/->
+   <SAM_Alignment object: Read 'SRR001432.159692 USI-EAS21_0008_3445:8:4:618:821 length=25' aligned to 1:[91360,91385)/->
+   <SAM_Alignment object: Read 'SRR001432.249247 USI-EAS21_0008_3445:8:6:144:741 length=25' aligned to 1:[97059,97084)/->
     
 [*FIXME*] The following is currently broken, likely due to a bug in pysam.    
 

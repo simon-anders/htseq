@@ -974,7 +974,7 @@ cdef class Alignment( object ):
    def __repr__( self ):
       cdef str s
       if self.paired_end:
-         s = "Paired-end Read"
+         s = "Paired-end read"
       else:
          s = "Read"
       if self.aligned:
@@ -1233,7 +1233,14 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          if read.is_proper_pair:
             strand = "-" if read.mate_is_reverse else "+"
             a.mate_start = GenomicPosition( samfile.getrname(read.mrnm), read.mpos, strand )
-            a.pe_which = "first" if read.is_read1 else "second" #TODO:check wheter that actually works as expected, what about 'unknown'?
+            if read.is_read1:
+               a.pe_which = intern( "first" )
+            elif read.is_read2:  
+               a.pe_which = intern( "second" )
+            else:
+               a.pe_which = intern( "unknown" )
+      else:
+         a.pe_which = intern( "not_paired_end" )
       return a
          
    @classmethod
