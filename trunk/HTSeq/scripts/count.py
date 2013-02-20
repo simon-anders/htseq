@@ -185,10 +185,11 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                rr = r 
             else: 
                rr = r[0] if r[0] is not None else r[1]
-            if not quiet:
-               sys.stderr.write( ( "Warning: Skipping read '%s', because chromosome " +
-                  "'%s', to which it has been aligned, did not appear in the GFF file.\n" ) % 
-                  ( rr.read.name, iv.chrom ) )
+            empty += 1
+            #if not quiet:
+            #   sys.stderr.write( ( "Warning: Skipping read '%s', because chromosome " +
+            #      "'%s', to which it has been aligned, did not appear in the GFF file.\n" ) % 
+            #      ( rr.read.name, iv.chrom ) )
 
          if i % 100000 == 0 and not quiet:
             sys.stderr.write( "%d sam %s processed.\n" % ( i, "lines " if not pe_mode else "line pairs" ) )
