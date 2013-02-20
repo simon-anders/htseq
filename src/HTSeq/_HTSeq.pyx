@@ -236,7 +236,7 @@ cdef class GenomicInterval:
          raise TypeError, "Cannot extend an interval to include None."
       if self.chrom != iv.chrom:
          raise ValueError, "Cannot extend an interval to include an interval on another chromosome."
-      if self.strand.se is not strand_nostrand and iv.strand is not strand_nostrand and \
+      if self.strand is not strand_nostrand and iv.strand is not strand_nostrand and \
             self.strand is not iv.strand:
          raise ValueError, "Cannot extend an interval to include an interval on another strand."
       self.start = min( self.start, iv.start )
