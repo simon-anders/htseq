@@ -210,16 +210,16 @@ Then, we can simply get a list of all reads within this interval as follows:
    >>> sortedbamfile = HTSeq.BAM_Reader( "SRR001432_head_sorted.bam" )
    >>> for almnt in sortedbamfile[ window ]:
    ...     print almnt   #doctest:+ELLIPSIS +NORMALIZE_WHITESPACE
-   <SAM_Alignment object: Paired-end Read 'SRR001432.90270 USI-EAS21_0008_3445:8:3:245:279 length=25' aligned to 1:[145437532,145437557)/->
+   <SAM_Alignment object: Read 'SRR001432.90270 USI-EAS21_0008_3445:8:3:245:279 length=25' aligned to 1:[145437532,145437557)/->
     ...
-   <SAM_Alignment object: Paired-end Read 'SRR001432.205754 USI-EAS21_0008_3445:8:5:217:355 length=25' aligned to 1:[145440975,145441000)/->
+   <SAM_Alignment object: Read 'SRR001432.205754 USI-EAS21_0008_3445:8:5:217:355 length=25' aligned to 1:[145440975,145441000)/->
       
 Let's have a closer look at the last alignment. As before, we first extent the read to fragment size::
 
    >>> fragmentsize = 200
    >>> almnt.iv.length = fragmentsize
    >>> almnt
-   <SAM_Alignment object: Paired-end Read 'SRR001432.205754 USI-EAS21_0008_3445:8:5:217:355 length=25' aligned to 1:[145440800,145441000)/->
+   <SAM_Alignment object: Read 'SRR001432.205754 USI-EAS21_0008_3445:8:5:217:355 length=25' aligned to 1:[145440800,145441000)/->
    
 The read has been aligned to the "-"
 strand, and hence, we should look at its distance to the *end* of the window
@@ -324,13 +324,13 @@ we selected as a good example::
    ...     if almnt.read.name.startswith( "SRR001432.700 " ):
    ...         break
    >>> almnt
-   <SAM_Alignment object: Paired-end Read 'SRR001432.700 USI-EAS21_0008_3445:8:1:35:294 length=25' aligned to 1:[169677855,169677880)/->
+   <SAM_Alignment object: Read 'SRR001432.700 USI-EAS21_0008_3445:8:1:35:294 length=25' aligned to 1:[169677855,169677880)/->
 
 Again, we extent the read to fragment size::
 
    >>> almnt.iv.length = fragmentsize
    >>> almnt
-   <SAM_Alignment object: Paired-end Read 'SRR001432.700 USI-EAS21_0008_3445:8:1:35:294 length=25' aligned to 1:[169677680,169677880)/->
+   <SAM_Alignment object: Read 'SRR001432.700 USI-EAS21_0008_3445:8:1:35:294 length=25' aligned to 1:[169677680,169677880)/->
    
 To see which windows the read covers, we subset the ``tssarray`` and ask for steps
 that the fragment in ``almnt`` covers:
