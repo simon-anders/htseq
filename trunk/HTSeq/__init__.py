@@ -3,10 +3,16 @@
 See http://www-huber.embl.de/users/anders/HTSeq for documentation.
 """
 
-import itertools, warnings
+import itertools, warnings, os
 
-from _HTSeq import *
-
+try:
+   from _HTSeq import *
+except ImportError:
+   if os.path.isfile( "setup.py" ):
+      raise ImportError( "Cannot import 'HTSeq' when working directory is HTSeq's own build directory.")
+   else:
+      raise
+      
 from _version import __version__
 
 #from vcf_reader import *
