@@ -406,7 +406,19 @@ These file are in the `GTF format`_, a tightening of the `GFF format`_. HTSeq of
 .. _`GTF format`: http://mblab.wustl.edu/GTF22.html
 .. _`GFF format`: http://www.sanger.ac.uk/resources/software/gff/spec.html
 
-   >>> gtf_file = HTSeq.GFF_Reader( "Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz" )
+   >>> gtf_file = HTSeq.GFF_Reader( "Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz",
+   ...    end_included=True )
+
+The GFF format is, unfortunately, a not very well specified file format. Several
+standard documents exist, from different groups, and they even contradict each 
+other in some points. Most importantly, it is unclear whether a range specified
+in a GFF line is supposed to include the base under the "end" position or not. Here,
+we specied the this file does includde the end. (Hint: The length of most coding exons
+is divisible by 3. If start-end is divisible by 3, too, end is
+not included, if the division leaves a remainder of two, end is included.)
+
+We iterate through this file as follows:
+
    >>> for feature in itertools.islice( gtf_file, 10 ):
    ...    print feature
    ... 
@@ -422,7 +434,16 @@ These file are in the `GTF format`_, a tightening of the `GFF format`_. HTSeq of
    <GenomicFeature: CDS 'R0030W' at 2-micron: 3270 -> 3813 (strand '+')>
 
 The ``feature`` variable is filled with objects of class :class:`GenomicFeature`. 
-As with all Python objects, the **dir** function shows us its slots and functions:
+If you compare the coordinated with the original file, you will notice that the
+GFF_Reader has subtracted one from all starts. This is because all file parsers in
+HTSeq adjust coordinates as necessary to fit the Python convention, which is that
+indexing starts with zero and the end is not included. Hence, you can immediately
+compare coordinates from different data formats without having to worry about 
+subtleties like the fact that GFF is one-based and SAM is zero-based.
+
+As with all Python objects, the **dir** function shows us the slots and 
+functions of our loop variable **feature** and so allow us to inspect what data
+it provides:
 
 .. doctest::
 
