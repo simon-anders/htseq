@@ -344,6 +344,8 @@ cdef class ChromVector( object ):
    
    @classmethod 
    def _create_view( cls, ChromVector vec, GenomicInterval iv ):
+      if iv.length == 0:
+         raise IndexError, "Cannot subset to zero-length interval."
       v = cls()
       v.iv = iv
       v.array = vec.array
@@ -373,7 +375,7 @@ cdef class ChromVector( object ):
          if index_slice.stop is not None:
             stop = index_slice.stop
             if stop > self.iv.end:
-               raise IndexError, "stop too large"
+               raise IndexError, "stop too large"               
          else:
             stop = self.iv.end
          iv = GenomicInterval( self.iv.chrom, start, stop, self.iv.strand )
@@ -416,6 +418,10 @@ cdef class ChromVector( object ):
                raise IndexError, "stop too large"
          else:
             stop = self.iv.end
+         if start > stop:
+            raise IndexError, "Start of interval is after its end."
+         if start == stop:
+            raise IndexError, "Cannot assign to zero-length interval."
          self.array[ start - self.offset : stop - self.iv.start : index.step ] = value
       elif isinstance( index, GenomicInterval ):
          if index.chrom != self.iv.chrom:

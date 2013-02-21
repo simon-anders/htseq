@@ -4,6 +4,26 @@
 Version history
 ***************
 
+Version 0.5.4
+=============
+
+2013-02-20
+
+Various bug fixed, including
+
+  - GFF_Reader interpreted the constructor's "end_included" flag
+    in the wrong way, hence the end position of intervals of
+    GFF features was off by 1 base pair before
+    
+  - htseq-count no longer warns about missing chromosomes, as this
+    warning was often misleading. Also, these reads are no properly
+    included in the "no_feature" count.
+    
+  - default for "max_qual" in "htseq-qa" is now 41, to accommodate newer
+    Illumina FASTQ files
+    
+  - BAM_Reader used to incorrectly label single-end reads as paired-end
+
 Version 0.5.3
 =============
 
