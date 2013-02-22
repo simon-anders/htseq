@@ -24,6 +24,15 @@ Various bug fixed, including
     
   - BAM_Reader used to incorrectly label single-end reads as paired-end
 
+
+Patch versions:
+
+* v0.5.4p1 (2013-02-22):
+
+  - changed default for GFF_Reader to end_included=True, which is actually the
+    correct style for Ensemble GTF files. Now the behavious should be as it 
+    was before.
+
 Version 0.5.3
 =============
 

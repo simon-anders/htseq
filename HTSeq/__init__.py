@@ -200,7 +200,7 @@ class GFF_Reader( FileOrSequence ):
    Iterating over the object then yields GenomicFeature objects.
    """
    
-   def __init__( self, filename_or_sequence, end_included=False ):
+   def __init__( self, filename_or_sequence, end_included=True ):
       FileOrSequence.__init__( self, filename_or_sequence )
       self.end_included = end_included
       self.metadata = {}
