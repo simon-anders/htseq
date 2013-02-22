@@ -413,7 +413,9 @@ The GFF format is, unfortunately, a not very well specified file format. Several
 standard documents exist, from different groups, and they even contradict each 
 other in some points. Most importantly, it is unclear whether a range specified
 in a GFF line is supposed to include the base under the "end" position or not. Here,
-we specied the this file does includde the end. (Hint: The length of most coding exons
+we specied the this file does include the end. Actually, this is the default
+for GFF_Reader, so it would not have been necessary to specify it. 
+(Hint, if you are unsure about your GFF file: The length of most coding exons
 is divisible by 3. If start-end is divisible by 3, too, end is
 not included, if the division leaves a remainder of two, end is included.)
 

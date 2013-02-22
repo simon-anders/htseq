@@ -62,7 +62,7 @@ As usual, there is a parser class, called **GFF_Reader**, that can generate an
 iterator of objects describing the features. These objects are of type :class`GenomicFeature`
 and each describes one line of a GFF file. See Section :ref:`tour` for an example.
 
-.. class:: GFF_Reader( filename_or_sequence, end_included=False )
+.. class:: GFF_Reader( filename_or_sequence, end_included=True )
 
    As a subclass of :class:`FileOrSequence`, GFF_Reader can be initialized either
    with a file name or with an open file or another sequence of lines.
@@ -71,7 +71,7 @@ and each describes one line of a GFF file. See Section :ref:`tour` for an exampl
    
    The GFF specification is unclear on whether the end coordinate marks the last
    base-pair of the feature (closed intervals, ``end_included=True``) or the one
-   after (half-open intervals, ``end_included=False``). The default, False, is
+   after (half-open intervals, ``end_included=False``). The default, True, is
    correct for Ensembl GTF files. If in doubt, look for a CDS or stop_codon
    feature in you GFF file. Its length should be divisible by 3. If "end-start"
    is divisible by 3, you need ``end_included=False``. If "end-start+1" is
