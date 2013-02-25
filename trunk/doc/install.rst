@@ -4,134 +4,120 @@
 Prequisites and installation
 ****************************
 
-Prequisites
-===========
-
-To use HTSeq, you need at least version 2.5 of Python_ (Python 3 does not work yet), 
-together with NumPy_,
-a commonly used Python package for numerical calculations. Mac and Linux users 
-will find that this is often pre-installed. (To check whether you have a working
-NumPy installation, start Python and simply type ``import numpy``. If you do not
-get an error, NumPy is available. Users of Debian and Ubuntu Linux should install
-the package ``python-numpy``.) 
-
-.. _Python: http://www.python.org/
-.. _NumPy: http://numpy.scipy.org/
-.. _`Enthought Python Distribution`: http://www.enthought.com/products/epd.php
-
-
-Download
-========
-
-HTSeq is available from the `Python Package Index (PyPI)`_. 
+HTSeq is available from the `Python Package Index (PyPI)`_. Download HTSeq from the
 
 .. _`Python Package Index (PyPI)`: http://pypi.python.org/
-
-Download HTSeq from the
 
   `HTSeq package download page on PyPI`_,
 
 .. _`HTSeq package download page on PyPI`: http://pypi.python.org/pypi/HTSeq
  
-where you will find various version of the package. Either pick a *binary*
-archive suitable for your operation system and Python version, or download the
-*source* tarball, which should work with all supported operating systems and Python
-versions.
+where you will find various version of the package. 
+
+To use HTSeq, you need at least version 2.5 of Python_ (Python 3 does not work yet), 
+together with NumPy_,
+a commonly used Python package for numerical calculations,
+and matplotlib_, a plotting library. 
+
+.. _Python: http://www.python.org/
+.. _NumPy: http://numpy.scipy.org/
+.. _matplotlib: http://matplotlib.org/
+
+HTSeq can be installed like any other Python package. For users unfamiliar with this,
+more detailled instructions are given below.
 
 
-Installing a binary package
-===========================
+Installation on Linux
+=====================
 
-For Windows, the binary package contains an automatic installer, Simply execute it.
+Make sure that you the standard GNU build environment installed, as well as Python together with its development headers and numpy and matplotlib. Users of Ubuntu Linux simply type::
 
-If you have a binary package (not containing a subdirectory called ``src``) for Linux or MacOS,
-unpack it, open a terminal and type, in the unpacked directory,
+   sudo apt-get install build-essential python2.7-dev python-numpy python-matplotlib
+
+This command installs the required packages as listed (or simply does nothing if they are already installed.
+
+For users of RedHat or RedHat-derived distros (Fedora, CentOS), the equivalent command
+seems to be (untested)::
+
+   sudo yum groupinstall "Development Tools"
+   sudo yum install python-devel numpy python-matplotlib
+
+To install HTSeq itself, download the *source* package from the `HTSeq PyPI page`_, unpack the tarball,
+go into the directory with the unpacked files and type there
+
+.. _`HTSeq PyPI page`: http://pypi.python.org/pypi/HTSeq
+
 ::
 
-   python setup.py install
-  
-If you do not have write permission for Python's ``site-package``
-directory, you can install it locally in your home directory as follows: 
+   python setup.py install --user
 
-   *Python 2.6* users simply type
+to install HTSeq for the current users. To make HTSeq available to all users, use instead::
 
-   ::
+   python setup.py build
+   sudo python setup.py install
 
-      python setup.py install --user
+To test the installation, change to another director than the build directory, start Python
+(by typing ``python``) and then try whether typing ``import HTSeq`` causes an error meesage.
 
-   to get it installed in a place in your home directory (typically ``~/.local``) 
-   where Python will find it.
+Installation on MacOS X
+=======================
 
-   For a local installation with *Python 2.5*, you have to specify a 
-   place where to install it to:
+Mac users should install NumPy as explained here_ in the NumPy/SciPy documentation. Note that you need
+to install Xcode to be able to compile NumPy. Due to the
+mess that Apple recently made out of Xcode, the whole process may be a slight bit more cumbersome than necessary, especially if you work with OSX Lion, so read the instructions carefully.
 
-   ::
+.. _here: http://www.scipy.org/Installing_SciPy/Mac_OS_X
 
-      python setup.py install --home <some_path>
-      
-   and then tell Python (every time before using HTSeq) where to look for it by setting
-   the environment variable ``PYTHONPATH``:
+If you want to produce plots or use htseq-qa, you will also need matplotlib. (For htseq-count, it
+is not required.) There seems to be a binary package (a "Python egg") available on the matplotlib
+SourceForge page.
 
-   ::
+To install HTSeq itself, download the *source* package from the `HTSeq PyPI page`_, unpack the tarball,
+go into the directory with the unpacked files and type there:
 
-     export PYTHONPATH=$PYTHONPATH:<some_path>/lib/python   
+.. _`HTSeq PyPI page`: http://pypi.python.org/pypi/HTSeq
 
-
-To test your installation, simply start Python (**not** in the directory
-with ``setup.py``) and type ``import HTSeq``. No error 
-message should appear.
-
-If you have problems with the installation, please do not hesitate to contact me
-(anders *at* embl *dot* de).
-
-
-Installing a source package
-===========================
-
-If you have a source package (containing a subdirectory called ``src``), you need to 
-first build the package before installing it. For this, make sure you have the
-GNU tool chain and the Python header files installed:
-
-* On a Mac, you need to install XCode (available from the Apple web site or from
-  your second Mac OS X install CD).
-
-* On Ubuntu or Debian Linux, install the ``build-essential`` and the 
-  ``python-dev`` package. For other Linux distributions, similar packages are available.
-
-* On MS Windows, MinGW_ is a commonly used build environment. Using it may be
-  a bit tricky, so use a binary package if possible. If non is available, see below
-  for detailed instructions.
-
-.. _MinGW: http://www.mingw.org/
-
-Unpack the source package, open a terminal, ``cd`` 
-into the unpacked directory, and type
 ::
 
    python setup.py build
-  
-Afterwards, proceed as with the binary package.
+
+to compile HTSeq. If you get an error regarding the availability of a C compiler, you may need to
+set environment variables to point Python to the . The NumPy/SciPy installation instructions above cover this topic well and
+apply here, too, so simply do the same as you did to install NumPy.
+
+Once building has been successful, use::
+
+   python setup.py --user
+
+to install HTSeq for the current users. To make HTSeq available to all users, use instead::
+
+   python setup.py build
+   sudo python setup.py install
+
+To test the installation, change to another director than the build directory, start Python
+(by typing ``python``) and then try whether typing ``import HTSeq`` causes an error meesage.
 
 
-Installation of a source package on MS Windows
-..............................................
+MS Windows
+==========
 
-If the current version is not available as binary package for Windows, either 
-ask me to build a Windows package, or proceed as follows:
+If you have not yet installed Python, do so first. You can find an automatic installer 
+for Windows on
+the `Python download page`_. Make sure to use Python 2.7, not Python 3.3. 
 
-- In addition to Python and numpy, also install MinGW_.
+.. _`Python download page`: http://www.python.org/getit/
 
-.. _MinGW: http://www.mingw.org/
+Then install the newest version of NumPy. Look here_ for the automatic installer (a file called "numpy_1.7.x_win32_superpack_python2.7.exe" or similar).
 
-- Download the source package and unpack it (e.g., with 7-zip) onto your desktop.
+.. _here http://sourceforge.net/projects/numpy/files/NumPy/
 
-- Start a command line terminal and type the following commands (substituting paths
-  where they are different on your system):
+If you want to produce plots or use htseq-qa, you will also need matplotlib. (For htseq-count, it
+is not required.) Follow the installation instructions on their web page.
 
-  ::  
-  
-     cd \Documents and Settings\anders\Desktop\HTSeq-0.4.4
-     PATH=%PATH%;C:\Python26;C:\MinGW\bin
-     python setup.py build --compiler=mingw32
-     python setup.py install
-    
+To install HTSeq itself, simply download the Windows installer from the `HTSeq download page`_
+and run it.
+
+.. _`HTSeq download page`: http://pypi.python.org/pypi/HTSeq
+
+To test your installation, start Python and then try whether typing ``import HTSeq`` 
+causes an error meesage.
