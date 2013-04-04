@@ -697,6 +697,9 @@ class VariantCall( object ):
             return self.info
     
     def sampleline( self ):
+       if self.format == None:
+          print >> sys.stderr, "No samples in this variant call!" 
+          return ""
        keys = self.format
        ret = [ ":".join( keys ) ]
        for sid in self.samples:
@@ -708,7 +711,10 @@ class VariantCall( object ):
        return "\t".join( ret )
     
     def to_line( self ):
-        return "\t".join( map( str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join( self.alt ), self.qual, self.filter, self.infoline(), self.sampleline() ] ) ) + "\n"
+       if self.format == None:
+          return "\t".join( map( str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join( self.alt ), self.qual, self.filter, self.infoline() ] ) ) + "\n"
+       else:
+          return "\t".join( map( str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join( self.alt ), self.qual, self.filter, self.infoline(), self.sampleline() ] ) ) + "\n"
     
     def __descr__( self ):
         return "<VariantCall at %s, ref '%s', alt %s >" % (str(self.pos).rstrip("/."), self.ref, str(self.alt).strip("[]"))
