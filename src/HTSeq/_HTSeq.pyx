@@ -1216,7 +1216,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          a.tid  = -1
       if self.mate_aligned:
          a.mrnm = sf.gettid( self.mate_start.chrom )
-         a.mpos = sf.gettid( self.mate_start.start )
+         a.mpos = self.mate_start.start
       else:
          a.mrnm = -1
          a.mpos = -1
