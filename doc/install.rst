@@ -107,9 +107,9 @@ the `Python download page`_. Make sure to use Python 2.7, not Python 3.3.
 
 .. _`Python download page`: http://www.python.org/getit/
 
-Then install the newest version of NumPy. Look here_ for the automatic installer (a file called "numpy_1.7.x_win32_superpack_python2.7.exe" or similar).
+Then install the newest version of NumPy. Look on `NumPy's PyPI page`_ for the automatic installer.
 
-.. _here http://sourceforge.net/projects/numpy/files/NumPy/
+.. _`NumPy's PyPI page`: https://pypi.python.org/pypi/numpy
 
 If you want to produce plots or use htseq-qa, you will also need matplotlib. (For htseq-count, it
 is not required.) Follow the installation instructions on their web page.
@@ -124,7 +124,7 @@ causes an error meesage.
 
 If you get the error message "ImportError: DLL load failed", you are most likely
 missing the file MSVCR110.DLL on your system, which you can get by downloading and
-installing the file "vcredist_x86.exe" from here_.
+installing the file "vcredist_x86.exe" from `this page`_.
 
-.. _here: http://www.microsoft.com/en-us/download/details.aspx?id=30679
+.. _`this page`: http://www.microsoft.com/en-us/download/details.aspx?id=30679
 
