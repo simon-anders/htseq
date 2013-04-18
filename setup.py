@@ -59,7 +59,7 @@ setup( name = 'HTSeq',
           Extension( 'HTSeq._HTSeq', 
              ['src/_HTSeq.c'], include_dirs=[numpy_include_dir], extra_compile_args=['-w'] ),
           Extension( 'HTSeq._StepVector', 
-             ['src/StepVector_wrap.cxx'], extra_objects=['src/step_vector.h'], extra_compile_args=['-w'] ),
+             ['src/StepVector_wrap.cxx'], extra_compile_args=['-w'] ),
        ],
        scripts = [
           'scripts/htseq-qa',

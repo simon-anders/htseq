@@ -33,6 +33,10 @@ Patch versions:
     correct style for Ensemble GTF files. Now the behavious should be as it 
     was before.
 
+* v0.5.4p2 (2013-04-18):
+
+  - fixed issue blocking proper built on Windows
+
 Version 0.5.3
 =============
 

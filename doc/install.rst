@@ -121,3 +121,10 @@ and run it.
 
 To test your installation, start Python and then try whether typing ``import HTSeq`` 
 causes an error meesage.
+
+If you get the error message "ImportError: DLL load failed", you are most likely
+missing the file MSVCR110.DLL on your system, which you can get by downloading and
+installing the file "vcredist_x86.exe" from here_.
+
+.. _here: http://www.microsoft.com/en-us/download/details.aspx?id=30679
+
