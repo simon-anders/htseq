@@ -114,24 +114,24 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
                write_to_samout( r, "too_low_aQual" )
                continue
             if stranded != "reverse":
-               iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" )
+               iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" and co.size > 0 )
             else:
-               iv_seq = ( invert_strand( co.ref_iv ) for co in r.cigar if co.type == "M" )            
+               iv_seq = ( invert_strand( co.ref_iv ) for co in r.cigar if co.type == "M" and co.size > 0 )            
          else:
             if r[0] is not None and r[0].aligned:
                if stranded != "reverse":
-                  iv_seq = ( co.ref_iv for co in r[0].cigar if co.type == "M" )
+                  iv_seq = ( co.ref_iv for co in r[0].cigar if co.type == "M" and co.size > 0 )
                else:
-                  iv_seq = ( invert_strand( co.ref_iv ) for co in r[0].cigar if co.type == "M" )
+                  iv_seq = ( invert_strand( co.ref_iv ) for co in r[0].cigar if co.type == "M" and co.size > 0 )
             else:
                iv_seq = tuple()
             if r[1] is not None and r[1].aligned:            
                if stranded != "reverse":
                   iv_seq = itertools.chain( iv_seq, 
-                     ( invert_strand( co.ref_iv ) for co in r[1].cigar if co.type == "M" ) )
+                     ( invert_strand( co.ref_iv ) for co in r[1].cigar if co.type == "M" and co.size > 0 ) )
                else:
                   iv_seq = itertools.chain( iv_seq, 
-                     ( co.ref_iv for co in r[1].cigar if co.type == "M" ) )
+                     ( co.ref_iv for co in r[1].cigar if co.type == "M" and co.size > 0 ) )
             else:
                if ( r[0] is None ) or not ( r[0].aligned ):
                   write_to_samout( r, "not_aligned" )

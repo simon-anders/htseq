@@ -37,6 +37,10 @@ Patch versions:
 
   - fixed issue blocking proper built on Windows
 
+* v0.5.4p3 (2013-04-29):
+
+  - htseq-count now correctly skips over "M0" cigar operations
+
 Version 0.5.3
 =============
 
