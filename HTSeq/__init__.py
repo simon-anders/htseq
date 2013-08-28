@@ -658,6 +658,7 @@ class VariantCall( object ):
         self.qual   = qual
         self.filter = filtr
         self.info   = info
+        self._original_line = None
     
     @classmethod
     def fromdict( cls, dictionary ):
@@ -670,7 +671,8 @@ class VariantCall( object ):
         ret.qual    = dictionary["qual"]
         ret.filter  = dictionary["filter"]
         ret.info    = dictionary["info"]
-    
+        ret._original_line = None
+
     @classmethod
     def fromline( cls, line, nsamples = 0, sampleids = [] ):
         ret = cls()
@@ -688,6 +690,7 @@ class VariantCall( object ):
                 spos += 1
         ret.pos = GenomicPosition( ret.chrom, int(ret.pos) )
         ret.alt = ret.alt.split(",")
+        ret._original_line = line
         return ret
     
     def infoline( self ):
@@ -695,6 +698,10 @@ class VariantCall( object ):
             return ";".join(map((lambda key: str(key) + "=" + str(self.info[key])), self.info ))
         else:
             return self.info
+    
+    def get_original_line( self ):
+       warnings.warn( "Original line is empty, probably this object was created from scratch and not from a line in a .vcf file!" )
+       return self._original_line
     
     def sampleline( self ):
        if self.format == None:
