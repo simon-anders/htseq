@@ -1326,7 +1326,10 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
                strand = "+"           
             alnmt.mate_start = GenomicPosition( mrnm, posint, strand )   
             if alnmt.mate_start.chrom == "=":
-               alnmt.mate_start.chrom = alnmt.iv.chrom
+               if alnmt.iv is not None:
+                  alnmt.mate_start.chrom = alnmt.iv.chrom
+               else:
+                  warnings.warn( "Malformed SAM line: MRNM == '=' although read is not aligned." )
          if flagint & 0x0040:
             alnmt.pe_which = intern( "first" )
          elif flagint & 0x0080:
