@@ -41,6 +41,12 @@ Patch versions:
 
   - htseq-count now correctly skips over "M0" cigar operations
 
+* v0.5.4p3 (2013-08-28):
+
+  - added ``.get_original_line()`` function to ``VariantCall``
+  - firex a bug with reads not being read as paired if they were not
+    flagged as proper pair
+
 Version 0.5.3
 =============
 
