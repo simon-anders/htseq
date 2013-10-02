@@ -41,11 +41,15 @@ Patch versions:
 
   - htseq-count now correctly skips over "M0" cigar operations
 
-* v0.5.4p3 (2013-08-28):
+* v0.5.4p4 (2013-08-28):
 
   - added ``.get_original_line()`` function to ``VariantCall``
   - firex a bug with reads not being read as paired if they were not
     flagged as proper pair
+
+* v0.5.4p5 (2013-10-02):
+
+  - parsing of GFF attribute field no longer fails on quoted semicolons
 
 Version 0.5.3
 =============

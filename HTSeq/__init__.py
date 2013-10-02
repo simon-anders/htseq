@@ -167,7 +167,7 @@ def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
       attrStr = attrStr[:-1]
    d = {}
    first_val = "_unnamed_"
-   for (i, attr) in itertools.izip( itertools.count(), attrStr.split( ";" ) ):
+   for (i, attr) in itertools.izip( itertools.count(), _HTSeq.quotesafe_split( attrStr ) ):
       if _re_attr_empty.match( attr ):
          continue
       if attr.count( '"' ) not in ( 0, 2 ):
