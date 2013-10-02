@@ -1416,3 +1416,32 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
             tc = "H"
          res.append( ":".join( [ op[0], tc, str(op[1]) ] ) )
       return res
+
+
+###########################
+##   Helpers
+###########################
+
+cpdef list quotesafe_split( bytes s, bytes split=b';', bytes quote=b'"' ):
+   cdef list l = []
+   cdef int i = 0
+   cdef int begin_token = 0
+   cdef bint in_quote = False
+   cdef char * s_c = s
+   cdef char split_c = split[0]
+   cdef char quote_c = quote[0]
+   if len(split) != 1:
+      raise ValueError, "'split' must be length 1"
+   if len(quote) != 1:
+      raise ValueError, "'quote' must be length 1"
+   while s_c[i] != 0:
+      if s_c[i] == quote_c:
+         in_quote = not in_quote
+      elif (not in_quote) and s_c[i] == split_c:
+         l.append( s[ begin_token : i ] )
+         begin_token = i + 1
+      i += 1
+   l.append( s[ begin_token : ] )
+   if in_quote:
+      raise ValueError, "unmatched quote"
+   return l
