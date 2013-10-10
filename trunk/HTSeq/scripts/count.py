@@ -63,7 +63,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
          if i % 100000 == 0 and not quiet:
             sys.stderr.write( "%d GFF lines processed.\n" % i )
    except:
-      sys.stderr.write( "Error occured in %s.\n" % gff.get_line_number_string() )
+      sys.stderr.write( "Error occured when processing GFF file (%s):\n" % gff.get_line_number_string() )
       raise
       
    if not quiet:
@@ -74,12 +74,14 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
    
    try:
       if sam_filename != "-":
-         read_seq = HTSeq.SAM_Reader( sam_filename )
+         read_seq_file = HTSeq.SAM_Reader( sam_filename )
+         read_seq = read_seq_file
          first_read = iter(read_seq).next()
       else:
-         read_seq = iter( HTSeq.SAM_Reader( sys.stdin ) )
-         first_read = read_seq.next()
-         read_seq = itertools.chain( [ first_read ], read_seq )
+         read_seq_file = HTSeq.SAM_Reader( sys.stdin )
+         read_seq_iter = iter( read_seq_file )
+         first_read = read_seq_iter.next()
+         read_seq = itertools.chain( [ first_read ], read_seq_iter )
       pe_mode = first_read.paired_end
    except:
       sys.stderr.write( "Error occured when reading first line of sam file.\n" )
@@ -87,7 +89,6 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
 
    try:
       if pe_mode:
-         read_seq_pe_file = read_seq
          read_seq = HTSeq.pair_SAM_alignments( read_seq )
       empty = 0
       ambiguous = 0
@@ -195,10 +196,7 @@ def count_reads_in_features( sam_filename, gff_filename, stranded,
             sys.stderr.write( "%d sam %s processed.\n" % ( i, "lines " if not pe_mode else "line pairs" ) )
 
    except:
-      if not pe_mode:
-         sys.stderr.write( "Error occured in %s.\n" % read_seq.get_line_number_string() )
-      else:
-         sys.stderr.write( "Error occured in %s.\n" % read_seq_pe_file.get_line_number_string() )
+      sys.stderr.write( "Error occured when processing SAM input (%s):\n" % read_seq_file.get_line_number_string() )
       raise
 
    if not quiet:
@@ -283,8 +281,8 @@ def main():
          opts.mode, opts.featuretype, opts.idattr, opts.quiet, opts.minaqual,
          opts.samout )
    except:
-      sys.stderr.write( "Error: %s\n" % str( sys.exc_info()[1] ) )
-      sys.stderr.write( "[Exception type: %s, raised in %s:%d]\n" % 
+      sys.stderr.write( "  %s\n" % str( sys.exc_info()[1] ) )
+      sys.stderr.write( "  [Exception type: %s, raised in %s:%d]\n" % 
          ( sys.exc_info()[1].__class__.__name__, 
            os.path.basename(traceback.extract_tb( sys.exc_info()[2] )[-1][0]), 
            traceback.extract_tb( sys.exc_info()[2] )[-1][1] ) )
