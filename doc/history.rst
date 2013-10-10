@@ -47,9 +47,10 @@ Patch versions:
   - firex a bug with reads not being read as paired if they were not
     flagged as proper pair
 
-* v0.5.4p5 (2013-10-02):
+* v0.5.4p5 (2013-10-02/2013-10-10):
 
   - parsing of GFF attribute field no longer fails on quoted semicolons
+  - fixed issue with get_line_number_string
 
 Version 0.5.3
 =============
