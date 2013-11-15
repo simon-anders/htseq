@@ -38,7 +38,7 @@ setup( name = 'HTSeq',
        description = "A framework to process and analyze data from " +
           "high-throughput sequencing (HTS) assays",
        classifiers = [
-          'Development Status :: 4 - Beta',
+          'Development Status :: 5 - Production/Stable',
           'Topic :: Scientific/Engineering :: Bio-Informatics',
           'Intended Audience :: Developers',
           'Intended Audience :: Science/Research',

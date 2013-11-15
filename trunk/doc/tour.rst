@@ -6,6 +6,10 @@ A tour through HTSeq
 
 .. currentmodule:: HTSeq
 
+In the analysis of high-throughput sequencing data, it is often necessary to
+write custom scripts to form the "glue" between tools or to perform specific
+analysis tasks. HTSeq is a Python package to facilitate this.
+
 This tour demonstrates the
 functionality of HTSeq by performing a number of common analysis tasks:
 
@@ -25,7 +29,7 @@ on the Python web site.)
 .. _`Python Tutorial`: http://docs.python.org/tutorial/
   
 If you want to try out the examples on your own system, you can download the 
-used example files here: `HTSeq_example_data.tgz`_
+example files used from here: `HTSeq_example_data.tgz`_
 
 .. _HTSeq_example_data.tgz: http://www-huber.embl.de/users/anders/HTSeq/HTSeq_example_data.tgz
 
@@ -42,10 +46,11 @@ HTSeq with
    >>> import HTSeq
    >>> fastq_file = HTSeq.FastqReader( "yeast_RNASeq_excerpt_sequence.txt", "solexa" )
   
-The first argument is the file name, the optional second argument indicates that 
-the quality values are encoded according to Solexa's specification. If you omit it,
-the default "phred" is assumed, which means the encoding originally suggested
-by the Sanger Institute. (A third option is "solexa_old", for data from the SolexaPipeline
+The first argument is the file name. The optional second argument indicates 
+the encoding for the quality string. If you omit, the default ("phred") is used. The
+example data, however, is from an older experiment, and hence encoded in the 
+offset-64 format that the Solexa/Illumina software pipeline used before 
+version 1.8. (A third option is "solexa_old", for data from the Solexa pipeline 
 prior to version 1.3.)
 
 The variable ``fastq_file`` is now an object of class :class:`FastqReader`, which
@@ -75,13 +80,13 @@ reads.
    ACTTTTAAAGATTGGCCAAGAATTGGGGATTGAAGA
    
 Of course, there is more to a read than its sequence. The variable ``read`` still
-contains the tenth read, and we may examine it::
+contains the tenth read, and we can examine it::
 
    >>> read
    <SequenceWithQualities object 'HWI-EAS225:1:10:1284:142#0/1'>
 
 A :class:`Sequence` object has two slots, called :attr:`seq <Sequence.seq>` and 
-:attr:`name <Sequence.name>`. This here is a :class:`SequenceWithQualities`, 
+:attr:`name <Sequence.name>`. This object is a :class:`SequenceWithQualities`, 
 and it also has a slot :attr:`qual <SequenceWithQualities.qual>`::
 
    >>> read.name
@@ -127,7 +132,7 @@ The average qualities are hence::
            24.10720429,  23.68026721,  23.52034081,  23.49437978,
            23.11076443,  22.5576223 ,  22.43549742,  22.62354494])
 
-If you have `matplotlib`_ installed, you can plot this.
+If you have `matplotlib`_ installed, you can plot these numbers.
 
 .. _matplotlib: http://matplotlib.sourceforge.net/
 
@@ -144,16 +149,8 @@ This is a very simple way of looking at the quality scores. For more sophisticat
 quality-control techniques, see the Chapter :ref:`qa`.
 
 
-What if you did not get the ``_sequence.txt`` file from your core facility but 
-instead the ``export.txt`` file? While the former contains only the reads and
-their quality, the latter also contains the alignment of the reads to a reference
-as found by Eland. To read it, simply use
-
-.. doctest::
-
-   >>> alignment_file = HTSeq.SolexaExportReader( "yeast_RNASeq_excerpt_export.txt" )  #doctest:+SKIP
-   
-``HTSeq`` can also use other alignment formats, e.g., SAM::   
+Instead of a FASTQ file, you might have a SAM file, with the reads already aligned.
+The SAM_Reader class can read such data.
    
    >>> alignment_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
    
@@ -299,10 +296,10 @@ Now, we can assign the value 5 to an interval:
    
 We may want to add the value 3 to an interval overlapping with the previous one:
 
+.. doctest:: 
+
    >>> iv = HTSeq.GenomicInterval( "chr1", 110, 135, "." )
    >>> ga[iv] += 3
-
-.. doctest:: 
 
 To see the effect of this, we read out an interval encompassing the region that 
 we changed. To display the data, we convert to a list:
@@ -343,7 +340,7 @@ numbers) is useful to organize metadata.
 
 
 Calculating coverage vectors
-============================
+----------------------------
 
 By a "coverage vector", we mean a vector (one-dimensional array) of the length of
 a chromosome, where each element counts how many reads cover the corresponding
@@ -352,12 +349,12 @@ coverage vectors for all the chromosomes in a genome.
 
 Hence, we start by defining a :class:`GenomicArray`:
 
-   >>> cvg = HTSeq.GenomicArray( "auto", stranded=True, typecode='i' )
+   >>> cvg = HTSeq.GenomicArray( "auto", stranded=True, typecode="i" )
    
 Instead of listing all chromosomes, we instruct the GenomicArray to add chromosome
 vectors as needed, by specifiyng ``"auto"``. As we set ``stranded=True``, there are now two 
 chromosome vectors for each
-chromosome, all holding integer values (``typecode='i'``). They all have an
+chromosome, all holding integer values (``typecode="i"``). They all have an
 "infinte" length as we did not specify the actual lengths of the chromosomes.
 
 To build the coverage vectors, we now simply iterate
@@ -383,12 +380,83 @@ write two BedGraph (Wiggle) files, one for the plus and one for the minus strand
    >>> cvg.write_bedgraph_file( "plus.wig", "+" )
    >>> cvg.write_bedgraph_file( "minus.wig", "-" )
    
-These two files can then be viewed in a genome browser (e.g. IGB_), alongside the 
+These two files can then be viewed in a genome browser (e.g. IGB_ or IGV_), alongside the 
 annotation from a GFF file (see below).
 
 .. _IGB: http://igb.bioviz.org/  
+.. _IGV: http://www.broadinstitute.org/igv/
+
+
+GenomicArrayOfSets
+------------------
  
- 
+Another use of genomic arrays is to store annotation data. In the next section, we will use this
+to store the position of all exons of the yeast genome in a genomic array and then go through 
+all our reads, querying the array for each read to report the exons overlapped by this read.
+
+In principle, we could use a genomic array with type code 'O' (for object), which can store arbitrary
+Python objects. However, there might be positions in the genome that are covered by more than one 
+gene, and hence, we better use a data structure that can accommodate overlapping features.
+
+The class:`GenomicArrayOfSets` is meant for this purpose. For each step, it stores a ``set`` of objects. To
+illustrate this, we initialize a GenomicArrayOfSets and then store three features in it:
+
+.. doctest::
+
+   >>> gas = HTSeq.GenomicArrayOfSets( "auto", stranded=False )
+   >>> gas[ HTSeq.GenomicInterval( "chr1", 100, 250 ) ] += "A"
+   >>> gas[ HTSeq.GenomicInterval( "chr1", 360, 640 ) ] += "A"
+   >>> gas[ HTSeq.GenomicInterval( "chr1", 510, 950 ) ] += "B"
+
+These three features represent three exons of two genes, arranged as shown in this figure:
+
+.. image:: GenomicArrayOfSets.svg
+
+Note that we used `+=`, not just `=`, above when adding the features. With a GenomicArrayOfSets, 
+you need to always use the `+=` operator (rather than `=`), so that the values gets 
+*added* to the step's set.
+
+Now consider a read that aligns to the following interval (represented in the figure above by the light blue line ):
+
+.. doctest::
+
+   >>> read_iv = HTSeq.GenomicInterval( "chr1", 450, 800 )
+
+We can query the GenomicArrayOfSets, as before:
+
+.. doctest::
+
+   >>> for iv, val in gas[ read_iv ].steps():
+   ...    print iv, val
+   chr1:[450,510)/. set(['A'])
+   chr1:[510,640)/. set(['A', 'B'])
+   chr1:[640,800)/. set(['B'])
+
+The interval has been subdivided into three pieces, corresponding to the three different sets that it overlaps,
+namely first only A, then A and B, and finally only B.
+
+You might be only interested in the set of all features that the read interval overlaps. To this end, just
+form the set union of the three reported sets, using Python's set union operator (``|``):
+
+.. doctest::
+
+   >>> fset = set()
+   >>> for iv, val in gas[ read_iv ].steps():
+   ...    fset |= val
+   >>> print fset
+   set(['A', 'B'])
+
+Experienced Python developers will recognize that the ``for`` loop can be replaced with a single line
+using a generator comprehension and the ``reduce`` function:
+
+.. doctest::
+
+   >>> reduce( set.union, ( val for iv, val in gas[ read_iv ].steps() ) )
+   set(['A', 'B'])
+
+We will come back to the constructs in the next section, after a brief detour on how to read GTF files.
+
+
 Counting reads by genes
 =======================
 
@@ -410,7 +478,7 @@ These file are in the `GTF format`_, a tightening of the `GFF format`_. HTSeq of
    ...    end_included=True )
 
 The GFF format is, unfortunately, a not very well specified file format. Several
-standard documents exist, from different groups, and they even contradict each 
+standard documents exist, from different groups, which contradict each 
 other in some points. Most importantly, it is unclear whether a range specified
 in a GFF line is supposed to include the base under the "end" position or not. Here,
 we specied the this file does include the end. Actually, this is the default
@@ -443,8 +511,8 @@ indexing starts with zero and the end is not included. Hence, you can immediatel
 compare coordinates from different data formats without having to worry about 
 subtleties like the fact that GFF is one-based and SAM is zero-based.
 
-As with all Python objects, the **dir** function shows us the slots and 
-functions of our loop variable **feature** and so allow us to inspect what data
+As with all Python objects, the ``dir`` function shows us the slots and 
+functions of our loop variable ``feature`` and so allow us to inspect what data
 it provides:
 
 .. doctest::
@@ -480,50 +548,22 @@ stored in the slot :attr:`name <GenomicFeature.name>`:
    >>> feature.name
    'R0030W'
 
-To deal with this data, we will use a :class:`GenomicArray`. A GenomicArray can store 
-not only numerical data but also arbitrary Python objects (with `typecode` `'O'`).
-Hence, we can assign those features that correspond to exons, to steps in the GenomicArray::
-
-   >>> exons = HTSeq.GenomicArray( "auto", stranded=False, typecode='O' )
-   >>> for feature in gtf_file:
-   ...    if feature.type == "exon":
-   ...       exons[ feature.iv ] = feature
-
-Now, we can ask what exons occur in a certain interval::
-
-   >>> iv = HTSeq.GenomicInterval( "II", 120000, 125000, "." )
-   >>> list( exons[iv].steps() ) #doctest:+NORMALIZE_WHITESPACE
-   [(<GenomicInterval object 'II', [120000,121877), strand '.'>, 
-        <GenomicFeature: exon 'YBL052C' at II: 121876 -> 119380 (strand '-')>), 
-    (<GenomicInterval object 'II', [121877,122755), strand '.'>, 
-        None), 
-    (<GenomicInterval object 'II', [122755,124762), strand '.'>, 
-        <GenomicFeature: exon 'YBL051C' at II: 124761 -> 122754 (strand '-')>), 
-    (<GenomicInterval object 'II', [124762,125000), strand '.'>, 
-        None)]    
-
-However, our RNA-Seq experiment was not strand-specific, i.e., we do not know whether
-the reads came from the plus or the minus strand. This is why we defined the GenomicArray
-as non-stranded (``stranded=False`` in the instantiation of ``exons`` above), instructing
-it to ignore all strand information. An issue with this is that we now have many overlapping
-genes and the simple assignment ``exons[ feature.iv ] = feature`` is overwriting, so that
-it is not clear which feature we set.
-
-The proper solution is to store not just single features at an interval but sets of all
-features which are present there. A specialization of :class:`GenomicArray`, 
-:class:`GenomicArrayOfSets` is offered to simplify this::
+To deal with this data, we will use the :class:`GenomicArrayOfSets` introuced in the
+previous section.
 
    >>> exons = HTSeq.GenomicArrayOfSets( "auto", stranded=False )
 
-We populate the array again with the feature data. This time, we use the 
-``+=``, which, for a GenomicArrayOfSets, does not mean numerical addition,
-but adds an object without overwriting what might already be there. Instead,
-it uses sets to deal with overlaps. (Also, we only store the gene name this time, as this
-will be more convenient later).
+However, our RNA-Seq experiment was not strand-specific, i.e., we do not know whether
+the reads came from the plus or the minus strand. This is why we defined the GenomicArrayOfSet
+as non-stranded (``stranded=False`` in the instantiation of ``exons`` above), instructing
+it to ignore all strand information. Teherfore, we now have many overlapping
+genes, but the GenomicArrayOfSets will handle this. 
  
    >>> for feature in gtf_file:
    ...    if feature.type == "exon":
    ...       exons[ feature.iv ] += feature.name
+
+Nate that, we only store the gene name this time, as this will be more convenient later.
 
 Assume we have a read covering this interval::
 
@@ -545,24 +585,24 @@ steps (a new step starts wherever a feature starts or ends), we get a set of fea
 names for each step, and we have to find the intersection of all these. This can be
 coded as follows::
 
-   >>> intersection_set = None
+   >>> iset = None
    >>> for iv2, step_set in exons[iv].steps():
-   ...    if intersection_set is None:
-   ...       intersection_set = step_set.copy()
+   ...    if iset is None:
+   ...       iset = step_set.copy()
    ...    else:
-   ...       intersection_set.intersection_update( step_set )
+   ...       iset.intersection_update( step_set )
    ... 
-   >>> print intersection_set
+   >>> print iset
    set(['YCL058C'])
 
 When we look at the first step, we make a
 copy of the steps (in order to not disturb the values stored in ``exons``.) For the following
-steps, we use the **intersection_update**
-method Python's standard **set** class, which performs a set intersection in 
+steps, we use the ``intersection_update``
+method Python's standard ``set`` class, which performs a set intersection in 
 place. Afterwards, we have a set with precisely one element. Getting this one 
 element is a tiny bit cumbersome; to access it, one needs to write::
 
-   >>> list(intersection_set)[0]
+   >>> list(iset)[0]
    'YCL058C'
 
 In this way, we can go through all our aligned reads, calculate the intersection
@@ -579,14 +619,14 @@ Now, we can finally count::
    >>> sam_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
    >>> for alnmt in sam_file:
    ...    if alnmt.aligned:
-   ...       intersection_set = None
+   ...       iset = None
    ...       for iv2, step_set in exons[ alnmt.iv ].steps():
-   ...           if intersection_set is None:
-   ...              intersection_set = step_set.copy()
+   ...           if iset is None:
+   ...              iset = step_set.copy()
    ...           else:
-   ...              intersection_set.intersection_update( step_set )
-   ...       if len( intersection_set ) == 1:
-   ...          counts[ list(intersection_set)[0] ] += 1
+   ...              iset.intersection_update( step_set )
+   ...       if len( iset ) == 1:
+   ...          counts[ list(iset)[0] ] += 1
 
 We can now conveniently print the result with:
 
@@ -644,6 +684,6 @@ If our variant calls are in a `VCF`_-file we can use the :class:`VCF_Reader` to 
 And much more
 =============   
       
-This tour was only meant to give an overview. There are many more tasks that can
+This tour is only meant to give an overview. There are many more tasks that can
 be solved with HTSeq. Have a look at the reference documentation in the following pages
 to see what else is there.      
