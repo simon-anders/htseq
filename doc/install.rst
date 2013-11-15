@@ -51,7 +51,7 @@ go into the directory with the unpacked files and type there
 
    python setup.py install --user
 
-to install HTSeq for the current users. To make HTSeq available to all users, use instead::
+to install HTSeq for the user currently logged in. To make HTSeq available to all users, use instead::
 
    python setup.py build
    sudo python setup.py install

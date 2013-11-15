@@ -11,6 +11,7 @@ HTSeq: Analysing high-throughput sequencing data with Python
    install
    tour
    tss
+   counting
    sequences
    genomic
    alignments
