@@ -168,22 +168,22 @@ Counting with gapped reads
 
 In the code above, we used this for loop ::
 
-gene_ids = set()
-for iv, val in features[ almnt.iv ].steps():
-    gene_ids |= val
+   gene_ids = set()
+   for iv, val in features[ almnt.iv ].steps():
+       gene_ids |= val
 
 to collect the gene IDs of all exons overlapped by the reads interval. For loop runs over the whole 
 interval covered by the aligned read, i.e., in the figure above, it would run from position 1000 
 to position 1378 on chromosome 1, including the alignment gap from 1020 to 1320. By looking at each
-cigar operation separately we can correctly skip the match. We only need to replace the for
+cigar operation separately we can correctly skip the gaps. We only need to replace the for
 loop with the following double loop ::
 
-gene_ids = set()
-for cigop in almnt.cigar:
-   if cigop.type != "M":
-      continue
-   for iv, val in features[ cigop.ref_iv ].steps():
-      gene_ids |= val
+   gene_ids = set()
+   for cigop in almnt.cigar:
+      if cigop.type != "M":
+         continue
+      for iv, val in features[ cigop.ref_iv ].steps():
+         gene_ids |= val
 
 The outer loop goes through the CIGAR operation, skipping all but the *match* operations, and 
 the inner loop inspects the steps covered by the match operations and collects the gene_ids in
@@ -217,11 +217,87 @@ the chose one using some custom logic, or to aggregate information over all of t
 or BAM file has been sorted by *read name* then alternative alignments for the same read will
 be in adjacent lines or records. To facilitate handling this case, HTSeq offers the function 
 function:`bundle_multiple_alignments`. It takes an iterator over :class:`SAM_Alignment` objects
-(e.g., a :class:`SAM_Reader` or :class:`BAM_Reader` object connected to a SAM/BAM file that has
-been sorted by name) and returns an iterator over lists of :class:`SAM_Alignment` objects. Each 
-list contains only records describing alignments for the same read.
+(e.g., a :class:`SAM_Reader` or :class:`BAM_Reader` object) and returns an iterator over 
+lists of :class:`SAM_Alignment` objects. Each list contains only records describing alignments 
+for the same read. For this to work, the SAM file has to be sorted by read name to ensure that
+mutiple alignments for the same read appear in adjacent records.
 
 
 Handling paired-end reads
 -------------------------
 
+In the case of paired-end alignments, we will typically want to count read pairs, not reads. After all,
+the fragment (and not the reads from either of its ends) are the actual evidence for a gene's expression
+that we want to count. Therefore, we want to process the alignment information for the two mated ends
+together. 
+
+First a quick review of how alignments for paired-end data are presented in a SAM file: The two "mated" reads referring to 
+the two end of a DNA fragment are reported in two separate records. The fact that the records describe
+the same fragment can be seen from the fact that they have the same read name (given by the ``read.name`` 
+slot). That they refer to opposite ends can be seen from the respective bits in the FLAG field, which
+are exposed by the `attribute`SAM_Alignment.pe_which` slot of the :class:`SAM_Alignment` class, which takes
+the values ``first`` or ``second`` (or ``unknown`` if not specified in the flag field, or ``not_paired_end`` if
+an alignment of a single-end read is represented) . If the read pair has multiple 
+alignments, each alignment is reported by a pair of SAM records. As corresponding records are not necessarily
+in adjacent lines, they are "linked" by the mate position fields (called RNEXT and PNEXT in the SAM specification),
+which are exposed by the slot :attribute:`SAM_Alignment.mate_pos`, which contains a :class:`GenomicPosition`
+object. The two records describing the two halves of a given alignment can be recognized as being correspondent 
+from the fact that each record's ``mate_pos`` attribute is equal to the starting position (given by``iv.start_as_pos``).
+
+Note that all the SAM records for a given read pair may be spread throughout the file. Only if the file is sorted
+by read name can we expect them to be at adjacent places, and even then, the records for multiple alignments can be
+intermixed.
+
+To facilitate handling paired-end alignments, HTSeq offers the function :function:`pair_SAM_alignments`. This function 
+expects an iterator over SAM records (typically, a :class:`SAM_Reader` or :class:`BAM_Reader` object) and returns 
+an iterator over pairs (i.e., tuples of length 2) of :class:`SAM_Alignment` records, with the first element being the alignment of the
+read from the first sequencing pass (i.e., from the 5' end of the DNA fragment) and the second element the corresponding alignment 
+from the second pass (i.e., the 3' read). The function expects the SAM file to be sorted by read name. It proceeds by reading
+in consecutive records with the same read name and storing them in a list. Once it finds a record with a differing read name,
+the function goes through the list, sorts its content into pairs of corresponding alignment records and yields these pairs. If the
+function's option ``bundle``[TODO: add description of "bundle" in alignment.rst, too] is 
+set to ``True``, the function does not yield the pairs separately but instead yields a list of all alignment pairs for
+the same read.
+
+Using these features, we can modify our counting loop as follows for paired-end data::
+
+   almnt_file = HTSeq.SAM_Reader( "my_paired_alignments.sam" )
+   counts = collections.Counter( )
+   for bundle in HTSeq.pair_SAM_alignments( almnt_file, bundle=True ):
+      if len(bundle) != 1
+         continue  # Skip multiple alignments
+      first_almnt, second_almnt = bundle[0]  # extract pair
+      if not first_almnt.aligned and second_almnt.aligned:
+         count[ "_unmapped" ] += 1
+         continue
+      gene_ids = set()
+      for iv, val in features[ left_almnt.iv ].steps():
+         gene_ids |= val
+      for iv, val in features[ right_almnt.iv ].steps():
+         gene_ids |= val
+      if len(gene_ids) == 1:
+         gene_id = list(gene_ids)[0]
+         counts[ gene_id ] += 1
+      elif len(gene_ids) == 0:
+         counts[ "_no_feature" ] += 1
+      else:
+         counts[ "_ambiguous" ] += 1
+
+   for gene_id in counts:
+      print gene_id, counts[ gene_id ]
+
+Note that here, we skip reads if only one of two mates are aligned. Of course, one could choose as well to count such a 
+pair for the gene to which the aligned mate has been mapped.
+
+The need to sort paired-end SAM files by read name can be an inconvenience, because many aligners output the SAM file
+sorted by position. In many use case, we can expect that the two ends of the same read will align to positions close
+to each other on the genome. Then, an alternative strategy to pair up alignment records is go through the SAM file, 
+which has been sorted by position, and keep a dictionary of alignment records whose partner record has not been found yet.
+For each record, we check the dictionary for its partner (i.e., for a record with the same read name and matching
+position information). If we find the partner, we remove it from the dictionary and yield both together as a pair. If the partner
+is not in the dictionary, the record is stored in the dictionary to wait for its partner to come along. As long as
+mated records are not too far from each other in the file, the dictionary will only contain a manageable number of records.
+Only if reads are often very far from each other (e.g., because the file was not sorted by position), the dictionary
+might become too large to fit into memory. 
+
+HTSeq offers this manner of pairing up alignment records in the function ... [TODO: Describe Paul's function].
