@@ -629,6 +629,48 @@ def pair_SAM_alignments( alignments, bundle=False ):
          yield p
 
 
+def pair_SAM_alignments_with_buffer( alignments, max_buffer_size=3000000 ):
+
+   almnt_buffer = {}
+   for almnt in alignments:
+
+      if not almnt.paired_end:
+         raise ValueError, "Sequence of paired-end alignments expected, but got single-end alignment."
+      if almnt.pe_which == "unknown":
+         raise ValueError, "Cannot process paired-end alignment found with 'unknown' 'pe_which' status."
+
+      mate_pe_which = "second" if almnt.pe_which == "first" else "second"
+      matekey = ( almnt.name, mate_pe_which, almnt.mate_start.chrom, almnt.mate_start.pos  ) if almnt.mate_aligned \
+         else ( almnt.name, mate_pe_which, None, None )
+
+      if matekey in almnt_buffer:
+         mate = almnt_buffer[ matekey ]
+         del almnt_buffer[ matekey ]
+         if almnt.pe_which == "first"
+            yield ( almnt, mate )
+         else
+            yield ( mate, almnt )
+      else:
+         almntkey = ( almnt.name, almnt.pe_which, almnt.iv.chrom, almnt.iv.start ) if almnt.aligned \
+            else ( almnt.name, almnt.pe_which, None, None )
+         if readkey in almnt_buffer:
+            raise ValueError, "Same alignment fount twice: %s and %s" % ( str(almnt_bufer[almntkey]), str(almnt) )
+         if len(almnt_buffer) > max_buffer_size:
+            raise ValueError, "Maximum alignment buffer size exceeded while pairing SAM alignments."
+         almnt_buffer[ readkey ] = almnt
+
+
+   if len(almnt_buffer) > 0:
+      warnings.warn( "Mate record missing for %d paired-end alignment records; one such record: %s" %
+         len(almnt_buffer), almnt_buffer.values()[0] )
+      for almnt in 
+         if almnt.pe_which == "first"
+            yield ( almnt, None )
+         else
+            yield ( None, almnt )
+
+
+
 ###########################
 ##   variant calls
 ###########################
