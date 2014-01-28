@@ -640,7 +640,7 @@ def pair_SAM_alignments_with_buffer( alignments, max_buffer_size=3000000 ):
          raise ValueError, "Cannot process paired-end alignment found with 'unknown' 'pe_which' status."
 
       mate_pe_which = "second" if almnt.pe_which == "first" else "second"
-      matekey = ( almnt.name, mate_pe_which, almnt.mate_start.chrom, almnt.mate_start.pos  ) if almnt.mate_aligned \
+      matekey = ( almnt.name, mate_pe_which, almnt.mate_start.chrom, almnt.mate_start.pos ) if almnt.mate_aligned \
          else ( almnt.name, mate_pe_which, None, None )
 
       if matekey in almnt_buffer:
@@ -663,7 +663,7 @@ def pair_SAM_alignments_with_buffer( alignments, max_buffer_size=3000000 ):
    if len(almnt_buffer) > 0:
       warnings.warn( "Mate record missing for %d paired-end alignment records; one such record: %s" %
          len(almnt_buffer), almnt_buffer.values()[0] )
-      for almnt in 
+      for almnt in almnt_buffer.values():
          if almnt.pe_which == "first"
             yield ( almnt, None )
          else
