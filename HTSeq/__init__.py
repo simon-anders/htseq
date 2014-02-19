@@ -3,7 +3,7 @@
 See http://www-huber.embl.de/users/anders/HTSeq for documentation.
 """
 
-import itertools, warnings, os
+import itertools, warnings, os, shlex
 
 try:
    from _HTSeq import *
@@ -861,6 +861,53 @@ class VCF_Reader( FileOrSequence ):
             vc = VariantCall.fromline( line, self.nsamples, self.sampleids )
             yield vc
 
+
+class WIG_Reader( FileOrSequence ):
+
+    def __init__( self, filename_or_sequence ):
+        FileOrSequence.__init__( self, filename_or_sequence )
+        self.attributes = {}
+        firstline = next( FileOrSequence.__iter__( self ) )
+        fields = shlex.split(firstline)
+        self.attributes = dict([(p[0], p[1].strip('"')) for p in [x.split("=") for x in fields[1:]]])
+        self.stepType = 'none'
+        
+    def __iter__( self ):
+        span = 1
+        pos = None
+        step = None
+        chrom = None
+        for line in FileOrSequence.__iter__( self ):
+            if line.startswith( 'track' ):
+                continue
+            elif line.startswith( 'fixedStep' ): # do fixed step stuff
+                self.stepType = 'fixed'
+                fields = shlex.split(line)[1:]
+                declarations = dict([(p[0], p[1].strip('"')) for p in [x.split("=") for x in fields[1:]]])
+                pos = int(declarations['start'])
+                step = int(declarations['step'])
+                chrom = declarations['chrom']
+                if 'span' in declarations:
+                    span = declarations['span']
+                else:
+                    span = 1
+            elif line.startswith( 'variableStep'): # do variable step stuff
+                self.stepType = 'variable'
+                fields = shlex.split(line)[1:]
+                declarations = dict([(p[0], p[1].strip('"')) for p in [x.split("=") for x in fields[1:]]])
+                chrom = declarations['chrom']
+                if 'span' in declarations:
+                    span = declarations['span']
+                else:
+                    span = 1
+            if self.stepType == 'fixed':
+                yield ( GenomicInterval( chrom, pos, pos + span, '*' ), int(line.strip()) )
+                pos += step
+            elif self.stepType == 'variable':
+                tmp = line.strip().split(" ")
+                pos = int(tmp[0])
+                yield ( GenomicInterval( chrom, pos, pos + span, '*' ), int(tmp[1]) )
+            
 class BAM_Reader( object ):
 
     def __init__( self, filename ):
