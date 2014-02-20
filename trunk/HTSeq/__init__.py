@@ -646,9 +646,9 @@ def pair_SAM_alignments_with_buffer( alignments, max_buffer_size=3000000 ):
       if matekey in almnt_buffer:
          mate = almnt_buffer[ matekey ]
          del almnt_buffer[ matekey ]
-         if almnt.pe_which == "first"
+         if almnt.pe_which == "first":
             yield ( almnt, mate )
-         else
+         else:
             yield ( mate, almnt )
       else:
          almntkey = ( almnt.name, almnt.pe_which, almnt.iv.chrom, almnt.iv.start ) if almnt.aligned \
@@ -664,9 +664,9 @@ def pair_SAM_alignments_with_buffer( alignments, max_buffer_size=3000000 ):
       warnings.warn( "Mate record missing for %d paired-end alignment records; one such record: %s" %
          len(almnt_buffer), almnt_buffer.values()[0] )
       for almnt in almnt_buffer.values():
-         if almnt.pe_which == "first"
+         if almnt.pe_which == "first":
             yield ( almnt, None )
-         else
+         else:
             yield ( None, almnt )
 
 
@@ -864,13 +864,11 @@ class VCF_Reader( FileOrSequence ):
 
 class WIG_Reader( FileOrSequence ):
 
-    def __init__( self, filename_or_sequence ):
+    def __init__( self, filename_or_sequence, verbose = True ):
         FileOrSequence.__init__( self, filename_or_sequence )
-        self.attributes = {}
-        firstline = next( FileOrSequence.__iter__( self ) )
-        fields = shlex.split(firstline)
-        self.attributes = dict([(p[0], p[1].strip('"')) for p in [x.split("=") for x in fields[1:]]])
+        self.attributes = {}       
         self.stepType = 'none'
+        self.verbose = verbose
         
     def __iter__( self ):
         span = 1
@@ -879,34 +877,40 @@ class WIG_Reader( FileOrSequence ):
         chrom = None
         for line in FileOrSequence.__iter__( self ):
             if line.startswith( 'track' ):
-                continue
+                fields = shlex.split(line)[1:]
+                self.attributes = dict([(p[0], p[1].strip('"')) for p in [x.split("=") for x in fields]])
             elif line.startswith( 'fixedStep' ): # do fixed step stuff
                 self.stepType = 'fixed'
                 fields = shlex.split(line)[1:]
-                declarations = dict([(p[0], p[1].strip('"')) for p in [x.split("=") for x in fields[1:]]])
+                declarations = dict([(p[0], p[1].strip('"')) for p in [x.split("=") for x in fields]])
                 pos = int(declarations['start'])
                 step = int(declarations['step'])
                 chrom = declarations['chrom']
                 if 'span' in declarations:
-                    span = declarations['span']
+                    span = int(declarations['span'])
                 else:
                     span = 1
-            elif line.startswith( 'variableStep'): # do variable step stuff
+            elif line.startswith( 'variableStep' ): # do variable step stuff
                 self.stepType = 'variable'
                 fields = shlex.split(line)[1:]
-                declarations = dict([(p[0], p[1].strip('"')) for p in [x.split("=") for x in fields[1:]]])
+                declarations = dict([(p[0], p[1].strip('"')) for p in [x.split("=") for x in fields]])
                 chrom = declarations['chrom']
                 if 'span' in declarations:
-                    span = declarations['span']
+                    span = int(declarations['span'])
                 else:
                     span = 1
-            if self.stepType == 'fixed':
-                yield ( GenomicInterval( chrom, pos, pos + span, '*' ), int(line.strip()) )
-                pos += step
-            elif self.stepType == 'variable':
-                tmp = line.strip().split(" ")
-                pos = int(tmp[0])
-                yield ( GenomicInterval( chrom, pos, pos + span, '*' ), int(tmp[1]) )
+            elif line.startswith( 'browser' ) or line.startswith( '#' ): #Comment or ignored
+                if self.verbose:
+                    print "Ignored line:", line
+                continue
+            else:
+                if self.stepType == 'fixed':
+                    yield ( GenomicInterval( chrom, pos, pos + span, '.' ), float(line.strip()) )
+                    pos += step
+                elif self.stepType == 'variable':
+                    tmp = line.strip().split(" ")
+                    pos = int(tmp[0])
+                    yield ( GenomicInterval( chrom, pos, pos + span, '.' ), float(tmp[1]) )
             
 class BAM_Reader( object ):
 
