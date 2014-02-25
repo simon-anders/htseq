@@ -77,19 +77,6 @@ class FileOrSequence( object ):
       else:
          return "line %d" % self.line_no
          
-class GeneratedSequence( object ):
-   """GeneratedSequence is a little helper class to get "respawnable"
-   iterator generators. Pass its constructor a function that generates
-   an iterator, and its arguments, and it will call this functionion 
-   whenever an iterator is requested.
-   """
-   
-   def __init__( self, generator, *args ):
-      self.generator = generator
-      self.args = args
-      
-   def __iter__( self ):
-      return self.generator( *self.args )
 
 #########################
 ## Features
@@ -628,10 +615,20 @@ def pair_SAM_alignments( alignments, bundle=False ):
       for p in process_list( almnt_list ):
          yield p
 
+class Pair_SAM_alignments_Warning ( UserWarning ):
+   pass
+
+class Missing_Mate_Warning ( Pair_SAM_alignments_Warning ):
+   pass
+
+class Ambiguous_Pairing_Warning ( Pair_SAM_alignments_Warning ):
+   pass
+
 
 def pair_SAM_alignments_with_buffer( alignments, max_buffer_size=3000000 ):
 
    almnt_buffer = {}
+   ambiguous_pairing_counter = 0
    for almnt in alignments:
 
       if not almnt.paired_end:
@@ -639,36 +636,56 @@ def pair_SAM_alignments_with_buffer( alignments, max_buffer_size=3000000 ):
       if almnt.pe_which == "unknown":
          raise ValueError, "Cannot process paired-end alignment found with 'unknown' 'pe_which' status."
 
-      mate_pe_which = "second" if almnt.pe_which == "first" else "second"
-      matekey = ( almnt.name, mate_pe_which, almnt.mate_start.chrom, almnt.mate_start.pos ) if almnt.mate_aligned \
-         else ( almnt.name, mate_pe_which, None, None )
+      matekey = ( 
+         almnt.read.name, 
+         "second" if almnt.pe_which == "first" else "first",
+         almnt.mate_start.chrom if almnt.mate_aligned else None, 
+         almnt.mate_start.pos if almnt.mate_aligned else None, 
+         almnt.iv.chrom if almnt.aligned else None, 
+         almnt.iv.start if almnt.aligned else None, 
+         -almnt.inferred_insert_size if almnt.aligned and almnt.mate_aligned else None )
 
       if matekey in almnt_buffer:
-         mate = almnt_buffer[ matekey ]
-         del almnt_buffer[ matekey ]
+         if len( almnt_buffer[ matekey ] ) == 1:            
+            mate = almnt_buffer[ matekey ][ 0 ]
+            del almnt_buffer[ matekey ]
+         else:
+            mate = almnt_buffer[ matekey ].pop( 0 )
+            if ambiguous_pairing_counter == 0:
+               ambiguous_pairing_first_occurance = matekey
+            ambiguous_pairing_counter += 1
          if almnt.pe_which == "first":
             yield ( almnt, mate )
          else:
             yield ( mate, almnt )
       else:
-         almntkey = ( almnt.name, almnt.pe_which, almnt.iv.chrom, almnt.iv.start ) if almnt.aligned \
-            else ( almnt.name, almnt.pe_which, None, None )
-         if readkey in almnt_buffer:
-            raise ValueError, "Same alignment fount twice: %s and %s" % ( str(almnt_bufer[almntkey]), str(almnt) )
+         almntkey = ( 
+            almnt.read.name, almnt.pe_which, 
+            almnt.iv.chrom if almnt.aligned else None, 
+            almnt.iv.start if almnt.aligned else None, 
+            almnt.mate_start.chrom if almnt.mate_aligned else None, 
+            almnt.mate_start.pos if almnt.mate_aligned else None, 
+            almnt.inferred_insert_size if almnt.aligned and almnt.mate_aligned else None )
+         if almntkey not in almnt_buffer:
+            almnt_buffer[ almntkey ] = [ almnt ]
+         else:
+            almnt_buffer[ almntkey ].append( almnt )
          if len(almnt_buffer) > max_buffer_size:
             raise ValueError, "Maximum alignment buffer size exceeded while pairing SAM alignments."
-         almnt_buffer[ readkey ] = almnt
-
 
    if len(almnt_buffer) > 0:
-      warnings.warn( "Mate record missing for %d paired-end alignment records; one such record: %s" %
-         len(almnt_buffer), almnt_buffer.values()[0] )
-      for almnt in almnt_buffer.values():
-         if almnt.pe_which == "first":
-            yield ( almnt, None )
-         else:
-            yield ( None, almnt )
+      warnings.warn( "Mate records missing for %d records; first such record: %s." % 
+         ( len(almnt_buffer), str( almnt_buffer.values()[0][0] ) ) )
+      for almnt_list in almnt_buffer.values():
+         for almnt in almnt_list:
+            if almnt.pe_which == "first":
+               yield ( almnt, None )
+            else:
+               yield ( None, almnt )
 
+   if ambiguous_pairing_counter > 0:
+      warnings.warn( "Mate pairing was ambiguous for %d records; mate key for first such record: %s." %
+         ( ambiguous_pairing_counter, str( ambiguous_pairing_first_occurance ) ) )
 
 
 ###########################
