@@ -565,6 +565,8 @@ class GenomicArrayOfSets( GenomicArray ):
                 
 def pair_SAM_alignments( alignments, bundle=False ):
 
+   mate_missing_count = [0]
+
    def process_list( almnt_list ):
       while len( almnt_list ) > 0:
          a1 = almnt_list.pop( 0 )
@@ -581,8 +583,10 @@ def pair_SAM_alignments( alignments, bundle=False ):
                break
          else:
             if a1.mate_aligned:
-               warnings.warn( "Read " + a1.read.name + " claims to have an aligned mate " +
-                  "which could not be found. (Is the SAM file properly sorted?)" )
+               mate_missing_count[0] += 1
+               if mate_missing_count[0] == 1:
+                  warnings.warn( "Read " + a1.read.name + " claims to have an aligned mate " +
+                     "which could not be found in an adjacent line." )
             a2 = None
          if a2 is not None:
             almnt_list.remove( a2 )
@@ -614,15 +618,8 @@ def pair_SAM_alignments( alignments, bundle=False ):
    else:
       for p in process_list( almnt_list ):
          yield p
-
-class Pair_SAM_alignments_Warning ( UserWarning ):
-   pass
-
-class Missing_Mate_Warning ( Pair_SAM_alignments_Warning ):
-   pass
-
-class Ambiguous_Pairing_Warning ( Pair_SAM_alignments_Warning ):
-   pass
+   if mate_missing_count[0] > 1:
+      warnings.warn( "%d reads with missing mate encountered." % mate_missing_count[0] )
 
 
 def pair_SAM_alignments_with_buffer( alignments, max_buffer_size=3000000 ):

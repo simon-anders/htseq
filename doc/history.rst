@@ -4,12 +4,34 @@
 Version history
 ***************
 
+Version 0.6.0
+=============
+
+2014-02-26
+
+- Several changes and improvements to htseq-count:
+
+  - BAM files can now be read natively. (New option ``--format``)
+
+  - Paired-end SAM files can be used also if sorted by position. No need any mroe to sort by name. (New option ``--order``.)
+
+  - Documentation extended by a FAQ section.
+
+  - Default for ``--minaqual`` is now 10. (was: 0)
+
+- New chapter in documentation, with more information on counting reads.
+
+- New function ``pair_SAM_alignments_with_buffer`` to implement pairing for position-sorted SAM files.
+
+- New classes ``WiggleReader`` and ``BED_Reader``.
+
+
 Version 0.5.4
 =============
 
 2013-02-20
 
-Various bug fixed, including
+Various bugs fixed, including
 
   - GFF_Reader interpreted the constructor's "end_included" flag
     in the wrong way, hence the end position of intervals of
