@@ -23,8 +23,6 @@ Version 0.6.0
 
 - New function ``pair_SAM_alignments_with_buffer`` to implement pairing for position-sorted SAM files.
 
-- New classes ``WiggleReader`` and ``BED_Reader``.
-
 
 Version 0.5.4
 =============

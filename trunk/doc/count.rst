@@ -264,8 +264,8 @@ Frequenctly asked questions
 *How should I cite htseq-count in a publication?*
    Please cite HTSeq as follows: S Anders, T P Pyl, W Huber: *HTSeq --- A Python framework to work with 
    high-throughput sequencing data*. bioRxiv 2014. `doi: 10.1101/002824`_.
-   (This is a print currently under review. We will replace this with the final published version
-   once available.)
+   (This is a preprint currently under review. We will replace this with the reference to the final 
+   published version once available.)
 
 .. _`doi: 10.1101/002824`: http://dx.doi.org/10.1101/002824
 
