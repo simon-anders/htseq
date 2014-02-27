@@ -31,9 +31,9 @@ Paper
 HTSeq is described in the following publication (which is currently under review but already
 available as preprint):
 
-| Simon Anders, Paul Theodor Pyl, Wolfgang Huber
-| *HTSeq --- A Python framework to work with high-throughput sequencing data*
-| bioRxiv preprint (2014), `doi: 10.1101/002824`_
+  | Simon Anders, Paul Theodor Pyl, Wolfgang Huber
+  | *HTSeq --- A Python framework to work with high-throughput sequencing data*
+  | bioRxiv preprint (2014), `doi: 10.1101/002824`_
 
 .. _`doi: 10.1101/002824`: http://dx.doi.org/10.1101/002824
 
