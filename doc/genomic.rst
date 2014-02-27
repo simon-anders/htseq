@@ -182,7 +182,7 @@ Instantiation
    or the like.) Finally, if ``chroms`` is the string ``"auto"``, the GenomicArray
    is created without any chromosomes but whenever the user attempts to assign a 
    value to a yet unknown chromosome, a new one is automatically created with 
-   :method:`GenomicArray.add_chrom`.
+   :meth:`GenomicArray.add_chrom`.
    
    If ``stranded`` is ``True``, two ``StepVector`` objects are created for each chromosome,
    one for the '+' and one for the '-' strand. For ``stranded == False``, only one
