@@ -189,6 +189,14 @@ Options
 Frequenctly asked questions
 ...........................
 
+*My shell reports "command not found" when I try to run "htseq-count". How can I launch the script?*
+   The file "htseq-count" has to be in the system's `search path`_. By default, Python places it
+   in its script directory, which you have to add to your search path. A maybe easier alternative
+   is to write ``python -m HTSeq.scripts.count`` instead of ``htseq-count``, followed by the
+   options and arguments, which will launch the htseq-count script as well.
+
+.. _`search path`:   http://en.wikipedia.org/wiki/PATH_(variable)
+
 *Why are multi-mapping reads and reads overlapping multiple features discarded rather than counted for each feature?*
    The primary intended use case for ``htseq-count`` is *differential* expression analysis, where
    one compares the expression of the same gene across samples and not the expression of different
