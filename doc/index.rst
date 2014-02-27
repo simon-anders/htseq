@@ -16,6 +16,7 @@ HTSeq: Analysing high-throughput sequencing data with Python
    genomic
    alignments
    features
+   otherparsers
    misc
    qa
    count      
