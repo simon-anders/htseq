@@ -234,7 +234,7 @@ Frequenctly asked questions
 
 *Most of my RNA-Seq reads are counted as ``__no_feature``. What could have gone wrong?*
    Common causes include:
-   - The `--stranded`` option was set wrongly. Use a genome browser (e.g., IGV) to check.
+   - The ``--stranded`` option was set wrongly. Use a genome browser (e.g., IGV) to check.
    - The GTF file uses coordinates from another reference assembly as the SAM file.
    - The chromosome names differ between GTF and SAM file (e.g., ``chr1`` in one file and jsut ``1`` in the other).
 

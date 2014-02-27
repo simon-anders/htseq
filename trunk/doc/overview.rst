@@ -89,6 +89,10 @@ Documentation overview
     The classes :class:`GenomicFeature` and :class:`GFF_Reader` help to deal with genomic
     annotation data.
     
+  * :ref:`otherparsers`
+  
+    This page describes classes to parse VCF, Wiggle and BED files.
+
   * :ref:`misc`
 
 

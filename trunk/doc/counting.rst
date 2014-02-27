@@ -235,12 +235,12 @@ First a quick review of how alignments for paired-end data are presented in a SA
 the two end of a DNA fragment are reported in two separate records. The fact that the records describe
 the same fragment can be seen from the fact that they have the same read name (given by the ``read.name`` 
 slot). That they refer to opposite ends can be seen from the respective bits in the FLAG field, which
-are exposed by the `attribute`SAM_Alignment.pe_which` slot of the :class:`SAM_Alignment` class, which takes
+are exposed by the :attr:`SAM_Alignment.pe_which` slot of the :class:`SAM_Alignment` class, which takes
 the values ``first`` or ``second`` (or ``unknown`` if not specified in the flag field, or ``not_paired_end`` if
 an alignment of a single-end read is represented) . If the read pair has multiple 
 alignments, each alignment is reported by a pair of SAM records. As corresponding records are not necessarily
 in adjacent lines, they are "linked" by the mate position fields (called RNEXT and PNEXT in the SAM specification),
-which are exposed by the slot :attribute:`SAM_Alignment.mate_pos`, which contains a :class:`GenomicPosition`
+which are exposed by the slot :attr:`SAM_Alignment.mate_pos`, which contains a :class:`GenomicPosition`
 object. The two records describing the two halves of a given alignment can be recognized as being correspondent 
 from the fact that each record's ``mate_pos`` attribute is equal to the starting position (given by``iv.start_as_pos``).
 
@@ -248,7 +248,7 @@ Note that all the SAM records for a given read pair may be spread throughout the
 by read name can we expect them to be at adjacent places, and even then, the records for multiple alignments can be
 intermixed.
 
-To facilitate handling paired-end alignments, HTSeq offers the function :function:`pair_SAM_alignments`. This function 
+To facilitate handling paired-end alignments, HTSeq offers the function :func:`pair_SAM_alignments`. This function 
 expects an iterator over SAM records (typically, a :class:`SAM_Reader` or :class:`BAM_Reader` object) and returns 
 an iterator over pairs (i.e., tuples of length 2) of :class:`SAM_Alignment` records, with the first element being the alignment of the
 read from the first sequencing pass (i.e., from the 5' end of the DNA fragment) and the second element the corresponding alignment 
@@ -298,6 +298,6 @@ position information). If we find the partner, we remove it from the dictionary 
 is not in the dictionary, the record is stored in the dictionary to wait for its partner to come along. As long as
 mated records are not too far from each other in the file, the dictionary will only contain a manageable number of records.
 Only if reads are often very far from each other (e.g., because the file was not sorted by position), the dictionary
-might become too large to fit into memory. 
-
-HTSeq offers this manner of pairing up alignment records in the function ... [TODO: Describe Paul's function].
+might become too large to fit into memory. HTSeq offers this manner of pairing up alignment records in the function 
+:func:`pair_SAM_alignment_with_buffer`, which can be used in the same manner as :func:`pair_SAM_alignment`, but
+takes one optional additional argument, the maximum size of the buffer (by default, 3 million).

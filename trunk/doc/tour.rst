@@ -656,30 +656,6 @@ in the CIGAR string. HTSeq has facilities to handle this conveniently, too, with
 class :class:`CigarOperation`. Chapter :ref:`count` describes a script which offers
 some further counting schemes.
 
-Mapping structural variants to genes
-====================================
-
-If we have performed SNP- or SV-calling on our dataset and end up with a set of structural variations (e.g. snps and indels) we might want to map those to genes to see which genes are potentially influenced by them.
-
-Using the previously described :class:`GFF_Reader` we get the :class:`GenomicArray` of exons that we're interested in.
-
-    >>> exons = HTSeq.GenomicArray( "auto", stranded=False, typecode='O' )
-    >>> for feature in gtf_file:
-    ...     if feature.type == "exon":
-    ...         exons[ feature.iv ] = feature
-
-If our variant calls are in a `VCF`_-file we can use the :class:`VCF_Reader` to extract the :class:`VariantCall` objects describing our snps and indels and start mapping them to our genes.
-
-    .. _`VCF`: http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-40
- 
-*FIXME*: We need to include this example file!
- 
-    >>> vcfr = HTSeq.VCF_Reader( "00-All.vcf.gz" ) #doctest: +SKIP
-    >>> vcfr.parse_meta() #doctest: +SKIP
-    >>> vcfr.make_info_dict() #doctest: +SKIP
-    >>> for vc in vcfr: #doctest: +SKIP
-    ...     print list( exons[vc.pos] )
-
 
 And much more
 =============   

@@ -259,20 +259,32 @@ object you typically never call the constructor yourself.
           print "   ", second
           
    Here, ``first`` and ``second`` are :class:`SAM_Alignment` objects, representing two reads
-   of the same cluster. If a read does not have a mate, it is assigned to one of ``first``
-   or ``second`` (depending on the sequencing pass it originates from) and the other is
-   set to ``None``. *Important*: For this to work, the SAM file has to be arranged such that
+   of the same cluster. For this to work, the SAM file has to be arranged such that
    paired reads are always in adjacent lines. As the SAM format requires that the query names
    (first column of the SAM file) is the same for mate pairs, this arrangement can easily be
-   achieved by sorting the SAM file lines lexicographically. (If your sorting tool cannot handle
-   big files, try Ruan Jue's *msort*, available from the SOAP_ web site.)
-   
-   Special care is taken to properly pair up multiple alignment lines for the same read.
-   
-         
-.. _SOAP: http://soap.genomics.org.cn
-         
+   achieved by sorting the SAM file lines lexicographically. 
 
+   Special care is taken to properly pair up multiple alignment lines for the same read.
+
+   In the SAM format, alignments for paired-end reads must be reported in paired alignment
+   records. If the mate of an alignment record is missing, this fact is counted and, at the
+   end, a warning stating the number of such violating reads is issued. The singleton
+   alignments are yielded as pairs, with the alignment in the first or second
+   element of the pair (depending on the sequencing pass it originates from) and the other 
+   element is set to ``None``. 
+   
+.. function:: pair_SAM_alignments_with_buffer( alignments, max_buffer_size=3000000 )
+
+   This function pairs up reads in a SAM file, in the same manner as :func:`pair_SAM_alignments`
+   but does not require that mated alignments appear in adjacent records, i.e., the SAM
+   file does not need to be sorted by read name beforehand. Rather, once the first alignment
+   of a pair is encountered, it is stored in a buffer until its mated alignment is encountered,
+   and then both are yielded together as pair. It is recommended that the data should be
+   sorted by position, because then, mated alignments will typicalle not be too distant from
+   each other in the file and hence only a limited number of alignments have to be held
+   concurrently in the buffer, thereby reducing memory needs. To avoid overflowing the
+   system's memory, the function stops and raises an exception once the number of
+   alignment records held in the buffer exceeds ``max_buffer_size``.
       
 .. class:: SolexaExportAlignment( line )
 
