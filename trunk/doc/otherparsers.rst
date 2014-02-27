@@ -13,7 +13,7 @@ Other parsers
 
 
 ``VCF_Reader`` and ``VariantCall``
-=====================================
+==================================
 
 VCF is a text file format (most likely stored in a compressed manner). It contains meta-information lines, a header line, and then data lines each containing information about a position in the genome.
 
@@ -123,7 +123,18 @@ Example Workflow for reading the dbSNP in VCF-format (obtained from `dbSNP <ftp:
 Wiggle Reader
 =============
 
-[describe Wiggle Reader here]
+The `Wiggle format`_ (file extension often ``.wig``) is a format to describe numeric scores assigned to base-pair positions on a genome.
+The class :class:`WiggleReader` is parser for such files. 
+
+.. class:: WiggleReader( filename_or_sequence, verbose=True )
+
+   The class is instatiated with the file name of a Wiggle file, or a sequence of lines in Wiggle format. A ``WiggleReader`` 
+   object generates an iterator, which yields pairs of the form ``(iv, score)``, where ``iv`` is a :class:`GenomicInterval` 
+   object and ``score`` is a ``float`` with the score that the file assigns to the specified interval. If ``verbose`` is set to
+   True, the user is alerted to skipped lines (comments or ``browser`` lines) by a message printed to the standard output.
+
+
+
 
 BED Reader
 ==========

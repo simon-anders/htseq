@@ -114,18 +114,18 @@ def count_reads_in_features( sam_filename, gff_filename, samtype, order, strande
          if not pe_mode:
             if not r.aligned:
                notaligned += 1
-               write_to_samout( r, "not_aligned" )
+               write_to_samout( r, "__not_aligned" )
                continue
             try:
                if r.optional_field( "NH" ) > 1:
                   nonunique += 1
-                  write_to_samout( r, "alignment_not_unique" )
+                  write_to_samout( r, "__alignment_not_unique" )
                   continue
             except KeyError:
                pass
             if r.aQual < minaqual:
                lowqual += 1
-               write_to_samout( r, "too_low_aQual" )
+               write_to_samout( r, "__too_low_aQual" )
                continue
             if stranded != "reverse":
                iv_seq = ( co.ref_iv for co in r.cigar if co.type == "M" and co.size > 0 )
@@ -148,20 +148,20 @@ def count_reads_in_features( sam_filename, gff_filename, samtype, order, strande
                      ( co.ref_iv for co in r[1].cigar if co.type == "M" and co.size > 0 ) )
             else:
                if ( r[0] is None ) or not ( r[0].aligned ):
-                  write_to_samout( r, "not_aligned" )
+                  write_to_samout( r, "__not_aligned" )
                   notaligned += 1
                   continue         
             try:
                if ( r[0] is not None and r[0].optional_field( "NH" ) > 1 ) or \
                      ( r[1] is not None and r[1].optional_field( "NH" ) > 1 ):
                   nonunique += 1
-                  write_to_samout( r, "alignment_not_unique" )
+                  write_to_samout( r, "__alignment_not_unique" )
                   continue
             except KeyError:
                pass
             if ( r[0] and r[0].aQual < minaqual ) or ( r[1] and r[1].aQual < minaqual ):
                lowqual += 1
-               write_to_samout( r, "too_low_aQual" )
+               write_to_samout( r, "__too_low_aQual" )
                continue         
          
          try:
@@ -186,16 +186,16 @@ def count_reads_in_features( sam_filename, gff_filename, samtype, order, strande
             else:
                sys.exit( "Illegal overlap mode." )
             if fs is None or len( fs ) == 0:
-               write_to_samout( r, "no_feature" )
+               write_to_samout( r, "__no_feature" )
                empty += 1
             elif len( fs ) > 1:
-               write_to_samout( r, "ambiguous[" + '+'.join( fs ) + "]" )
+               write_to_samout( r, "__ambiguous[" + '+'.join( fs ) + "]" )
                ambiguous += 1
             else:
                write_to_samout( r, list(fs)[0] )
                counts[ list(fs)[0] ] += 1
          except UnknownChrom:
-            write_to_samout( r, "no_feature" )
+            write_to_samout( r, "__no_feature" )
             empty += 1
 
    except:
