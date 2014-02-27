@@ -876,7 +876,7 @@ class VCF_Reader( FileOrSequence ):
             yield vc
 
 
-class WIG_Reader( FileOrSequence ):
+class WiggleReader( FileOrSequence ):
 
     def __init__( self, filename_or_sequence, verbose = True ):
         FileOrSequence.__init__( self, filename_or_sequence )
@@ -1008,3 +1008,29 @@ class BAM_Writer( object ):
    
    def close( self ):
       self.sf.close()
+
+
+class BED_Reader( FileOrSequence ):
+
+   def __init__( self, filename_or_sequence ):
+      FileOrSequence.__init__( self, filename_or_sequence )
+        
+   def __iter__( self ):
+      for line in FileOrSequence.__iter__( self ):
+         if line.startswith( "track" ):
+            continue
+         fields = line.split()
+         if len(fields) < 3:
+            raise ValueError, "BED file line contains less than 3 fields"
+         if len(fields) > 9:
+            raise ValueError, "BED file line contains more than 9 fields"
+         iv = GenomicInterval( fields[0], int(fields[1]), int(fields[2]), fields[5] if len(fields) > 5 else "." )
+         f = GenomicFeature( fields[3] if len(fields) > 3 else "unnamed", "BED line", iv )
+         if len(fields) > 4:
+            f.score = float( fields[4] )
+         if len(fields) > 7:
+            f.thick = GenomicInterval( iv.chrom, int( fields[6] ), int( fields[7] ), iv.strand )
+         if len(fields) > 8:
+            f.itemRgb = [ int(a) for a in fields[8].split(",") ]            
+         yield(f)
+
