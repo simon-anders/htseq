@@ -126,6 +126,8 @@ Wiggle Reader
 The `Wiggle format`_ (file extension often ``.wig``) is a format to describe numeric scores assigned to base-pair positions on a genome.
 The class :class:`WiggleReader` is parser for such files. 
 
+.. _`Wiggle format`: http://genome.ucsc.edu/goldenPath/help/wiggle.html
+
 .. class:: WiggleReader( filename_or_sequence, verbose=True )
 
    The class is instatiated with the file name of a Wiggle file, or a sequence of lines in Wiggle format. A ``WiggleReader`` 
@@ -134,9 +136,38 @@ The class :class:`WiggleReader` is parser for such files.
    True, the user is alerted to skipped lines (comments or ``browser`` lines) by a message printed to the standard output.
 
 
-
-
 BED Reader
 ==========
 
-[describe BED Reader here]
+The `BED format`_  is a format originally used to describe gene models but is also commonly used to describe other genomic features.
+
+.. _`BED format`: http://genome.ucsc.edu/FAQ/FAQformat.html#format1
+
+.. class:: BED_Reader( filename_or_sequence )
+
+   The class is instatiated with the file name of a BED file, or a sequence of lines in BED format. A ``BED_Reader`` 
+   object generates an iterator, which yields a :class:`GenomicFeature` object for each line in the BED file (except for
+   lines starting with ``track``, whcih are skipped).
+
+   The attributes of the yielded ``GenomicFeature`` objects are as follows:
+
+   ``iv``
+      a :class:`GenomicInterval` object with the coordinates as given by the 1st, 2nd, 3rd, and 6th column of the BED file. If the
+      BED file has less than 6 columns, the strand is set to "``.``".
+
+   ``name``
+      the name of feature as given in the 4th column, or ``unnamed``, if the file has only three columns
+
+   ``type``
+      always the string ``BED line``
+
+   ``score``
+      a float with the score as given by the 5th column (or ``None`` if the BED file has less 5 columns).
+
+   ``thick``
+      a :class:`GenomicInterval` object containg the "thick" part of the feature, as specified by the 6th and 7th column, with chromosome
+      and strand copied from ``iv`` (or ``None`` if the BED file has less 7 columns).
+
+   ``itemRgb``
+      a list of three ``int`` values, taken from the 8th column (``None`` if the BED file has less 8 columns). In a BED file, this triple
+      is meant to specify the colour in which the feature should be drawn in a browser.

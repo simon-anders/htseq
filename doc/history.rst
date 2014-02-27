@@ -4,6 +4,14 @@
 Version history
 ***************
 
+Version 0.6.1
+=============
+
+2014-02-27
+
+- added parser classes for BED and Wiggle format
+
+
 Version 0.6.0
 =============
 
