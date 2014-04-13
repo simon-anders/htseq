@@ -11,6 +11,12 @@ Version 0.6.1
 
 - added parser classes for BED and Wiggle format
 
+Patch versions:
+
+- 0.6.1p1 (2014-04-13)
+
+  - Fixed incorrect version tag
+
 
 Version 0.6.0
 =============
