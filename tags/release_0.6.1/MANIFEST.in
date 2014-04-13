@@ -1,0 +1,5 @@
+include src/step_vector.h
+include VERSION
+prune example_data
+prune test
+exclude todo.txt
