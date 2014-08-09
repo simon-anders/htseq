@@ -194,15 +194,17 @@ A simple example of the usage is given here:
    <SAM_Alignment object: Read 'SRR001432.159692 USI-EAS21_0008_3445:8:4:618:821 length=25' aligned to 1:[91360,91385)/->
    <SAM_Alignment object: Read 'SRR001432.249247 USI-EAS21_0008_3445:8:6:144:741 length=25' aligned to 1:[97059,97084)/->
     
-[*FIXME*] The following is currently broken, likely due to a bug in pysam.    
-
 .. doctest::
     
-   >>> bam_writer = HTSeq.BAM_Writer.from_BAM_Reader( "region.bam", bam_reader ) #set-up BAM_Writer with same header as reader #doctest: +SKIP
-   >>> for a in bam_reader.fetch( region = "1:249000000-249200000" ): #fetching reads in a region #doctest: +SKIP
+   >>> bam_writer = HTSeq.BAM_Writer.from_BAM_Reader( "region.bam", bam_reader ) #set-up BAM_Writer with same header as reader 
+   >>> for a in bam_reader.fetch( region = "1:249000000-249200000" ): #fetching reads in a region 
    ...    print "Writing Alignment", a, "to file", bam_writer.filename 
-   ...	  bam_writer.write( a ) 
-   >>> bam_writer.close() #doctest: +SKIP
+   ...	  bam_writer.write( a )    #doctest:+ELLIPSIS
+   Writing Alignment <SAM_Alignment object: Read 'SRR001432.104735 USI-EAS21_0008_3445:8:3:934:653 length=25' aligned to 1:[249085369,249085394)/-> to file region.bam
+   Writing Alignment <SAM_Alignment object: Read 'SRR001432.280764 USI-EAS21_0008_3445:8:7:479:581 length=25' aligned to 1:[249105864,249105889)/-> to file region.bam
+   ...
+   Writing Alignment <SAM_Alignment object: Read 'SRR001432.248967 USI-EAS21_0008_3445:8:6:862:756 length=25' aligned to 1:[249167916,249167941)/-> to file region.bam
+   >>> bam_writer.close() 
  
 Genomic intervals and genomic arrays
 ====================================
