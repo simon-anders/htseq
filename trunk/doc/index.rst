@@ -12,6 +12,7 @@ HTSeq: Analysing high-throughput sequencing data with Python
    tour
    tss
    counting
+   refoverview
    sequences
    genomic
    alignments

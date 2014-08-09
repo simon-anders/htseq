@@ -58,10 +58,20 @@ Documentation overview
   This chapter explains typical usage patterns for HTSeq by explaining in detail 
   three different solutions to the same programming task.
 
+* :ref:`counting`
+
+  This chapter explorer in detail the use case of counting the overlap of reads
+  with annotation features and explains how to implement custom logic by
+  writing on's own customized counting scripts
+
 
 * Reference documentation
 
   The various classes of `HTSeq` are described here.
+
+  * :ref:`refoverview` 
+
+    A brief overview over all classes.
 
   * :ref:`sequences` 
   

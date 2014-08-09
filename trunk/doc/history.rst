@@ -17,6 +17,10 @@ Patch versions:
 
   - Fixed incorrect version tag
 
+- 0.6.1p2 (2014-08-09)
+
+  - some improvements to documentation
+
 
 Version 0.6.0
 =============
