@@ -9,7 +9,7 @@ except ImportError:
    sys.stderr.write( "Could not import 'setuptools', falling back to 'distutils'.\n" )
    from distutils.core import setup, Extension
 
-if sys.version_info[0] < 2 or sys.version_info < 5:
+if sys.version_info[0] < 2 and sys.version_info[1] < 5:
    sys.stderr.write( "Error in setup script for HTSeq:\n" )
    sys.stderr.write( "You need at least version 2.5 of Python to use HTSeq.\n" )
    sys.exit( 1 )
