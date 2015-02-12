@@ -813,6 +813,9 @@ cdef class SequenceWithQualities( Sequence ):
          self._qualstr = b""
          self._qualscale = "none"
          self._qualstr_phred = b""
+         #Experimentally trying to set qualstr when the array is modified directly
+         tmp = self.qualstr
+         self._qualstr = self._qualstr_phred
               
    def __repr__( self ):
       return "<%s object '%s'>" % ( self.__class__.__name__, self.name )
@@ -1192,6 +1195,36 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
     - tags: the extra information tags [not yet implemented]
    """
 
+   def to_pysam_AlignedSegment( self, sf ):
+      try:
+         import pysam
+      except ImportError:
+         sys.stderr.write( "Please Install PySam to use this functionality (http://code.google.com/p/pysam/)" )
+         raise
+      
+      a = pysam.AlignedSegment()
+      a.query_sequence = self.read.seq if self.iv == None or self.iv.strand == '+' else self.read.get_reverse_complement().seq
+      a.query_qualities = self.read.qual if self.iv == None or self.iv.strand == '+' else self.read.get_reverse_complement().qual
+      a.query_name = self.read.name
+      a.flag = self.flag
+      a.tags = self.optional_fields
+      if self.aligned:
+         a.cigartuples = [ (cigar_operation_code_dict[c.type], c.size) for c in self.cigar ]
+         a.reference_start = self.iv.start
+         a.reference_id = sf.gettid( self.iv.chrom )
+         a.template_length = self.inferred_insert_size
+         a.mapping_quality = self.aQual
+      else:
+         a.reference_start  = -1
+         a.reference_id  = -1
+      if self.mate_aligned:
+         a.next_reference_id = sf.gettid( self.mate_start.chrom )
+         a.next_reference_start = self.mate_start.start
+      else:
+         a.next_reference_id = -1
+         a.next_reference_start = -1
+      return a
+
    def to_pysam_AlignedRead( self, sf ):
       try:
          import pysam
@@ -1249,6 +1282,44 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          if not read.mate_is_unmapped:
             strand = "-" if read.mate_is_reverse else "+"
             a.mate_start = GenomicPosition( samfile.getrname(read.mrnm), read.mpos, strand )
+         else:
+            a.mate_start = None
+         if read.is_read1:
+            a.pe_which = intern( "first" )
+         elif read.is_read2:  
+            a.pe_which = intern( "second" )
+         else:
+            a.pe_which = intern( "unknown" )
+      else:
+         a.pe_which = intern( "not_paired_end" )
+      return a
+
+   @classmethod
+   def from_pysam_AlignedSegment( cls, read, samfile ):
+      strand = "-" if read.is_reverse else "+"
+      if not read.is_unmapped:
+          chrom = samfile.getrname(read.tid)
+          iv = GenomicInterval( chrom, read.reference_start, read.reference_end, strand )
+      else:
+          iv = None
+      seq = SequenceWithQualities( read.query_sequence, read.query_name, '', "noquals" )
+      if read.query_qualities != None:
+          seq.qual = numpy.array(read.query_qualities)
+      a = SAM_Alignment( seq, iv )
+      a.cigar = build_cigar_list( [ (cigar_operation_codes[code], length) for (code, length) in read.cigartuples ] , read.reference_start, chrom, strand ) if iv != None else []
+      a.inferred_insert_size = read.template_length
+      a.aQual = read.mapping_quality
+      a.flag = read.flag
+      a.proper_pair = read.is_proper_pair
+      a.not_primary_alignment = read.is_secondary
+      a.failed_platform_qc = read.is_qcfail
+      a.pcr_or_optical_duplicate = read.is_duplicate
+      a.original_sam_line = ""
+      a.optional_fields = read.tags
+      if read.is_paired:
+         if not read.mate_is_unmapped:
+            strand = "-" if read.mate_is_reverse else "+"
+            a.mate_start = GenomicPosition( samfile.getrname(read.mrnm), read.next_reference_start, strand )
          else:
             a.mate_start = None
          if read.is_read1:
