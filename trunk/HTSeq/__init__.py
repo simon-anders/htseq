@@ -943,7 +943,8 @@ class BAM_Reader( object ):
         sf = pysam.Samfile(self.filename, "rb")
         self.record_no = 0
         for pa in sf:
-            yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
+            #yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
+            yield SAM_Alignment.from_pysam_AlignedSegment( pa, sf )
             self.record_no += 1
     
     def fetch( self, reference = None, start = None, end = None, region = None ):
@@ -1004,7 +1005,8 @@ class BAM_Writer( object ):
       return BAM_Writer( filename = fn, header = br.get_header_dict() )
    
    def write( self, alnmt):
-      self.sf.write( alnmt.to_pysam_AlignedRead( self.sf ) )
+      #self.sf.write( alnmt.to_pysam_AlignedRead( self.sf ) )
+      self.sf.write( alnmt.to_pysam_AlignedSegment( self.sf ) )
    
    def close( self ):
       self.sf.close()
