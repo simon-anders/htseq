@@ -7,6 +7,7 @@ import itertools, warnings, os, shlex
 import sys
 
 try:
+   import HTSeq
    from HTSeq._HTSeq import *
    #from _HTSeq import *
 except ImportError:
@@ -15,7 +16,7 @@ except ImportError:
    else:
       raise
       
-from _version import __version__
+from HTSeq._version import __version__
 
 #from vcf_reader import *
 
