@@ -5,3 +5,10 @@ HTSeq/StepVector.py
 HTSeq/_version.py
 src/_HTSeq.c
 src/StepVector_wrap.cxx
+*/*.bak
+HTSeq/__pycache__/
+example_data/minus.wig
+example_data/plus.wig
+example_data/region.bam
+example_data/test.fa
+example_data/test.fq

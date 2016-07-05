@@ -198,10 +198,12 @@ class GFF_Reader( FileOrSequence ):
    
    def __iter__( self ):
       for line in FileOrSequence.__iter__( self ):
+         line = bytes(line, encoding="UTF-8")
+         
          if line == "\n":
             continue
-         if line.startswith( '#' ):
-            if line.startswith( "##" ):
+         if line.startswith( b'#' ):
+            if line.startswith( b"##" ):
                mo = _re_gff_meta_comment.match( line )
                if mo:
                   self.metadata[ mo.group(1) ] = mo.group(2)
@@ -764,7 +766,7 @@ class VariantCall( object ):
     
     def sampleline( self ):
        if self.format == None:
-          print("No samples in this variant call!", file=sys.stderr) 
+          sys.stderr.write("No samples in this variant call!\n") 
           return ""
        keys = self.format
        ret = [ ":".join( keys ) ]

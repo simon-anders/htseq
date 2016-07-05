@@ -67,7 +67,7 @@ reads.
 
    >>> import itertools
    >>> for read in itertools.islice( fastq_file, 10 ):
-   ...    print read
+   ...    print(read)
    CTTACGTTTTCTGTATCAATACTCGATTTATCATCT
    AATTGGTTTCCCCGCCGAGACCGTACACTACCAGCC
    TTTGGACTTGATTGTTGACGCTATCAAGGCTGCTGG
@@ -445,7 +445,7 @@ form the set union of the three reported sets, using Python's set union operator
    >>> fset = set()
    >>> for iv, val in gas[ read_iv ].steps():
    ...    fset |= val
-   >>> print fset
+   >>> print(fset)
    set(['A', 'B'])
 
 Experienced Python developers will recognize that the ``for`` loop can be replaced with a single line

@@ -1305,7 +1305,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
           iv = GenomicInterval( chrom, read.reference_start, read.reference_end, strand )
       else:
           iv = None
-      seq = SequenceWithQualities( read.query_sequence, read.query_name, '', "noquals" )
+      seq = SequenceWithQualities(bytes(read.query_sequence,encoding="UTF-8"), read.query_name, b'', 'noquals')
       if read.query_qualities != None:
           seq.qual = numpy.array(read.query_qualities)
       a = SAM_Alignment( seq, iv )
@@ -1375,9 +1375,9 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          iv = GenomicInterval( rname, posint, cigarlist[-1].ref_iv.end, strand )   
             
       if qual != "*":
-         swq = SequenceWithQualities( seq.upper(), qname, qual )
+         swq = SequenceWithQualities( bytes(seq.upper(),encoding="UTF-8"), qname, bytes(seq.upper(),encoding="UTF-8") )
       else:
-         swq = SequenceWithQualities( seq.upper(), qname, "", "noquals" )
+         swq = SequenceWithQualities( bytes(seq.upper(),encoding="UTF-8"), qname, "", "noquals" )
 
       alnmt = SAM_Alignment( swq, iv )
       alnmt.flag = flagint   
