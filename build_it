@@ -2,4 +2,5 @@
 
 (cd src; make)
 echo __version__ = \"`cat VERSION`\" > HTSeq/_version.py
-python setup.py build
+python3 setup.py build
+#python2 setup.py build
