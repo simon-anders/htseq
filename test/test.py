@@ -9,28 +9,28 @@ import HTSeq
 os.chdir( "example_data" )
 
 def test_rst_file( filename ):
-   print "Doctest of %s:" % os.path.basename( filename )
+   print("Doctest of %s:" % os.path.basename( filename ))
    (failure_count, test_count) = doctest.testfile( 
       os.path.join( "..", "doc", filename ), module_relative=False )
 
    if failure_count == 0:
-      print "All %d tests passed." % test_count
+      print("All %d tests passed." % test_count)
       return True
    else:   
-      print "%d of %d tests failed." % (failure_count, test_count)
+      print("%d of %d tests failed." % (failure_count, test_count))
       return False
 
 ok = True
 if len(sys.argv) == 1:
    for fn in glob.glob( "../doc/*.rst" ):
       ok &= test_rst_file( os.path.basename( fn ) )
-      print
+      print()
    if not ok:
-      print "Not all tests passed."
+      print("Not all tests passed.")
       exit( 1 )
 elif len(sys.argv) == 2:
    test_rst_file( sys.argv[1] )
 else:
-   print "Wrong usage"
-   print "Call without arguments to run all doctest, or with the (base) name"
-   print "of one rst file from the doc directory to run doctest on it."
+   print("Wrong usage")
+   print("Call without arguments to run all doctest, or with the (base) name")
+   print("of one rst file from the doc directory to run doctest on it.")

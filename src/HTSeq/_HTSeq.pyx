@@ -6,13 +6,16 @@ import csv
 import gzip
 import itertools 
 import collections
-import cStringIO
+try:
+    import cStringIO
+except:
+    pass
 import warnings
 import numpy
 cimport numpy
 
-import StepVector
-import _HTSeq_internal
+from HTSeq import StepVector
+from HTSeq import _HTSeq_internal
 
 
 ###########################
@@ -84,11 +87,11 @@ cdef class GenomicInterval:
    def __repr__( GenomicInterval self ):
       return "<%s object '%s', [%d,%s), strand '%s'>" % \
          ( self.__class__.__name__, self.chrom, self.start, 
-           str(self.end) if self.end != sys.maxint else "Inf", self.strand )
+           str(self.end) if self.end != sys.maxsize else "Inf", self.strand )
          
    def __str__( GenomicInterval self ):
          return "%s:[%d,%s)/%s" % \
-            ( self.chrom, self.start, str(self.end) if self.end != sys.maxint else "Inf", self.strand )
+            ( self.chrom, self.start, str(self.end) if self.end != sys.maxsize else "Inf", self.strand )
 
    property length:
 
@@ -499,7 +502,7 @@ cdef class GenomicArray( object ):
          if storage != 'step':
             raise TypeError, "Indefinite-length chromosomes can " + \
                " only be used with storage type 'StepVector'."
-         chroms = dict( [ ( c, sys.maxint ) for c in chroms ] )
+         chroms = dict( [ ( c, sys.maxsize ) for c in chroms ] )
       elif not isinstance( chroms, dict ):
          raise TypeError, "'chroms' must be a list or a dict or 'auto'."
       self.storage = storage
@@ -550,10 +553,10 @@ cdef class GenomicArray( object ):
       else:
          raise TypeError, "Illegal index type."
             
-   def add_chrom( self, chrom, length = sys.maxint, start_index = 0 ):
+   def add_chrom( self, chrom, length = sys.maxsize, start_index = 0 ):
       cdef GenomicInterval iv 
-      if length == sys.maxint:
-         iv = GenomicInterval( chrom, start_index, sys.maxint, "." )
+      if length == sys.maxsize:
+         iv = GenomicInterval( chrom, start_index, sys.maxsize, "." )
       else:
          iv = GenomicInterval( chrom, start_index, start_index + length, "." )
       if self.stranded:
@@ -587,7 +590,7 @@ cdef class GenomicArray( object ):
          f.write( "track type=bedGraph %s\n" % track_options )
       for chrom in self.chrom_vectors:
          for iv, value in self.chrom_vectors[ chrom ][ strand ].steps():
-            if iv.start == -sys.maxint-1 or iv.end == sys.maxint:
+            if iv.start == -sys.maxsize-1 or iv.end == sys.maxsize:
                continue
             f.write( "%s\t%d\t%d\t%f\n" % (iv.chrom, iv.start, iv.end, value) )    
       if not hasattr( file_or_filename, "write" ):
@@ -619,7 +622,7 @@ def _make_translation_table_for_complementation( ):
    t[ ord('t') ] = 'a'
    t[ ord('c') ] = 'g'
    t[ ord('g') ] = 'c'
-   return ''.join( t )
+   return bytes(''.join( t ),encoding="UTF-8")
    
 cdef bytes _translation_table_for_complementation = _make_translation_table_for_complementation( )
 
@@ -687,15 +690,15 @@ cdef class Sequence( object ):
       cdef char* seq_cstr = self.seq
       for i in xrange( seq_length ):
          b = seq_cstr[i]
-         if b == 'A' or b == 'a':
+         if b in [b'A', b'a']:
             count_array[ i, 0 ] += 1
-         elif b == 'C' or b == 'c':
+         elif b in [b'C', b'c']:
             count_array[ i, 1 ] += 1
-         elif b == 'G' or b == 'g':
+         elif b in [b'G', b'g']:
             count_array[ i, 2 ] += 1
-         elif b == 'T' or b == 't':
+         elif b in [b'T', b't']:
             count_array[ i, 3 ] += 1
-         elif b == 'N' or b == 'n' or b == ".":
+         elif b in [b'N', b'n', b'.']:
             count_array[ i, 4 ] += 1
          else:
             raise ValueError, "Illegal base letter encountered."
@@ -1302,7 +1305,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
           iv = GenomicInterval( chrom, read.reference_start, read.reference_end, strand )
       else:
           iv = None
-      seq = SequenceWithQualities( read.query_sequence, read.query_name, '', "noquals" )
+      seq = SequenceWithQualities(bytes(read.query_sequence,encoding="UTF-8"), read.query_name, b'', 'noquals')
       if read.query_qualities != None:
           seq.qual = numpy.array(read.query_qualities)
       a = SAM_Alignment( seq, iv )
@@ -1372,9 +1375,9 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          iv = GenomicInterval( rname, posint, cigarlist[-1].ref_iv.end, strand )   
             
       if qual != "*":
-         swq = SequenceWithQualities( seq.upper(), qname, qual )
+         swq = SequenceWithQualities( bytes(seq.upper(),encoding="UTF-8"), qname, bytes(seq.upper(),encoding="UTF-8") )
       else:
-         swq = SequenceWithQualities( seq.upper(), qname, "", "noquals" )
+         swq = SequenceWithQualities( bytes(seq.upper(),encoding="UTF-8"), qname, "", "noquals" )
 
       alnmt = SAM_Alignment( swq, iv )
       alnmt.flag = flagint   

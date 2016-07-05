@@ -12,7 +12,7 @@ def invert_strand( iv ):
    elif iv2.strand == "-":
       iv2.strand = "+"
    else:
-      raise ValueError, "Illegal strand"
+      raise ValueError("Illegal strand")
    return iv2
 
 def count_reads_in_features( sam_filename, gff_filename, samtype, order, stranded, 
@@ -49,12 +49,12 @@ def count_reads_in_features( sam_filename, gff_filename, samtype, order, strande
             try:
                feature_id = f.attr[ id_attribute ]
             except KeyError:
-               raise ValueError, ( "Feature %s does not contain a '%s' attribute" % 
-                  ( f.name, id_attribute ) )
+               raise ValueError( "Feature %s does not contain a '%s' attribute" % 
+                  ( f.name, id_attribute ))
             if stranded != "no" and f.iv.strand == ".":
-               raise ValueError, ( "Feature %s at %s does not have strand information but you are "
+               raise ValueError( "Feature %s at %s does not have strand information but you are "
                   "running htseq-count in stranded mode. Use '--stranded=no'." % 
-                  ( f.name, f.iv ) )
+                  ( f.name, f.iv ))
             features[ f.iv ] += feature_id
             counts[ f.attr[ id_attribute ] ] = 0
          i += 1
@@ -75,17 +75,17 @@ def count_reads_in_features( sam_filename, gff_filename, samtype, order, strande
    elif samtype == "bam":
       SAM_or_BAM_Reader = HTSeq.BAM_Reader
    else:
-      raise ValueError, "Unknown input format %s specified." % samtype
+      raise ValueError("Unknown input format %s specified." % samtype)
 
    try:
       if sam_filename != "-":
          read_seq_file = SAM_or_BAM_Reader( sam_filename )
          read_seq = read_seq_file
-         first_read = iter(read_seq).next()
+         first_read = next(iter(read_seq))
       else:
          read_seq_file = SAM_or_BAM_Reader( sys.stdin )
          read_seq_iter = iter( read_seq_file )
-         first_read = read_seq_iter.next()
+         first_read = next(read_seq_iter)
          read_seq = itertools.chain( [ first_read ], read_seq_iter )
       pe_mode = first_read.paired_end
    except:
@@ -99,7 +99,7 @@ def count_reads_in_features( sam_filename, gff_filename, samtype, order, strande
          elif order == "pos":
             read_seq = HTSeq.pair_SAM_alignments_with_buffer( read_seq )
          else:
-            raise ValueError, "Illegal order specified."
+            raise ValueError("Illegal order specified.")
       empty = 0
       ambiguous = 0
       notaligned = 0
@@ -209,12 +209,12 @@ def count_reads_in_features( sam_filename, gff_filename, samtype, order, strande
       samoutfile.close()
 
    for fn in sorted( counts.keys() ):
-      print "%s\t%d" % ( fn, counts[fn] )
-   print "__no_feature\t%d" % empty
-   print "__ambiguous\t%d" % ambiguous
-   print "__too_low_aQual\t%d" % lowqual
-   print "__not_aligned\t%d" % notaligned
-   print "__alignment_not_unique\t%d" % nonunique
+      print("%s\t%d" % ( fn, counts[fn] ))
+   print("__no_feature\t%d" % empty)
+   print("__ambiguous\t%d" % ambiguous)
+   print("__too_low_aQual\t%d" % lowqual)
+   print("__not_aligned\t%d" % notaligned)
+   print("__alignment_not_unique\t%d" % nonunique)
 
       
 def main():
