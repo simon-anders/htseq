@@ -622,7 +622,7 @@ def _make_translation_table_for_complementation( ):
    t[ ord('t') ] = 'a'
    t[ ord('c') ] = 'g'
    t[ ord('g') ] = 'c'
-   return bytes(''.join( t ),encoding="UTF-8")
+   return ''.join( t ).encode()
    
 cdef bytes _translation_table_for_complementation = _make_translation_table_for_complementation( )
 
@@ -786,7 +786,7 @@ cdef class SequenceWithQualities( Sequence ):
          raise ValueError, "Quality string missing."
       if seq_len != len( self._qualstr ):
          raise ValueError, "Quality string has not the same length as sequence."
-      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qualarr = numpy.empty( ( seq_len, ), numpy.int )
+      cdef numpy.ndarray[ numpy.uint8_t, ndim=1 ] qualarr = numpy.empty( ( seq_len, ), numpy.int )
       cdef int i
       cdef char * qualstr = self._qualstr
       if self._qualscale == "phred":
@@ -808,8 +808,8 @@ cdef class SequenceWithQualities( Sequence ):
             self._fill_qual_arr()
          return self._qualarr
       def __set__( self, newvalue ):
-         if not ( isinstance( newvalue, numpy.ndarray ) and newvalue.dtype == numpy.int ) :
-            raise TypeError, "qual can only be assigned a numpy array of type numpy.int"
+         if not ( isinstance( newvalue, numpy.ndarray ) and newvalue.dtype == numpy.uint8 ) :
+            raise TypeError, "qual can only be assigned a numpy array of type numpy.uint8"
          if not ( newvalue.shape == ( len(self.seq), ) ) :
             raise TypeError, "assignment to qual with illegal shape"
          self._qualarr = newvalue
@@ -836,7 +836,7 @@ cdef class SequenceWithQualities( Sequence ):
       cdef int seqlen
       cdef char * qualstr_phred_cstr = self._qualstr_phred
       cdef int i
-      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array
+      cdef numpy.ndarray[ numpy.uint8_t, ndim=1 ] qual_array
       if qualstr_phred_cstr[0] == 0:
          if self._qualscale == "noquals":
             raise ValueError, "Quality string missing" 
@@ -844,7 +844,8 @@ cdef class SequenceWithQualities( Sequence ):
             self._qualstr_phred = self._qualstr
          else:
             seqlen = len( self.seq )
-            self._qualstr_phred = <bytes>(' ') * seqlen
+            #FIXME: is this fixed now?
+            self._qualstr_phred = b' ' * seqlen
             qualstr_phred_cstr = self._qualstr_phred
             if self._qualarr is None:
                self._fill_qual_arr()
@@ -885,7 +886,7 @@ cdef class SequenceWithQualities( Sequence ):
       cdef numpy.ndarray[ numpy.int_t, ndim=2 ] count_array = count_array_
       if self._qualarr is None:
          self._fill_qual_arr()   
-      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array = self._qualarr
+      cdef numpy.ndarray[ numpy.uint8_t, ndim=1 ] qual_array = self._qualarr
 
       cdef numpy.npy_intp seq_length = numpy.PyArray_DIMS( qual_array  )[0]
       cdef numpy.npy_intp qual_size  = numpy.PyArray_DIMS( count_array )[1]
@@ -919,7 +920,7 @@ cdef class SequenceWithQualities( Sequence ):
       cdef int sum_mm_qual
       if self._qualarr is None:
          self._fill_qual_arr()   
-      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array = self._qualarr
+      cdef numpy.ndarray[ numpy.uint8_t, ndim=1 ] qual_array = self._qualarr
       for i in xrange( 1, minlen+1 ):
          num_mismatches = 0
          for j in xrange( i ):
@@ -947,7 +948,7 @@ cdef class SequenceWithQualities( Sequence ):
       cdef int sum_mm_qual
       if self._qualarr is None:
          self._fill_qual_arr()   
-      cdef numpy.ndarray[ numpy.int_t, ndim=1 ] qual_array = self._qualarr
+      cdef numpy.ndarray[ numpy.uint8_t, ndim=1 ] qual_array = self._qualarr
       for i in xrange( 1, minlen+1 ):
          sum_mm_qual = 0
          for j in xrange( i ):
@@ -1266,10 +1267,10 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
           iv = GenomicInterval( chrom, read.pos, read.aend, strand )
       else:
           iv = None
-      if read.qual != "*":
-         seq = SequenceWithQualities( read.seq, read.qname, read.qual )
+      if read.qual != b"*":
+         seq = SequenceWithQualities(read.query_sequence.encode(), read.qname, read.qual.encode() )
       else:
-         seq = SequenceWithQualities( read.seq, read.qname, read.qual, "noquals" )
+         seq = SequenceWithQualities(read.query_sequence.encode(), read.qname, read.qual.encode(), "noquals" )
       a = SAM_Alignment( seq, iv )
       a.cigar = build_cigar_list( [ (cigar_operation_codes[code], length) for (code, length) in read.cigar ] , read.pos, chrom, strand ) if iv != None else []
       a.inferred_insert_size = read.isize
@@ -1305,7 +1306,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
           iv = GenomicInterval( chrom, read.reference_start, read.reference_end, strand )
       else:
           iv = None
-      seq = SequenceWithQualities(bytes(read.query_sequence,encoding="UTF-8"), read.query_name, b'', 'noquals')
+      seq = SequenceWithQualities(read.query_sequence.encode(), read.query_name, b'', 'noquals')
       if read.query_qualities != None:
           seq.qual = numpy.array(read.query_qualities)
       a = SAM_Alignment( seq, iv )
@@ -1374,10 +1375,10 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          cigarlist = parse_cigar( cigar, posint, rname, strand )
          iv = GenomicInterval( rname, posint, cigarlist[-1].ref_iv.end, strand )   
             
-      if qual != "*":
-         swq = SequenceWithQualities( bytes(seq.upper(),encoding="UTF-8"), qname, bytes(seq.upper(),encoding="UTF-8") )
+      if qual != b"*":
+         swq = SequenceWithQualities( seq.upper().encode(), qname, seq.upper().encode() )
       else:
-         swq = SequenceWithQualities( bytes(seq.upper(),encoding="UTF-8"), qname, "", "noquals" )
+         swq = SequenceWithQualities( seq.upper().encode(), qname, "", "noquals" )
 
       alnmt = SAM_Alignment( swq, iv )
       alnmt.flag = flagint   
