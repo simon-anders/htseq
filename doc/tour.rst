@@ -92,11 +92,11 @@ and it also has a slot :attr:`qual <SequenceWithQualities.qual>`::
    >>> read.name
    'HWI-EAS225:1:10:1284:142#0/1'
    >>> read.seq
-   'ACTTTTAAAGATTGGCCAAGAATTGGGGATTGAAGA'
+   b'ACTTTTAAAGATTGGCCAAGAATTGGGGATTGAAGA'
    >>> read.qual
    array([33, 33, 33, 33, 33, 33, 29, 27, 29, 32, 29, 30, 30, 21, 22, 25, 25,
           25, 23, 28, 24, 24, 29, 29, 29, 25, 28, 24, 24, 26, 25, 25, 24, 24,
-          24, 24])
+          24, 24], dtype=uint8)
 
 The values in the quality array are, for each base in the sequence, the Phred
 score for the correctness of the base.
@@ -187,7 +187,7 @@ A simple example of the usage is given here:
    
    >>> bam_reader = HTSeq.BAM_Reader( "SRR001432_head_sorted.bam" )
    >>> for a in itertools.islice( bam_reader, 5 ):  # printing first 5 reads
-   ...    print a
+   ...    print(a)
    <SAM_Alignment object: Read 'SRR001432.165255 USI-EAS21_0008_3445:8:4:718:439 length=25' aligned to 1:[29267,29292)/->
    <SAM_Alignment object: Read 'SRR001432.238475 USI-EAS21_0008_3445:8:6:888:446 length=25' aligned to 1:[62943,62968)/->
    <SAM_Alignment object: Read 'SRR001432.116075 USI-EAS21_0008_3445:8:3:657:64 length=25' aligned to 1:[86980,87005)/->
@@ -198,7 +198,7 @@ A simple example of the usage is given here:
     
    >>> bam_writer = HTSeq.BAM_Writer.from_BAM_Reader( "region.bam", bam_reader ) #set-up BAM_Writer with same header as reader 
    >>> for a in bam_reader.fetch( region = "1:249000000-249200000" ): #fetching reads in a region 
-   ...    print "Writing Alignment", a, "to file", bam_writer.filename 
+   ...    print("Writing Alignment", a, "to file", bam_writer.filename)
    ...	  bam_writer.write( a )    #doctest:+ELLIPSIS
    Writing Alignment <SAM_Alignment object: Read 'SRR001432.104735 USI-EAS21_0008_3445:8:3:934:653 length=25' aligned to 1:[249085369,249085394)/-> to file region.bam
    Writing Alignment <SAM_Alignment object: Read 'SRR001432.280764 USI-EAS21_0008_3445:8:7:479:581 length=25' aligned to 1:[249105864,249105889)/-> to file region.bam
@@ -232,11 +232,11 @@ described above
    >>> aln.read.name
    'HWI-EAS225:1:11:76:63#0/1'
    >>> aln.read.seq
-   'ACTGTAAATACTTTTCAGAAGAGATTTGTAGAATCC'
+   b'ACTGTAAATACTTTTCAGAAGAGATTTGTAGAATCC'
    >>> aln.read.qual
    array([33, 33, 33, 33, 31, 33, 30, 32, 33, 30, 29, 33, 32, 32, 32, 31, 32,
           31, 29, 28, 30, 28, 30, 24, 28, 30, 28, 26, 24, 29, 24, 23, 23, 27,
-          25, 25])
+          25, 25], dtype=uint8)
 
 Furthermore, every alignment object has a slot ``iv`` (for "interval") that describes where
 the read was aligned to (if it was aligned). To hold this 
@@ -322,7 +322,7 @@ Often, reading out the data that way is useful, too:
 .. doctest:: 
 
    >>> for iv2, value in ga[iv].steps():
-   ...    print iv2, value
+   ...    print(iv2, value)
    ... 
    chr1:[90,100)/. 0
    chr1:[100,110)/. 5
@@ -429,10 +429,10 @@ We can query the GenomicArrayOfSets, as before:
 .. doctest::
 
    >>> for iv, val in gas[ read_iv ].steps():
-   ...    print iv, val
-   chr1:[450,510)/. set(['A'])
-   chr1:[510,640)/. set(['A', 'B'])
-   chr1:[640,800)/. set(['B'])
+   ...    print(iv, sorted(val))
+   chr1:[450,510)/. ['A']
+   chr1:[510,640)/. ['A', 'B']
+   chr1:[640,800)/. ['B']
 
 The interval has been subdivided into three pieces, corresponding to the three different sets that it overlaps,
 namely first only A, then A and B, and finally only B.
@@ -445,16 +445,16 @@ form the set union of the three reported sets, using Python's set union operator
    >>> fset = set()
    >>> for iv, val in gas[ read_iv ].steps():
    ...    fset |= val
-   >>> print(fset)
-   set(['A', 'B'])
+   >>> print(sorted(fset))
+   ['A', 'B']
 
 Experienced Python developers will recognize that the ``for`` loop can be replaced with a single line
 using a generator comprehension and the ``reduce`` function:
 
 .. doctest::
 
-   >>> reduce( set.union, ( val for iv, val in gas[ read_iv ].steps() ) )
-   set(['A', 'B'])
+   >>> sorted(set.union(*[val for iv, val in gas[ read_iv ].steps()]))
+   ['A', 'B']
 
 We will come back to the constructs in the next section, after a brief detour on how to read GTF files.
 
@@ -492,7 +492,7 @@ not included, if the division leaves a remainder of two, end is included.)
 We iterate through this file as follows:
 
    >>> for feature in itertools.islice( gtf_file, 10 ):
-   ...    print feature
+   ...    print(feature)
    ... 
    <GenomicFeature: exon 'R0010W' at 2-micron: 251 -> 1523 (strand '+')>
    <GenomicFeature: CDS 'R0010W' at 2-micron: 251 -> 1520 (strand '+')>
@@ -540,9 +540,13 @@ The last column (the attributes) is parsed and presented as a dict:
 
 .. doctest::
 
-   >>> feature.attr    #doctest:+NORMALIZE_WHITESPACE
-   {'exon_number': '1', 'gene_id': 'R0030W', 'transcript_name': 'RAF1', 
-   'transcript_id': 'R0030W', 'protein_id': 'R0030W', 'gene_name': 'RAF1'}
+   >>> sorted(feature.attr.items())    #doctest:+NORMALIZE_WHITESPACE
+   [('exon_number', '1'),
+    ('gene_id', 'R0030W'),
+    ('gene_name', 'RAF1'),
+    ('protein_id', 'R0030W'),
+    ('transcript_id', 'R0030W'),
+    ('transcript_name', 'RAF1')] 
    
 The very first attribute in this column is usually some kind of ID, hence it is
 stored in the slot :attr:`name <GenomicFeature.name>`:
@@ -574,11 +578,11 @@ Assume we have a read covering this interval::
 Its left half covers two genes (YCL058C, YCL058W-A), but its right half only
 YCL058C because YCL058W-A end in the middle of the read::
 
-   >>> list( exons[iv].steps() )   #doctest:+NORMALIZE_WHITESPACE
+   >>> [(st[0], sorted(st[1])) for st in exons[iv].steps()]   #doctest:+NORMALIZE_WHITESPACE
    [(<GenomicInterval object 'III', [23850,23925), strand '.'>,
-        set(['YCL058C', 'YCL058W-A'])),
+        ['YCL058C', 'YCL058W-A']),
     (<GenomicInterval object 'III', [23925,23950), strand '.'>, 
-        set(['YCL058C']))]
+        ['YCL058C'])]
 
 Assuming the transcription boundaries in our GTF file to be correct, we may conclude
 that this read is from the gene that appears in both steps and not from the one that
@@ -594,8 +598,8 @@ coded as follows::
    ...    else:
    ...       iset.intersection_update( step_set )
    ... 
-   >>> print iset
-   set(['YCL058C'])
+   >>> print(iset)
+   {'YCL058C'}
 
 When we look at the first step, we make a
 copy of the steps (in order to not disturb the values stored in ``exons``.) For the following
@@ -636,7 +640,7 @@ We can now conveniently print the result with:
 .. doctest::
 
    >>> for name in sorted( counts.keys() ):  
-   ...    print name, counts[name]   #doctest:+ELLIPSIS
+   ...    print(name, counts[name])   #doctest:+ELLIPSIS
    15S_rRNA 0
    21S_rRNA 0
    HRA1 0

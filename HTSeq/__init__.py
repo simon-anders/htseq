@@ -98,7 +98,7 @@ class GenomicFeature( object ):
    
    def __init__( self, name, type_, interval ):
       self.name = name
-      self.type = sys.intern( type_.decode() )
+      self.type = sys.intern( type_ )
       self.iv = interval
       
    def __repr__( self ):
@@ -153,11 +153,11 @@ def parse_GFF_attribute_string( attrStr, extra_return_first_value=False ):
    If 'extra_return_first_value' is set, a pair is returned: the dictionary
    and the value of the first attribute. This might be useful if this is the ID.
    """
-   if attrStr.endswith( b"\n" ):
+   if attrStr.endswith( "\n" ):
       attrStr = attrStr[:-1]
    d = {}
    first_val = "_unnamed_"
-   for (i, attr) in zip( itertools.count(), _HTSeq.quotesafe_split( attrStr ) ):
+   for (i, attr) in zip( itertools.count(), _HTSeq.quotesafe_split( attrStr.encode() ) ):
       attr = attr.decode()
       if _re_attr_empty.match( attr ):
          continue
@@ -199,27 +199,28 @@ class GFF_Reader( FileOrSequence ):
    
    def __iter__( self ):
       for line in FileOrSequence.__iter__( self ):
-         line = bytes(line, encoding="UTF-8")
+         if isinstance(line, bytes):
+            line = line.decode()
          
-         if line == b"\n":
+         if line == "\n":
             continue
-         if line.startswith( b'#' ):
-            if line.startswith( b"##" ):
+         if line.startswith( '#' ):
+            if line.startswith( "##" ):
                mo = _re_gff_meta_comment.match( line )
                if mo:
                   self.metadata[ mo.group(1) ] = mo.group(2)
             continue
          ( seqname, source, feature, start, end, score, 
-            strand, frame, attributeStr ) = line.split( b"\t", 8 )   
+            strand, frame, attributeStr ) = line.split( "\t", 8 )   
          ( attr, name ) = parse_GFF_attribute_string( attributeStr, True )
          if self.end_included:
-            iv = GenomicInterval( seqname.decode(), int(start)-1, int(end), strand.decode() )
+            iv = GenomicInterval( seqname, int(start)-1, int(end), strand )
          else:
-            iv = GenomicInterval( seqname.decode(), int(start)-1, int(end)-1, strand.decode() )
+            iv = GenomicInterval( seqname, int(start)-1, int(end)-1, strand )
          f = GenomicFeature( name, feature, iv )
-         if score != b".":
+         if score != ".":
             score = float( score )
-         if frame != b".":
+         if frame != ".":
             frame = int( frame )
          f.source = source
          f.score = score
@@ -295,10 +296,10 @@ class FastaReader( FileOrSequence ):
             mo = _re_fasta_header_line.match( line )
             name = mo.group(1)
             descr = mo.group(2)
-            seq = ""
+            seq = b""
          else: 
             assert seq is not None, "FASTA file does not start with '>'."
-            seq += line[:-1]
+            seq += line[:-1].encode()
       if seq is not None:
          s = Sequence( seq, name )
          s.descr = descr
@@ -378,18 +379,18 @@ class FastqReader( FileOrSequence ):
       fin = FileOrSequence.__iter__( self )
       while True:
          id1  = next(fin)
-         seq  = next(fin)
+         seq  = next(fin).encode()
          id2  = next(fin)
-         qual = next(fin)
-         if qual == "":
+         qual = next(fin).encode()
+         if qual == b"":
             if id1 != "":
                warnings.warn( "Number of lines in FASTQ file is not "
                   "a multiple of 4. Discarding the last, "
                   "incomplete record" )
             break
             
-         if not qual.endswith( "\n" ):
-            qual += "\n"
+         if not qual.endswith( b"\n" ):
+            qual += b"\n"
          if not id1.startswith( "@" ):
             raise ValueError( "Primary ID line in FASTQ file does"
                "not start with '@'. Either this is not FASTQ data or the parser got out of sync." )

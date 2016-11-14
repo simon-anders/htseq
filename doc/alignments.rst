@@ -42,8 +42,11 @@ If you have a SAM file (e.g., from BWA or BowTie), you can call it with:
 
 .. doctest::
 
-   >>> count_in_chroms( HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" ) ) #doctest:+ELLIPSIS
-   defaultdict(..., {'XVI': 1509, 'V': 999, ..., 'XV': 2133})
+   >>> sorted(count_in_chroms( HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" ) ).items()) #doctest:+NORMALIZE_WHITESPACE
+   [('2-micron', 46), ('I', 362), ('II', 1724), ('III', 365), ('IV', 3015),
+    ('IX', 648), ('V', 999), ('VI', 332), ('VII', 2316), ('VIII', 932),
+    ('X', 1129), ('XI', 1170), ('XII', 4215), ('XIII', 1471), ('XIV', 1297),
+    ('XV', 2133), ('XVI', 1509)]
 
 If, however, you have done your alignment with Eland from the SolexaPipeline, which
 uses the "Solexa export" format, you can use the same function, only using :class:`SolexaExportReader` 
@@ -254,9 +257,9 @@ object you typically never call the constructor yourself.
    A typical use may be::
    
       for first, second in HTSeq.SAM_Reader( "some_paired_end_data.sam" ):
-          print "Pair, consisting of"
-          print "   ", first
-          print "   ", second
+          print("Pair, consisting of")
+          print("   ", first)
+          print("   ", second)
           
    Here, ``first`` and ``second`` are :class:`SAM_Alignment` objects, representing two reads
    of the same cluster. For this to work, the SAM file has to be arranged such that
@@ -349,14 +352,14 @@ objects in the list.
       
       .. doctest::
       
-          >>> HTSeq.cigar_operation_names    #doctest:+NORMALIZE_WHITESPACE
-          {'D': 'deleted',
-           'I': 'inserted',
-           'H': 'hard-clipped',
-           'M': 'matched',
-           'N': 'skipped',
-           'P': 'padded',
-           'S': 'soft-clipped'}
+          >>> sorted(HTSeq.cigar_operation_names.items())    #doctest:+NORMALIZE_WHITESPACE
+          [('D', 'deleted'),
+           ('H', 'hard-clipped'),
+           ('I', 'inserted'),
+           ('M', 'matched'),
+           ('N', 'skipped'),
+           ('P', 'padded'),
+           ('S', 'soft-clipped')]
            
    .. attribute:: CigarOperation.size
    

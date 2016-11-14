@@ -24,7 +24,7 @@ For example, if you have data in a tab-separated file as follows:
 .. doctest::
 
    >>> for line in open( "feature_list.txt" ):  #doctest:+NORMALIZE_WHITESPACE
-   ...     print line,
+   ...     print(line)
    chr2  100	300	+	"gene A"
    chr2	200	400	-	"gene B"
    chr3	150	270	+	"gene C"
@@ -41,9 +41,9 @@ Then, you could load this information as follows::
 Now, to see whether there is a feature at a given :class:`GenomicPosition`, you just query the
 genomic array::
 
-   >>> print genes[ HTSeq.GenomicPosition( "chr3", 100, "+" ) ]
+   >>> print(genes[ HTSeq.GenomicPosition( "chr3", 100, "+" ) ])
    None
-   >>> print genes[ HTSeq.GenomicPosition( "chr3", 200, "+" ) ]
+   >>> print(genes[ HTSeq.GenomicPosition( "chr3", 200, "+" ) ])
    gene C
 
 See :class:`GenomicArray` and :class:`GenomicArrayOfSets` for more sophisticated use.

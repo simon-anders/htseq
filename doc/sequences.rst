@@ -22,7 +22,7 @@ Instantiation
 
    Pass the DNA sequence and, optionally, a name or ID to the constructor::
    
-      >>> myseq = HTSeq.Sequence( "ACCGTTAC", "my_sequence" )
+      >>> myseq = HTSeq.Sequence( b"ACCGTTAC", "my_sequence" )
    
    (If the name is omitted, the default ``"unnamed"`` is used.)
    
@@ -34,7 +34,7 @@ Attributes
    The information can be accessed via the attributes **seq** and **name**, which are strings::   
    
       >>> myseq.seq
-      'ACCGTTAC'
+      b'ACCGTTAC'
       >>> myseq.name
       'my_sequence'
 
@@ -50,7 +50,7 @@ Representation and string conversion
 
    The **__str__** method returns just the sequence:
 
-      >>> print myseq
+      >>> print(myseq)
       ACCGTTAC
       
    Note that the length of a sequence is the number of bases::
@@ -65,7 +65,7 @@ Subsetting
       >>> myseq2.name
       'my_sequence[part]'
       >>> myseq2.seq
-      'GT'
+      b'GT'
    
    (Note that ``"[part]"`` is appended to the name of the subsetted copy.)
    
@@ -75,13 +75,13 @@ Reverse complement
 
 ::   
 
-      >>> print myseq.get_reverse_complement()
+      >>> print(myseq.get_reverse_complement())
       GTAACGGT
       >>> rc = myseq.get_reverse_complement()
       >>> rc.name
       'revcomp_of_my_sequence'
       >>> rc.seq
-      'GTAACGGT'
+      b'GTAACGGT'
 
 Writing to FASTA file
    
@@ -162,9 +162,9 @@ Trimming reads
    
    Here is an example::
    
-      >>> seq2 = HTSeq.Sequence( "ACGTAAAGCGGTACGGGGGG" )
-      >>> left_seq = HTSeq.Sequence( "CCCACG" )
-      >>> print seq2.trim_left_end( left_seq )
+      >>> seq2 = HTSeq.Sequence( b"ACGTAAAGCGGTACGGGGGG" )
+      >>> left_seq = HTSeq.Sequence( b"CCCACG" )
+      >>> print(seq2.trim_left_end( left_seq ))
       TAAAGCGGTACGGGGGG
       
    The right end of the pattern ("ACG") matched the left end of the sequence, and
@@ -173,12 +173,12 @@ Trimming reads
    The optional argument ``mismatch_prop`` is the number of allowed mismatches as
    proportion of the length of the match::
 
-      >>> right_seq = HTSeq.Sequence( "GGGTGGG" )
-      >>> print seq2.trim_right_end( right_seq )
+      >>> right_seq = HTSeq.Sequence( b"GGGTGGG" )
+      >>> print(seq2.trim_right_end( right_seq ))
       ACGTAAAGCGGTACGGG
-      >>> print seq2.trim_right_end( right_seq, 1/6. )
+      >>> print(seq2.trim_right_end( right_seq, 1/6. ))
       ACGTAAAGCGGTAC
-      >>> print seq2.trim_right_end( right_seq, 1/7. )
+      >>> print(seq2.trim_right_end( right_seq, 1/7. ))
       ACGTAAAGCGGTACGGG
       
    Here, if we allow at least one mismatch per six bases, the whole pattern gets cut off.
@@ -204,7 +204,7 @@ Instantiation
    A ``SequenceWithQualities`` can be instantiated as a ``Sequence``, but now with
    a third argument, the quality string::
 
-      >>> myread = HTSeq.SequenceWithQualities( "ACGACTGACC", "my_read", "IICGAB##(!" )
+      >>> myread = HTSeq.SequenceWithQualities( b"ACGACTGACC", "my_read", b"IICGAB##(!" )
    
    The quality string is interpreted as Sanger-encoded string of Phred values, as
    defined in the `FASTQ format specification`_, i.e., each letter in the quality
@@ -214,9 +214,9 @@ Instantiation
    The Phred scores can then be found in the slot ``qual``::
 
       >>> myread.qualstr
-      'IICGAB##(!'
+      b'IICGAB##(!'
       >>> myread.qual
-      array([40, 40, 34, 38, 32, 33,  2,  2,  7,  0])
+      array([40, 40, 34, 38, 32, 33,  2,  2,  7,  0], dtype=uint8)
       
    If the quality string follows the `Solexa FASTQ` specification, the value to be
    subtracted is not 33 but 64. If you pass a quality string in this format, set
@@ -250,11 +250,11 @@ Attributes
       The quality string according to Sanger Phred encoding. In case the quality was
       originally given in ``solexa`` or ``solexa-old`` format, it is converted::
       
-         >>> read2 = HTSeq.SequenceWithQualities( "ACGACTGACC", "my_read", "hhgddaZVFF", "solexa" )
+         >>> read2 = HTSeq.SequenceWithQualities( b"ACGACTGACC", "my_read", b"hhgddaZVFF", "solexa" )
          >>> read2.qual
-         array([40, 40, 39, 36, 36, 33, 26, 22,  6,  6])
+         array([40, 40, 39, 36, 36, 33, 26, 22,  6,  6], dtype=uint8)
          >>> read2.qualstr
-         "IIHEEB;7''"
+         b"IIHEEB;7''"
      
 Writing to FASTQ file
    
@@ -330,7 +330,7 @@ Example 1
    each sequence, e.g.::
    
       >>> for s in HTSeq.FastaReader( "fastaEx.fa" ):
-      ...     print "Sequence '%s' has length %d." % ( s.name, len(s) )
+      ...     print("Sequence '%s' has length %d." % ( s.name, len(s) ))
       Sequence 'sequence1' has length 72.
       Sequence 'sequence2' has length 70.
       
@@ -340,7 +340,7 @@ Example 2
    
       >>> sequences = dict( (s.name, s) for s in HTSeq.FastaReader("fastaEx.fa") )
       >>> sequences["sequence1"].seq
-      'AGTACGTAGTCGCTGCTGCTACGGGCGCTAGCTAGTACGTCACGACGTAGATGCTAGCTGACTAAACGATGC'
+      b'AGTACGTAGTCGCTGCTGCTACGGGCGCTAGCTAGTACGTCACGACGTAGATGCTAGCTGACTAAACGATGC'
 
 
 ``FastqReader``

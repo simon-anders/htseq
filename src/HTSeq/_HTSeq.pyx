@@ -221,17 +221,17 @@ cdef class GenomicInterval:
       else: 
          return iv.end > self.start
       
-   def xrange( GenomicInterval self, long int step = 1 ):
+   def range( GenomicInterval self, long int step = 1 ):
       """Generate an iterator over the GenomicPositions covered by the interval,
       running from start to end.
       """
-      return _HTSeq_internal.GenomicInterval_xrange( self, step )
+      return _HTSeq_internal.GenomicInterval_range( self, step )
 
-   def xrange_d( GenomicInterval self, long int step = 1 ):
+   def range_d( GenomicInterval self, long int step = 1 ):
       """Generate an iterator over the GenomicPositions covered by the interval.
       running from start_d to end_d.
       """
-      return _HTSeq_internal.GenomicInterval_xranged( self, step )
+      return _HTSeq_internal.GenomicInterval_ranged( self, step )
       
    cpdef extend_to_include( GenomicInterval self, GenomicInterval iv ):
       """Extend the interval such that it includes iv."""
@@ -613,16 +613,7 @@ def _GenomicArray_unpickle( stranded, typecode, chrom_vectors ):
    
    
 def _make_translation_table_for_complementation( ):
-   t = [ chr(i) for i in xrange(256) ]
-   t[ ord('A') ] = 'T'
-   t[ ord('T') ] = 'A'
-   t[ ord('C') ] = 'G'
-   t[ ord('G') ] = 'C'
-   t[ ord('a') ] = 't'
-   t[ ord('t') ] = 'a'
-   t[ ord('c') ] = 'g'
-   t[ ord('g') ] = 'c'
-   return ''.join( t ).encode()
+   return bytes.maketrans(b'ACGTacgt', b'TGCAtgca')
    
 cdef bytes _translation_table_for_complementation = _make_translation_table_for_complementation( )
 
@@ -649,7 +640,7 @@ cdef class Sequence( object ):
          "revcomp_of_" + self.name )
          
    def __str__( self ):
-      return self.seq
+      return self.seq.decode()
       
    def __repr__( self ):
       return "<%s object '%s' (length %d)>" % ( 
@@ -672,7 +663,7 @@ cdef class Sequence( object ):
          fasta_file.write( ">%s\n" % self.name )
       i = 0
       while i*70 < len(self.seq):
-         fasta_file.write( self.seq[ i*70 : (i+1)*70 ] + "\n" )
+         fasta_file.write( self.seq[ i*70 : (i+1)*70 ].decode() + "\n" )
          i += 1
          
    cpdef object add_bases_to_count_array( Sequence self, numpy.ndarray count_array_ ):
@@ -688,7 +679,7 @@ cdef class Sequence( object ):
       cdef numpy.npy_intp i
       cdef char b
       cdef char* seq_cstr = self.seq
-      for i in xrange( seq_length ):
+      for i in range( seq_length ):
          b = seq_cstr[i]
          if b in [b'A', b'a']:
             count_array[ i, 0 ] += 1
@@ -718,9 +709,9 @@ cdef class Sequence( object ):
       cdef int match = 0
       cdef int i, j
       cdef int num_mismatches
-      for i in xrange( 1, minlen+1 ):
+      for i in range( 1, minlen+1 ):
          num_mismatches = 0
-         for j in xrange( i ):
+         for j in range( i ):
             if seq_cstr[ j ] != pat_cstr[ patlen - i + j ]:
                num_mismatches += 1
                if num_mismatches > mismatch_prop * i:
@@ -742,9 +733,9 @@ cdef class Sequence( object ):
       cdef int match = 0
       cdef int i, j
       cdef int num_mismatches
-      for i in xrange( 1, minlen+1 ):
+      for i in range( 1, minlen+1 ):
          num_mismatches = 0
-         for j in xrange( i ):
+         for j in range( i ):
             if seq_cstr[ seqlen - i + j ] != pat_cstr[ j ]:
                num_mismatches += 1
                if num_mismatches > mismatch_prop * i:
@@ -786,17 +777,17 @@ cdef class SequenceWithQualities( Sequence ):
          raise ValueError, "Quality string missing."
       if seq_len != len( self._qualstr ):
          raise ValueError, "Quality string has not the same length as sequence."
-      cdef numpy.ndarray[ numpy.uint8_t, ndim=1 ] qualarr = numpy.empty( ( seq_len, ), numpy.int )
+      cdef numpy.ndarray[ numpy.uint8_t, ndim=1 ] qualarr = numpy.empty( ( seq_len, ), numpy.uint8 )
       cdef int i
       cdef char * qualstr = self._qualstr
       if self._qualscale == "phred":
-         for i in xrange( seq_len ):
+         for i in range( seq_len ):
             qualarr[i] = qualstr[i] - 33
       elif self._qualscale == "solexa":
-         for i in xrange( seq_len ):
+         for i in range( seq_len ):
             qualarr[i] = qualstr[i] - 64
       elif self._qualscale == "solexa-old":
-         for i in xrange( seq_len ):
+         for i in range( seq_len ):
             qualarr[i] = 10 * math.log10( 1 + 10 ** ( qualstr[i] - 64 ) / 10.0 )
       else:
          raise ValueError, "Illegal quality scale '%s'." % self._qualscale
@@ -850,7 +841,7 @@ cdef class SequenceWithQualities( Sequence ):
             if self._qualarr is None:
                self._fill_qual_arr()
             qual_array = self._qualarr               
-            for i in xrange( seqlen ):
+            for i in range( seqlen ):
                qualstr_phred_cstr[i] = 33 + qual_array[i]            
       return self._qualstr_phred
       
@@ -860,9 +851,9 @@ cdef class SequenceWithQualities( Sequence ):
          fastq_file.write( "@%s %s\n" % ( self.name, self.descr ) )
       else:
          fastq_file.write( "@%s\n" % self.name )
-      fastq_file.write( self.seq + "\n" )
+      fastq_file.write( self.seq.decode() + "\n" )
       fastq_file.write( "+\n" )
-      fastq_file.write( self.qualstr + "\n" )
+      fastq_file.write( self.qualstr.decode() + "\n" )
 
    def get_fastq_str( self, bint convert_to_phred=False ):
       sio = cStringIO.StringIO()
@@ -896,7 +887,7 @@ cdef class SequenceWithQualities( Sequence ):
       
       cdef numpy.npy_intp i
       cdef numpy.npy_int q
-      for i in xrange( seq_length ):
+      for i in range( seq_length ):
          q = qual_array[i]
          if( q >= qual_size ):
             raise ValueError, "Too large quality value encountered."
@@ -921,9 +912,9 @@ cdef class SequenceWithQualities( Sequence ):
       if self._qualarr is None:
          self._fill_qual_arr()   
       cdef numpy.ndarray[ numpy.uint8_t, ndim=1 ] qual_array = self._qualarr
-      for i in xrange( 1, minlen+1 ):
+      for i in range( 1, minlen+1 ):
          num_mismatches = 0
-         for j in xrange( i ):
+         for j in range( i ):
             if seq_cstr[ j ] != pat_cstr[ patlen - i + j ]:
                sum_mm_qual += qual_array[ j ]
                if sum_mm_qual > max_mm_qual:
@@ -949,9 +940,9 @@ cdef class SequenceWithQualities( Sequence ):
       if self._qualarr is None:
          self._fill_qual_arr()   
       cdef numpy.ndarray[ numpy.uint8_t, ndim=1 ] qual_array = self._qualarr
-      for i in xrange( 1, minlen+1 ):
+      for i in range( 1, minlen+1 ):
          sum_mm_qual = 0
-         for j in xrange( i ):
+         for j in range( i ):
             if seq_cstr[ seqlen - i + j ] != pat_cstr[ j ]:
                sum_mm_qual += qual_array[ seqlen - i + j ]
                if sum_mm_qual > max_mm_qual:
@@ -1122,7 +1113,7 @@ cpdef list parse_cigar( str cigar_string, int ref_left = 0, str chrom = "", str 
    if split_cigar[-1] != '' or len(split_cigar) % 2 != 1:
       raise ValueError, "Illegal CIGAR string '%s'" % cigar_string
    cl = []
-   for i in xrange( len(split_cigar) // 2 ):
+   for i in range( len(split_cigar) // 2 ):
       try:
          size = int( split_cigar[2*i] )
       except ValueError:

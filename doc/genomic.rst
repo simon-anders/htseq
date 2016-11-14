@@ -44,7 +44,7 @@ Representation and string conversion
    interval, the ``__repr__`` method is a bit more verbose::
    
       >>> iv = HTSeq.GenomicInterval( "chr3", 123203, 127245, "+" )
-      >>> print iv
+      >>> print(iv)
       chr3:[123203,127245)/+
       >>> iv
       <GenomicInterval object 'chr3', [123203,127245), strand '+'>
@@ -230,15 +230,15 @@ Attributes
       .. doctest::
       
          >>> ga = HTSeq.GenomicArray( [ "chr1", "chr2" ], stranded=False )
-         >>> ga.chrom_vectors #doctest:+NORMALIZE_WHITESPACE
-         {'chr2': {'.': <ChromVector object, chr2:[0,Inf)/., step>}, 
-          'chr1': {'.': <ChromVector object, chr1:[0,Inf)/., step>}}
+         >>> sorted(ga.chrom_vectors.items()) #doctest:+NORMALIZE_WHITESPACE
+         [('chr1', {'.': <ChromVector object, chr1:[0,Inf)/., step>}),
+          ('chr2', {'.': <ChromVector object, chr2:[0,Inf)/., step>})] 
          >>> ga = HTSeq.GenomicArray( [ "chr1", "chr2" ], stranded=True )
-         >>> ga.chrom_vectors  #doctest:+NORMALIZE_WHITESPACE
-         {'chr2': {'+': <ChromVector object, chr2:[0,Inf)/+, step>, 
-                   '-': <ChromVector object, chr2:[0,Inf)/-, step>}, 
-          'chr1': {'+': <ChromVector object, chr1:[0,Inf)/+, step>, 
-                   '-': <ChromVector object, chr1:[0,Inf)/-, step>}}
+         >>> sorted([(st[0], sorted(st[1].items())) for st in ga.chrom_vectors.items()])  #doctest:+NORMALIZE_WHITESPACE
+         [('chr1', [('+', <ChromVector object, chr1:[0,Inf)/+, step>), 
+                    ('-', <ChromVector object, chr1:[0,Inf)/-, step>)]),
+          ('chr2', [('+', <ChromVector object, chr2:[0,Inf)/+, step>), 
+                    ('-', <ChromVector object, chr2:[0,Inf)/-, step>)])]
 
    .. attribute:: GenomicArray.auto_add_chroms
    
@@ -277,7 +277,7 @@ Data access
    through them with::
    
       >>> for iv, value in ga[ iv ].steps():
-      ...    print iv, value
+      ...    print(iv, value)
       chr1:[250,400)/+ 20.0
       chr1:[400,450)/+ 0.0
       
@@ -350,12 +350,12 @@ one object. The __iadd__ method is overloaded to add elements to the sets:
    >>> gas = HTSeq.GenomicArrayOfSets( ["chr1", "chr2"], stranded=False )
    >>> gas[ivA] += "gene A"
    >>> gas[ivB] += "gene B"
-   >>> list( gas[ HTSeq.GenomicInterval( "chr1", 0, 500, "." ) ].steps() ) #doctest:+NORMALIZE_WHITESPACE
-   [(<GenomicInterval object 'chr1', [0,100), strand '.'>,   set([])), 
-    (<GenomicInterval object 'chr1', [100,200), strand '.'>, set(['gene A'])), 
-    (<GenomicInterval object 'chr1', [200,300), strand '.'>, set(['gene A', 'gene B'])), 
-    (<GenomicInterval object 'chr1', [300,400), strand '.'>, set(['gene B'])), 
-    (<GenomicInterval object 'chr1', [400,500), strand '.'>, set([]))]
+   >>> [(st[0], sorted(st[1])) for st in gas[ HTSeq.GenomicInterval( "chr1", 0, 500, "." ) ].steps()] #doctest:+NORMALIZE_WHITESPACE
+   [(<GenomicInterval object 'chr1', [0,100), strand '.'>,   []), 
+    (<GenomicInterval object 'chr1', [100,200), strand '.'>, ['gene A']), 
+    (<GenomicInterval object 'chr1', [200,300), strand '.'>, ['gene A', 'gene B']), 
+    (<GenomicInterval object 'chr1', [300,400), strand '.'>, ['gene B']), 
+    (<GenomicInterval object 'chr1', [400,500), strand '.'>, [])]
 
 .. class:: GenomicArrayOfSets( chroms, stranded = True )
 
