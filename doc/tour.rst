@@ -233,6 +233,8 @@ described above
    'HWI-EAS225:1:11:76:63#0/1'
    >>> aln.read.seq
    b'ACTGTAAATACTTTTCAGAAGAGATTTGTAGAATCC'
+   >>> aln.read.qualstr
+   b'BBBB@B?AB?>BAAA@A@>=?=?9=?=;9>988<::'
    >>> aln.read.qual
    array([33, 33, 33, 33, 31, 33, 30, 32, 33, 30, 29, 33, 32, 32, 32, 31, 32,
           31, 29, 28, 30, 28, 30, 24, 28, 30, 28, 26, 24, 29, 24, 23, 23, 27,

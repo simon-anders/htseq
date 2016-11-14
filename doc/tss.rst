@@ -239,17 +239,17 @@ set variable that we created above) and for each TSS position, loop through
 all aligned reads close to it. Here is this double loop::
 
    >>> profileB = numpy.zeros( 2*halfwinwidth, dtype='i' )   
-   ... for p in tsspos:
-   ...    window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
-   ...    for almnt in sortedbamfile[ window ]:
-   ...       almnt.iv.length = fragmentsize
-   ...       if p.strand == "+":
-   ...          start_in_window = almnt.iv.start - p.pos + halfwinwidth 
-   ...          end_in_window   = almnt.iv.end   - p.pos + halfwinwidth 
-   ...       else:
-   ...          start_in_window = p.pos + halfwinwidth - almnt.iv.end
-   ...          end_in_window   = p.pos + halfwinwidth - almnt.iv.start
-   ...       profileB[ start_in_window : end_in_window ] += 1
+   >>> for p in tsspos:
+   ...     window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
+   ...     for almnt in sortedbamfile[ window ]:
+   ...         almnt.iv.length = fragmentsize
+   ...         if p.strand == "+":
+   ...             start_in_window = almnt.iv.start - p.pos + halfwinwidth
+   ...             end_in_window   = almnt.iv.end   - p.pos + halfwinwidth
+   ...         else:
+   ...             start_in_window = p.pos + halfwinwidth - almnt.iv.end
+   ...             end_in_window   = p.pos + halfwinwidth - almnt.iv.start
+   ...         profileB[ start_in_window : end_in_window ] += 1
 
 This loop now runs a good deal faster than our first attempt, and has a much
 smaller memory footprint.

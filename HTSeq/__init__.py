@@ -379,18 +379,18 @@ class FastqReader( FileOrSequence ):
       fin = FileOrSequence.__iter__( self )
       while True:
          id1  = next(fin)
-         seq  = next(fin).encode()
+         seq  = next(fin)
          id2  = next(fin)
-         qual = next(fin).encode()
-         if qual == b"":
+         qual = next(fin)
+         if qual == "":
             if id1 != "":
                warnings.warn( "Number of lines in FASTQ file is not "
                   "a multiple of 4. Discarding the last, "
                   "incomplete record" )
             break
             
-         if not qual.endswith( b"\n" ):
-            qual += b"\n"
+         if not qual.endswith( "\n" ):
+            qual += "\n"
          if not id1.startswith( "@" ):
             raise ValueError( "Primary ID line in FASTQ file does"
                "not start with '@'. Either this is not FASTQ data or the parser got out of sync." )
@@ -401,8 +401,8 @@ class FastqReader( FileOrSequence ):
             raise ValueError( "Primary and secondary ID line in FASTQ"
                "disagree." )
                
-         yield SequenceWithQualities( seq[:-1], id1[1:-1], qual[:-1], 
-            self.qual_scale )
+         yield SequenceWithQualities( seq[:-1].encode(), id1[1:-1],
+                                      qual[:-1].encode(), self.qual_scale )
 
 class BowtieReader( FileOrSequence ):
    """A BowtieFile object is associated with a Bowtie output file that 

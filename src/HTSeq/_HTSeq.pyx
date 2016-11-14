@@ -1366,10 +1366,10 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
          cigarlist = parse_cigar( cigar, posint, rname, strand )
          iv = GenomicInterval( rname, posint, cigarlist[-1].ref_iv.end, strand )   
             
-      if qual != b"*":
-         swq = SequenceWithQualities( seq.upper().encode(), qname, seq.upper().encode() )
+      if qual != "*":
+         swq = SequenceWithQualities( seq.upper().encode(), qname, qual.upper().encode() )
       else:
-         swq = SequenceWithQualities( seq.upper().encode(), qname, "", "noquals" )
+         swq = SequenceWithQualities( seq.upper().encode(), qname, b"", "noquals" )
 
       alnmt = SAM_Alignment( swq, iv )
       alnmt.flag = flagint   
