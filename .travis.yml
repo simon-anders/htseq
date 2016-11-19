@@ -1,0 +1,26 @@
+language: python
+
+python:
+  - "3.2"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+
+env:
+ - CC=gcc-5 SWIG=swig3.0
+
+addons:
+  apt:
+    sources:
+     - ubuntu-toolchain-r-test
+    packages:
+     - gcc-5
+     - g++-5
+
+before_install:
+  - sudo add-apt-repository ppa:rosmo/swig3.0.7 -y
+  - sudo apt-get -qq update
+  - sudo apt-get install -y swig3.0
+ 
+script:
+- bash .travis_compile.sh
