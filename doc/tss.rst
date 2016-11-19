@@ -311,7 +311,7 @@ giving its midpoint, i.e., the actual TSS position, as follows::
    ...       tssarray[ window ] += p
 
    >>> len( list( tssarray.chrom_vectors["1"]["."].steps() ) )
-   30089
+   30085
 
 
 As before, ``p`` is the position of the TSS, and ``window`` is the interval 
