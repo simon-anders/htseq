@@ -138,9 +138,8 @@ If you have `matplotlib`_ installed, you can plot these numbers.
 
 .. doctest::
 
-   >>> from matplotlib import pyplot      
-   >>> pyplot.plot( qualsum / nreads )    #doctest:+ELLIPSIS
-   [<matplotlib.lines.Line2D object at 0x...>]
+   >>> from matplotlib import pyplot      #doctest:+SKIP
+   >>> pyplot.plot( qualsum / nreads )    #doctest:+SKIP
    >>> pyplot.show()                      #doctest:+SKIP 
 
 .. image:: qualplot.png

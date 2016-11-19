@@ -118,7 +118,7 @@ With matplotlib, we can see that this vector is, in effect, not all zero:
 
 .. doctest::
 
-   >>> from matplotlib import pyplot
+   >>> from matplotlib import pyplot #doctest: +SKIP
    >>> pyplot.plot( wincvg )    #doctest: +SKIP
    >>> pyplot.show()            #doctest: +SKIP
 
