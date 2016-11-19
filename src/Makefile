@@ -1,5 +1,6 @@
 CYTHON=cython
-SWIG=swig
+SWIG=${SWIG=swig}
+
 
 all: StepVector_wrap.cxx ../HTSeq/StepVector.py _HTSeq.c
 
