@@ -21,6 +21,11 @@ before_install:
   - sudo add-apt-repository ppa:rosmo/swig3.0.7 -y
   - sudo apt-get -qq update
   - sudo apt-get install -y swig3.0
+
+install:
+  - pip install Cython
+  - pip install numpy
+  - bash ./build_it
  
 script:
-- bash .travis_compile.sh
+  - python test/test.py
