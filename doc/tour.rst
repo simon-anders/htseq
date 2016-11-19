@@ -374,8 +374,7 @@ We can plot an excerpt of this with:
 
 .. doctest::
 
-   >>> pyplot.plot( list( cvg[ HTSeq.GenomicInterval( "III", 200000, 500000, "+" ) ] ) )     #doctest:+ELLIPSIS
-   [<matplotlib.lines.Line2D object at 0x...>]
+   >>> pyplot.plot( list( cvg[ HTSeq.GenomicInterval( "III", 200000, 500000, "+" ) ] ) )     #doctest:+SKIP
    
 However, a proper genome browser gives a better impression of the data. The following commands
 write two BedGraph (Wiggle) files, one for the plus and one for the minus strands::
