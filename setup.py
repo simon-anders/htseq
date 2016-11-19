@@ -51,7 +51,7 @@ setup( name = 'HTSeq',
           'Operating System :: POSIX',
           'Programming Language :: Python'
        ],
-       requires = [ 'numpy', 'python (>=2.5, <3.0)' ],
+       requires = [ 'numpy', 'python (>=3.0)' ],
        
        py_modules = [ 
           'HTSeq._HTSeq_internal', 
