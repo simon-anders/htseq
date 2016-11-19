@@ -25,6 +25,7 @@ before_install:
 install:
   - pip install Cython
   - pip install numpy
+  - pip install pysam
   - bash ./build_it
  
 script:
