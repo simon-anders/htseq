@@ -656,15 +656,26 @@ cdef class Sequence( object ):
          new_name = self.name + "[part]"
       return Sequence( self.seq[ item ], new_name )
    
-   def write_to_fasta_file( self, fasta_file ):
+   def write_to_fasta_file( self, fasta_file, characters_per_line=70 ):
+      """Write sequence to file in FASTA format.
+
+      Arguments:
+              - fasta_file (file handle): destination file
+                  - characters_per_line (int >=0): if 0, write the whole sequence on a single line. Otherwise, break into several lines if the sequence is long enough.
+
+      """
       if self.descr is not None:
          fasta_file.write( ">%s %s\n" % ( self.name, self.descr ) )
       else:
          fasta_file.write( ">%s\n" % self.name )
-      i = 0
-      while i*70 < len(self.seq):
-         fasta_file.write( self.seq[ i*70 : (i+1)*70 ].decode() + "\n" )
-         i += 1
+
+      if characters_per_line == 0:
+         fasta_file.write( self.seq.decode() + "\n" )
+      else:
+         i = 0
+         while i*characters_per_line < len(self.seq):
+            fasta_file.write( self.seq[ i*characters_per_line : (i+1)*characters_per_line ].decode() + "\n" )
+            i += 1
          
    cpdef object add_bases_to_count_array( Sequence self, numpy.ndarray count_array_ ):
       
