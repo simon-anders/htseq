@@ -1,4 +1,4 @@
-language: python
+lllanguage: python
 
 python:
   - 2.7
@@ -19,14 +19,33 @@ addons:
      - g++-5
 
 before_install:
-  - sudo add-apt-repository ppa:rosmo/swig3.0.7 -y
-  - sudo apt-get -qq update
-  - sudo apt-get install -y swig3.0
-  - virtualenv -p python .venv
-  - source .venv/bin/activate
-  - pip install numpy cython
+#  - sudo add-apt-repository ppa:rosmo/swig3.0.7 -y
+#  - sudo apt-get -qq update
+#  - sudo apt-get install -y swig3.0
+#  - virtualenv -p python .venv
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+  # Add conda forge
+  - conda config --add channels conda-forge 
+
+  - conda create -q -n htseq-dependencies python=$TRAVIS_PYTHON_VERSION swig=3.0.12 cython flake8 numpy
+  - source activate htseq-dependencies
+
+#  - source .venv/bin/activate
+#  - pip install numpy cython flake8
   - cd src ; make
   - python setup.py install
 
 script:
   - python setup.py test
+  - cd "$TRAVIS_BUILD_DIR" && ./scripts/flake8.sh
