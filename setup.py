@@ -64,7 +64,8 @@ setup( name = 'HTSeq',
        scripts = [
           'scripts/htseq-qa',
           'scripts/htseq-count',
-       ]
+       ],
+       test_suite="tests"
      )
 
 
