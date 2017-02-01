@@ -49,6 +49,7 @@ before_install:
 
 #  - source .venv/bin/activate
 #  - pip install numpy cython flake8
+  - ./build_it
   - cd src ; make ; cd ..
   - python setup.py install
 
