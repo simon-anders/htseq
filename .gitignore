@@ -1,0 +1,13 @@
+/.venv*
+*.pyc
+/build
+/dist
+*.egg-info
+
+HTSeq/StepVector.py
+HTSeq/_HTSeq.so
+HTSeq/_StepVector.so
+HTSeq/_version.py
+src/StepVector_wrap.cxx
+src/_HTSeq.c
+
