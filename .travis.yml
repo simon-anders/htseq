@@ -23,7 +23,7 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y swig3.0
   - "virtualenv -p python .venv ; pip install numpy cython"
-  - "source .venv_py/bin/activate ; cd src ; make ; cd .. ; python setup.py install"
+  - "source .venv/bin/activate ; cd src ; make ; cd .. ; python setup.py install"
 
 script:
   - python setup.py test
