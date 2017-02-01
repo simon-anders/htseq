@@ -1,14 +1,18 @@
-lllanguage: python
+dist: trusty
+
+sudo: required
+
+notifications:
+  email: false
+
+language: python
 
 python:
   - 2.7
-#  - "3.2"
-#  - "3.3"
-#  - "3.4"
-#  - "3.5"
 
 env:
  - CC=gcc-5 SWIG=swig3.0
+ - CC=gcc SWIG=swig3.0
 
 addons:
   apt:
@@ -19,40 +23,56 @@ addons:
      - g++-5
 
 before_install:
-#  - sudo add-apt-repository ppa:rosmo/swig3.0.7 -y
-#  - sudo apt-get -qq update
-#  - sudo apt-get install -y swig3.0
-#  - virtualenv -p python .venv
-  - python --version
-  - export PYTHON_VERSION=$(python --version 2>&1 | grep -o -E ' ([^ \.]+.[^\.]+)')
-  - echo "-> "$PYTHON_VERSION
+  - sudo add-apt-repository ppa:nschloe/swig-backports -y
+  - sudo apt-get -qq update
+  - sudo apt-get install -y swig3.0
 
-  - export PYTHON_VERSION="2.7"
-  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-  #- if [[ "$PYTHON_VERSION" == "2.7" ]]; then
-  #    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-  #  else
-  #    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  #  fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
-  # Add conda forge
-  - conda config --add channels conda-forge 
-
-  - conda create -q -n htseq-dependencies python=2.7 swig=3.0.12 cython flake8 numpy
-  - source activate htseq-dependencies
-
-#  - source .venv/bin/activate
-#  - pip install numpy cython flake8
-  - ./build_it
-  - cd src ; make ; cd ..
-  - python setup.py install
-
+install:
+  - pip install Cython
+  - pip install numpy
+  - pip install pysam
+  - pip install matplotlib
+  - bash ./build_it
+ 
 script:
-  - python setup.py test
-  - cd "$TRAVIS_BUILD_DIR" && ./scripts/flake8.sh
+  - python test/test.py
+
+# CODE FROM YOURI
+#before_install:
+##  - sudo add-apt-repository ppa:rosmo/swig3.0.7 -y
+##  - sudo apt-get -qq update
+##  - sudo apt-get install -y swig3.0
+##  - virtualenv -p python .venv
+#  - python --version
+#  - export PYTHON_VERSION=$(python --version 2>&1 | grep -o -E ' ([^ \.]+.[^\.]+)')
+#  - echo "-> "$PYTHON_VERSION
+#
+#  - export PYTHON_VERSION="2.7"
+#  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+#  #- if [[ "$PYTHON_VERSION" == "2.7" ]]; then
+#  #    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+#  #  else
+#  #    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+#  #  fi
+#  - bash miniconda.sh -b -p $HOME/miniconda
+#  - export PATH="$HOME/miniconda/bin:$PATH"
+#  - hash -r
+#  - conda config --set always_yes yes --set changeps1 no
+#  - conda update -q conda
+#  # Useful for debugging any issues with conda
+#  - conda info -a
+#  # Add conda forge
+#  - conda config --add channels conda-forge 
+#
+#  - conda create -q -n htseq-dependencies python=2.7 swig=3.0.12 cython flake8 numpy
+#  - source activate htseq-dependencies
+#
+##  - source .venv/bin/activate
+##  - pip install numpy cython flake8
+#  - ./build_it
+#  - cd src ; make ; cd ..
+#  - python setup.py install
+#
+#script:
+#  - python setup.py test
+#  - cd "$TRAVIS_BUILD_DIR" && ./scripts/flake8.sh
