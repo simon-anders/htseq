@@ -22,8 +22,11 @@ before_install:
   - sudo add-apt-repository ppa:rosmo/swig3.0.7 -y
   - sudo apt-get -qq update
   - sudo apt-get install -y swig3.0
-  - "virtualenv -p python .venv ; pip install numpy cython"
-  - "source .venv/bin/activate ; cd src ; make ; cd .. ; python setup.py install"
+  - virtualenv -p python .venv
+  - source .venv/bin/activate
+  - pip install numpy cython
+  - cd src ; make
+  - python setup.py install
 
 script:
   - python setup.py test
