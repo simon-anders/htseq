@@ -138,9 +138,8 @@ If you have `matplotlib`_ installed, you can plot these numbers.
 
 .. doctest::
 
-   >>> from matplotlib import pyplot      
-   >>> pyplot.plot( qualsum / nreads )    #doctest:+ELLIPSIS
-   [<matplotlib.lines.Line2D object at 0x...>]
+   >>> from matplotlib import pyplot      #doctest:+SKIP
+   >>> pyplot.plot( qualsum / nreads )    #doctest:+SKIP
    >>> pyplot.show()                      #doctest:+SKIP 
 
 .. image:: qualplot.png
@@ -373,8 +372,7 @@ We can plot an excerpt of this with:
 
 .. doctest::
 
-   >>> pyplot.plot( list( cvg[ HTSeq.GenomicInterval( "III", 200000, 500000, "+" ) ] ) )     #doctest:+ELLIPSIS
-   [<matplotlib.lines.Line2D object at 0x...>]
+   >>> pyplot.plot( list( cvg[ HTSeq.GenomicInterval( "III", 200000, 500000, "+" ) ] ) )     #doctest:+SKIP
    
 However, a proper genome browser gives a better impression of the data. The following commands
 write two BedGraph (Wiggle) files, one for the plus and one for the minus strands::
@@ -429,10 +427,10 @@ We can query the GenomicArrayOfSets, as before:
 .. doctest::
 
    >>> for iv, val in gas[ read_iv ].steps():
-   ...    print iv, val
-   chr1:[450,510)/. set(['A'])
-   chr1:[510,640)/. set(['A', 'B'])
-   chr1:[640,800)/. set(['B'])
+   ...    print iv, sorted(val)
+   chr1:[450,510)/. ['A']
+   chr1:[510,640)/. ['A', 'B']
+   chr1:[640,800)/. ['B']
 
 The interval has been subdivided into three pieces, corresponding to the three different sets that it overlaps,
 namely first only A, then A and B, and finally only B.
@@ -445,16 +443,16 @@ form the set union of the three reported sets, using Python's set union operator
    >>> fset = set()
    >>> for iv, val in gas[ read_iv ].steps():
    ...    fset |= val
-   >>> print fset
-   set(['A', 'B'])
+   >>> print sorted(fset)
+   ['A', 'B']
 
 Experienced Python developers will recognize that the ``for`` loop can be replaced with a single line
 using a generator comprehension and the ``reduce`` function:
 
 .. doctest::
 
-   >>> reduce( set.union, ( val for iv, val in gas[ read_iv ].steps() ) )
-   set(['A', 'B'])
+   >>> sorted(set.union(*[val for iv, val in gas[ read_iv ].steps()]))
+   ['A', 'B']
 
 We will come back to the constructs in the next section, after a brief detour on how to read GTF files.
 
@@ -540,9 +538,13 @@ The last column (the attributes) is parsed and presented as a dict:
 
 .. doctest::
 
-   >>> feature.attr    #doctest:+NORMALIZE_WHITESPACE
-   {'exon_number': '1', 'gene_id': 'R0030W', 'transcript_name': 'RAF1', 
-   'transcript_id': 'R0030W', 'protein_id': 'R0030W', 'gene_name': 'RAF1'}
+   >>> sorted(feature.attr.items())    #doctest:+NORMALIZE_WHITESPACE
+   [('exon_number', '1'),
+    ('gene_id', 'R0030W'),
+    ('gene_name', 'RAF1'),
+    ('protein_id', 'R0030W'),
+    ('transcript_id', 'R0030W'),
+    ('transcript_name', 'RAF1')] 
    
 The very first attribute in this column is usually some kind of ID, hence it is
 stored in the slot :attr:`name <GenomicFeature.name>`:
@@ -574,11 +576,11 @@ Assume we have a read covering this interval::
 Its left half covers two genes (YCL058C, YCL058W-A), but its right half only
 YCL058C because YCL058W-A end in the middle of the read::
 
-   >>> list( exons[iv].steps() )   #doctest:+NORMALIZE_WHITESPACE
+   >>> [(st[0], sorted(st[1])) for st in exons[iv].steps()]   #doctest:+NORMALIZE_WHITESPACE
    [(<GenomicInterval object 'III', [23850,23925), strand '.'>,
-        set(['YCL058C', 'YCL058W-A'])),
+        ['YCL058C', 'YCL058W-A']),
     (<GenomicInterval object 'III', [23925,23950), strand '.'>, 
-        set(['YCL058C']))]
+        ['YCL058C'])]
 
 Assuming the transcription boundaries in our GTF file to be correct, we may conclude
 that this read is from the gene that appears in both steps and not from the one that
