@@ -10,6 +10,7 @@ language: python
 python:
   - "3.4"
   - "3.5"
+  - "3.6"
 
 env:
  - CC=gcc-5 SWIG=swig3.0 PYSAM_VERSION='pysam==0.9.0'
