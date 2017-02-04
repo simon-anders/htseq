@@ -13,10 +13,13 @@ python:
   - "3.6"
 
 env:
- - CC=gcc-5 SWIG=swig3.0 PYSAM_VERSION='pysam==0.9.0'
- - CC=gcc SWIG=swig3.0 PYSAM_VERSION='pysam==0.9.0'
- - CC=gcc-5 SWIG=swig3.0 PYSAM_VERSION='pysam'
- - CC=gcc SWIG=swig3.0 PYSAM_VERSION='pysam'
+ global:
+  - SWIG=swig3.0
+ matrix:
+  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0'
+  - CC=gcc PYSAM_VERSION='pysam==0.9.0'
+  - CC=gcc-5 PYSAM_VERSION='pysam'
+  - CC=gcc PYSAM_VERSION='pysam'
 
 addons:
   apt:
