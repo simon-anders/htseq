@@ -974,7 +974,8 @@ class BAM_Reader( object ):
            raise TypeError, "Use a HTSeq.GenomicInterval to access regions within .bam-file!"        
         if self.sf is None:
            self.sf = pysam.Samfile( self.filename, "rb" )
-           if not self.sf._hasIndex():
+           # NOTE: pysam 0.9 has renames _hasIndex into has_index
+           if (hasattr(self.sf, '_hasIndex') and (not self.sf._hasIndex())) or (not self.sf.has_index()):
               raise ValueError, "The .bam-file has no index, random-access is disabled!"
         for pa in self.sf.fetch( iv.chrom, iv.start+1, iv.end ):
             yield SAM_Alignment.from_pysam_AlignedRead( pa, self.sf )
