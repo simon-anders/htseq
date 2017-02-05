@@ -2,6 +2,7 @@
 
 import sys
 import os.path
+from Cython.Build import cythonize
 
 try:
     from setuptools import setup, Extension
@@ -57,12 +58,17 @@ setup(name='HTSeq',
          'HTSeq.scripts.qa',
          'HTSeq.scripts.count'
       ],
-      ext_modules=[
-         Extension(
-             'HTSeq._HTSeq',
-             ['src/_HTSeq.c'],
+      ext_modules=cythonize(
+             module_list=['src/HTSeq/_HTSeq.pyx'],
+             working='src',
              include_dirs=[numpy_include_dir],
-             extra_compile_args=['-w']),
+             extra_compile_args=['-w'],
+      ) + [
+         #Extension(
+         #    'HTSeq._HTSeq',
+         #    ['src/_HTSeq.c'],
+         #    include_dirs=[numpy_include_dir],
+         #    extra_compile_args=['-w']),
          Extension(
              'HTSeq._StepVector',
              ['src/StepVector_wrap.cxx'],
