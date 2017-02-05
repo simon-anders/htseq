@@ -1,7 +1,4 @@
 #!/bin/bash
 
 (cd src; make)
-echo __version__ = \"`cat VERSION`\" > HTSeq/_version.py
-
 python3 setup.py build
-
