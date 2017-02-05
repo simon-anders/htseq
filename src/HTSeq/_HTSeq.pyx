@@ -1190,6 +1190,11 @@ cdef _parse_SAM_optional_field_value( str field ):
       return field[5:]
    elif field[3] == 'H':
       return int( field[5:], 16 )
+   elif field[3] == 'B':
+      if field[5] == 'f': 
+         return numpy.array( field[7:].split(','), float )
+      else:
+         return numpy.array( field[7:].split(','), int )
    else:
       raise ValueError, "SAM optional field with illegal type letter '%s'" % field[2]
 
