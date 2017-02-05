@@ -54,15 +54,15 @@ to go through only the first 100 features in the GTF file)::
    ...       print feature.attr["gene_id"], feature.attr["transcript_id"], feature.iv.start_d_as_pos
    ENSG00000223972 ENST00000456328 1:11873/+
    ENSG00000223972 ENST00000450305 1:12009/+
-   ENSG00000227232 ENST00000423562 1:29368/-
-   ENSG00000227232 ENST00000438504 1:29368/-
-   ENSG00000227232 ENST00000488147 1:29568/-
-   ENSG00000227232 ENST00000430492 1:29341/-
+   ENSG00000227232 ENST00000423562 1:29369/-
+   ENSG00000227232 ENST00000438504 1:29369/-
+   ENSG00000227232 ENST00000488147 1:29569/-
+   ENSG00000227232 ENST00000430492 1:29342/-
    ENSG00000243485 ENST00000473358 1:29553/+
    ENSG00000243485 ENST00000469289 1:30266/+
    ENSG00000221311 ENST00000408384 1:30365/+
-   ENSG00000237613 ENST00000417324 1:36079/-
-   ENSG00000237613 ENST00000461467 1:36071/-
+   ENSG00000237613 ENST00000417324 1:36080/-
+   ENSG00000237613 ENST00000461467 1:36072/-
    ENSG00000233004 ENST00000421949 1:53048/+
    ENSG00000240361 ENST00000492842 1:62947/+
    ENSG00000177693 ENST00000326183 1:69054/+
@@ -118,7 +118,7 @@ With matplotlib, we can see that this vector is, in effect, not all zero:
 
 .. doctest::
 
-   >>> from matplotlib import pyplot
+   >>> from matplotlib import pyplot #doctest: +SKIP
    >>> pyplot.plot( wincvg )    #doctest: +SKIP
    >>> pyplot.show()            #doctest: +SKIP
 
@@ -239,17 +239,17 @@ set variable that we created above) and for each TSS position, loop through
 all aligned reads close to it. Here is this double loop::
 
    >>> profileB = numpy.zeros( 2*halfwinwidth, dtype='i' )   
-   ... for p in tsspos:
-   ...    window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
-   ...    for almnt in sortedbamfile[ window ]:
-   ...       almnt.iv.length = fragmentsize
-   ...       if p.strand == "+":
-   ...          start_in_window = almnt.iv.start - p.pos + halfwinwidth 
-   ...          end_in_window   = almnt.iv.end   - p.pos + halfwinwidth 
-   ...       else:
-   ...          start_in_window = p.pos + halfwinwidth - almnt.iv.end
-   ...          end_in_window   = p.pos + halfwinwidth - almnt.iv.start
-   ...       profileB[ start_in_window : end_in_window ] += 1
+   >>> for p in tsspos:
+   ...     window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
+   ...     for almnt in sortedbamfile[ window ]:
+   ...         almnt.iv.length = fragmentsize
+   ...         if p.strand == "+":
+   ...             start_in_window = almnt.iv.start - p.pos + halfwinwidth
+   ...             end_in_window   = almnt.iv.end   - p.pos + halfwinwidth
+   ...         else:
+   ...             start_in_window = p.pos + halfwinwidth - almnt.iv.end
+   ...             end_in_window   = p.pos + halfwinwidth - almnt.iv.start
+   ...         profileB[ start_in_window : end_in_window ] += 1
 
 This loop now runs a good deal faster than our first attempt, and has a much
 smaller memory footprint.
@@ -311,7 +311,7 @@ giving its midpoint, i.e., the actual TSS position, as follows::
    ...       tssarray[ window ] += p
 
    >>> len( list( tssarray.chrom_vectors["1"]["."].steps() ) )
-   30089
+   30085
 
 
 As before, ``p`` is the position of the TSS, and ``window`` is the interval 
@@ -337,15 +337,17 @@ that the fragment in ``almnt`` covers:
 
    >>> for step_iv, step_set in tssarray[ almnt.iv ].steps():
    ...    print "Step", step_iv, ", contained by these windows:"
+   ...    out = set()
    ...    for p in step_set:
-   ...        print "   Window around TSS at", p
-   Step 1:[169677680,169677837)/. , contained by these windows:
-      Window around TSS at 1:169679671/-
-      Window around TSS at 1:169677779/-
-   Step 1:[169677837,169677880)/. , contained by these windows:
-      Window around TSS at 1:169680837/-
-      Window around TSS at 1:169679671/-
-      Window around TSS at 1:169677779/-
+   ...        out.add("   Window around TSS at "+str(p))
+   ...    print '\n'.join(sorted(out))
+   Step 1:[169677680,169677838)/. , contained by these windows:
+      Window around TSS at 1:169677780/-
+      Window around TSS at 1:169679672/-
+   Step 1:[169677838,169677880)/. , contained by these windows:
+      Window around TSS at 1:169677780/-
+      Window around TSS at 1:169679672/-
+      Window around TSS at 1:169680838/-
 
 As is typical for GenomicArrayOfSets, some TSSs appear in more than one step. To make
 sure that we don't count them twice, we take the union of all the step sets (with 
@@ -355,11 +357,11 @@ the operator ``|=``, which means in-place union when used for Python sets):
   
    >>> s = set()
    >>> for step_iv, step_set in tssarray[ almnt.iv ].steps():
-   ...    s |= step_set
-   >>> s  ##doctest:+NORMALIZE_WHITESPACE
-   set([<GenomicPosition object '1':169680837, strand '-'>, 
-        <GenomicPosition object '1':169677779, strand '-'>, 
-        <GenomicPosition object '1':169679671, strand '-'>])        
+   ...    s |= {x.__repr__() for x in step_set}
+   >>> sorted(s)  ##doctest:+NORMALIZE_WHITESPACE
+   ["<GenomicPosition object '1':169677780, strand '-'>", 
+    "<GenomicPosition object '1':169679672, strand '-'>",        
+    "<GenomicPosition object '1':169680838, strand '-'>"] 
   
 For each of the values for ``p`` in ``s``, we calculate values for ``start_in_window`` 
 and ``stop_in_window``, as before, and then add ones in the ``profile`` vector
