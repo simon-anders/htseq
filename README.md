@@ -8,3 +8,5 @@ developers. If you want to use HTSeq or are looking for
 documentation, please see:
 
    http://www-huber.embl.de/users/anders/HTSeq/
+
+**NOTE**: htseq is currently undergoing a major update. The `master` (python2.7) and `python3` (python>=3.4) branches on github require `pysam>=0.9`, but the PyPI version refers to the last stable release, which is only compatible with `pysam<=0.8.0`.We will update the PyPI version within the next few weeks (hopefully!).

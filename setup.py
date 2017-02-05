@@ -18,7 +18,7 @@ if sys.version_info[0] < 2 and sys.version_info[1] < 5:
 
 if sys.version_info[0] >= 3:
     sys.stderr.write("Error in setup script for HTSeq:\n")
-    sys.stderr.write("Sorry, this package does not yet work with Python 3.\n")
+    sys.stderr.write("See the python3 branch on github for Python 3 support.\n")
     sys.stderr.write("Please use Python 2.x, x>=5.\n")
     sys.exit(1)
 
@@ -33,11 +33,18 @@ except ImportError:
 numpy_include_dir = os.path.join(os.path.dirname(numpy.__file__),
                                  'core', 'include')
 
+# Update version from VERSION file into module
+with open('VERSION') as fversion:
+    version = fversion.readline().rstrip()
+with open('HTSeq/_version.py', 'wt') as fversion:
+    fversion.write('__version__ = "'+version+'"')
 
 setup(name='HTSeq',
-      version=file("VERSION").readline().rstrip(),
+      version=version,
       author='Simon Anders',
       author_email='sanders@fs.tum.de',
+      maintainer='Fabio Zanini',
+      maintainer_email='fabio.zanini@stanford.edu',
       url='http://www-huber.embl.de/users/anders/HTSeq/',
       description="A framework to process and analyze data from " +
                   "high-throughput sequencing (HTS) assays",
