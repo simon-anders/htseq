@@ -2,17 +2,20 @@
 
 import sys
 import os.path
-from Cython.Build import cythonize
 
 python_version_min = '3.4'
 
 try:
     from setuptools import setup, Extension
     from setuptools.command.build_py import build_py
+    from setuptools import Command
 except ImportError:
     sys.stderr.write("Could not import 'setuptools', falling back to 'distutils'.\n")
     from distutils.core import setup, Extension
     from distutils.command.build_py import build_py
+    from distutils.cmd import Command
+
+from distutils.log import INFO as logINFO
 
 if sys.version_info < tuple(map(int, python_version_min.split('.'))):
     sys.stderr.write("Error in setup script for HTSeq:\n")
@@ -36,33 +39,48 @@ with open('HTSeq/_version.py', 'wt') as fversion:
     fversion.write('__version__ = "'+version+'"')
 
 
-class Build_with_preprocess(build_py):
+class Preprocess_command(Command):
+    '''Cython and SWIG preprocessing'''
+    description = "preprocess Cython and SWIG files for HTSeq"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        self.swig_and_cython()
+
     def swig_and_cython(self):
         import os
         from subprocess import call
 
         def c(x): return call(x, shell=True)
+        def p(x): return self.announce(x, level=logINFO)
 
         # CYTHON
-        print('Cythonizing...')
+        p('cythonizing')
         cython = os.getenv('CYTHON', 'cython')
         c(cython+' -3 src/HTSeq/_HTSeq.pyx -o src/_HTSeq.c')
-        print('done')
 
         # SWIG
-        print('SWIGging...')
+        p('SWIGging')
         swig = os.getenv('SWIG', 'swig')
         c(swig+' -Wall -c++ -python -py3 src/StepVector.i')
-        print('done, correcting and moving...')
         pyswigged = 'src/StepVector.py'
+        p('correcting SWIG for python3')
         c("2to3 --no-diffs --write --nobackups "+pyswigged)
         c("sed -i 's/    import builtins as __builtin__/    import builtins/' "+pyswigged)
         c("sed -i 's/\.next/.__next__/' "+pyswigged)
+        p('moving swigged .py module')
         c('mv '+pyswigged+' HTSeq/StepVector.py')
-        print('done')
 
+
+class Build_with_preprocess(build_py):
     def run(self):
-        self.swig_and_cython()
+        self.run_command('preprocess')
         super().run()
 
 
@@ -84,7 +102,11 @@ setup(name='HTSeq',
          'Operating System :: POSIX',
          'Programming Language :: Python'
       ],
-      requires=['numpy', 'python (>='+python_version_min+')'],
+      requires=[
+          'python (>='+python_version_min+')',
+          'numpy',
+          'pysam (>=0.9.0)',
+      ],
       ext_modules=[
          Extension(
              'HTSeq._HTSeq',
@@ -108,6 +130,7 @@ setup(name='HTSeq',
          'scripts/htseq-count',
       ],
       cmdclass={
+          'preprocess': Preprocess_command,
           'build_py': Build_with_preprocess,
           }
       )
