@@ -37,7 +37,7 @@ install:
   - pip install numpy
   - pip install "$PYSAM_VERSION"
   - pip install matplotlib
-  - bash ./build_it
+  - python setup.py build
  
 script:
   - python test/test.py

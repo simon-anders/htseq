@@ -1,4 +1,0 @@
-#!/bin/bash
-
-(cd src; make)
-python setup.py build
