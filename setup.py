@@ -78,27 +78,41 @@ class Preprocess_command(Command):
 
     def swig_and_cython(self):
         import os
-        from subprocess import call
+        from shutil import copy
+        from subprocess import check_call, SubprocessError
 
-        def c(x): return call(x, shell=True)
+        def c(x): return check_call(x, shell=True)
         def p(x): return self.announce(x, level=logINFO)
 
         # CYTHON
         p('cythonizing')
         cython = os.getenv('CYTHON', 'cython')
-        c(cython+' -3 src/HTSeq/_HTSeq.pyx -o src/_HTSeq.c')
+        try:
+            c(cython+' -3 src/HTSeq/_HTSeq.pyx -o src/_HTSeq.c')
+        except SubprocessError:
+            if os.path.isfile('src/_HTSeq.c'):
+                p('Cython not found, but transpiled file found')
+            else:
+                raise
 
         # SWIG
         p('SWIGging')
         swig = os.getenv('SWIG', 'swig')
-        c(swig+' -Wall -c++ -python -py3 src/StepVector.i')
         pyswigged = 'src/StepVector.py'
-        p('correcting SWIG for python3')
-        c("2to3 --no-diffs --write --nobackups "+pyswigged)
-        c("sed -i 's/    import builtins as __builtin__/    import builtins/' "+pyswigged)
-        c("sed -i 's/\.next/.__next__/' "+pyswigged)
+        try:
+            c(swig+' -Wall -c++ -python -py3 src/StepVector.i')
+            p('correcting SWIG for python3')
+            c("2to3 --no-diffs --write --nobackups "+pyswigged)
+            c("sed -i 's/    import builtins as __builtin__/    import builtins/' "+pyswigged)
+            c("sed -i 's/\.next/.__next__/' "+pyswigged)
+        except SubprocessError:
+            if (os.path.isfile('src/StepVector_wrap.cxx') and
+                    os.path.isfile('src/StepVector.py')):
+                p('SWIG not found, but transpiled files found')
+            else:
+                raise
         p('moving swigged .py module')
-        c('mv '+pyswigged+' HTSeq/StepVector.py')
+        copy(pyswigged, 'HTSeq/StepVector.py')
 
 
 class Build_with_preprocess(build_py):
