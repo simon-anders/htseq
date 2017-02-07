@@ -2,6 +2,7 @@
 
 import sys
 import os.path
+from distutils.log import INFO as logINFO
 
 python_version = '2.7'
 python_version_tuple = tuple(map(int, python_version.split('.')))
@@ -10,14 +11,36 @@ try:
     from setuptools import setup, Extension
     from setuptools.command.build_py import build_py
     from setuptools import Command
+    # Setuptools but not distutils support build/runtime/optional dependencies
+    # NOTE: setuptools < 18.0 has issues with Cython as a dependency
+    # NOTE: old setuptools < 18.0 has issues with extras
+    kwargs = dict(
+        setup_requires=[
+              'Cython',
+              'numpy',
+              'pysam>=0.9.0',
+        ],
+        install_requires=[
+            'numpy',
+            'pysam>=0.9.0',
+        ],
+        extras_require={
+            'htseq-qa': ['matplotlib>=1.4']
+        },
+      )
 except ImportError:
     sys.stderr.write("Could not import 'setuptools'," +
                      " falling back to 'distutils'.\n")
     from distutils.core import setup, Extension
     from distutils.command.build_py import build_py
     from distutils.cmd import Command
-
-from distutils.log import INFO as logINFO
+    kwargs = dict(
+        requires=[
+              'Cython',
+              'numpy',
+              'pysam>=0.9.0',
+            ]
+    )
 
 if ((sys.version_info[0] != python_version_tuple[0]) or
     (sys.version_info[1] != python_version_tuple[1])):
@@ -94,6 +117,7 @@ setup(name='HTSeq',
       url='http://www-huber.embl.de/users/anders/HTSeq/',
       description="A framework to process and analyze data from " +
                   "high-throughput sequencing (HTS) assays",
+      license='GPL3',
       classifiers=[
          'Development Status :: 5 - Production/Stable',
          'Topic :: Scientific/Engineering :: Bio-Informatics',
@@ -102,11 +126,6 @@ setup(name='HTSeq',
          'License :: OSI Approved :: GNU General Public License (GPL)',
          'Operating System :: POSIX',
          'Programming Language :: Python'
-      ],
-      requires=[
-          'python (=='+python_version+')',
-          'numpy',
-          'pysam (>=0.9.0)',
       ],
       ext_modules=[
          Extension(
@@ -133,5 +152,6 @@ setup(name='HTSeq',
       cmdclass={
           'preprocess': Preprocess_command,
           'build_py': Build_with_preprocess,
-          }
+          },
+      **kwargs
       )
