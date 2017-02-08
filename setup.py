@@ -83,23 +83,38 @@ class Preprocess_command(Command):
 
     def swig_and_cython(self):
         import os
-        from subprocess import call
+        from shutil import copy
+        from subprocess import check_call
+        from subprocess import CalledProcessError as SubprocessError
 
-        def c(x): return call(x, shell=True)
+        def c(x): return check_call(x, shell=True)
         def p(x): return self.announce(x, level=logINFO)
 
         # CYTHON
         p('cythonizing')
         cython = os.getenv('CYTHON', 'cython')
-        c(cython+' src/HTSeq/_HTSeq.pyx -o src/_HTSeq.c')
+        try:
+            c(cython+' src/HTSeq/_HTSeq.pyx -o src/_HTSeq.c')
+        except SubprocessError:
+            if os.path.isfile('src/_HTSeq.c'):
+                p('Cython not found, but transpiled file found')
+            else:
+                raise
 
         # SWIG
         p('SWIGging')
         swig = os.getenv('SWIG', 'swig')
-        c(swig+' -Wall -c++ -python src/StepVector.i')
         pyswigged = 'src/StepVector.py'
+        try:
+            c(swig+' -Wall -c++ -python src/StepVector.i')
+        except SubprocessError:
+            if (os.path.isfile('src/StepVector_wrap.cxx') and
+                    os.path.isfile('src/StepVector.py')):
+                p('SWIG not found, but transpiled files found')
+            else:
+                raise
         p('moving swigged .py module')
-        c('mv '+pyswigged+' HTSeq/StepVector.py')
+        copy(pyswigged, 'HTSeq/StepVector.py')
 
 
 class Build_with_preprocess(build_py):
