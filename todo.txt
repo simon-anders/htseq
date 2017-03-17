@@ -1,8 +1,0 @@
-HTSeq bug list:
-
-- Strand should not be an object
-
-- qualstr should be available in all three formats
-  
-- AlignmentWithSequenceReversal: read_as_aligned should be a property
-

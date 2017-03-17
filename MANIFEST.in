@@ -1,8 +1,0 @@
-include src/step_vector.h
-include VERSION
-include src/HTSeq/*
-include src/*.i
-include src/StepVector.py
-prune example_data
-prune test
-exclude todo.txt

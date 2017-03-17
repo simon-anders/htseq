@@ -33,11 +33,9 @@ before_install:
   - sudo apt-get install -y swig3.0
 
 install:
-  # setuptools < 18.0 has issues with Cython as a dependency
-  - pip install Cython
-  - sed -i "s/pysam>=0.9.0/$PYSAM_VERSION/" setup.py
-  # old setuptools also has a bug for extras, but it still compiles
-  - pip install '.[htseq-qa]'
+  - sed -i "s/pysam>=0.9.0/$PYSAM_VERSION/" requirements.txt
+  - pip install -r requirements.txt
+  - pip install -i https://testpypi.python.org/pypi HTSeq
  
 script:
   - python test/test.py
