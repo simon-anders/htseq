@@ -14,10 +14,14 @@ env:
  global:
   - SWIG=swig3.0
  matrix:
-  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0'
-  - CC=gcc PYSAM_VERSION='pysam==0.9.0'
-  - CC=gcc-5 PYSAM_VERSION='pysam'
-  - CC=gcc PYSAM_VERSION='pysam'
+  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://testpypi.python.org/pypi"
+  - CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://testpypi.python.org/pypi"
+  - CC=gcc-5 PYSAM_VERSION='pysam' PYPI="-i https://testpypi.python.org/pypi"
+  - CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://testpypi.python.org/pypi"
+  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0' PYPI=""
+  - CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI=""
+  - CC=gcc-5 PYSAM_VERSION='pysam' PYPI=""
+  - CC=gcc PYSAM_VERSION='pysam' PYPI=""
 
 addons:
   apt:
@@ -35,7 +39,7 @@ before_install:
 install:
   - sed -i "s/pysam>=0.9.0/$PYSAM_VERSION/" requirements.txt
   - pip install -r requirements.txt
-  - pip install -i https://testpypi.python.org/pypi HTSeq
+  - pip install $PYPI HTSeq
  
 script:
   - python test/test.py
