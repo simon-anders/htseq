@@ -94,12 +94,14 @@ class Preprocess_command(Command):
         p('cythonizing')
         cython = os.getenv('CYTHON', 'cython')
         try:
-            c(cython+' src/HTSeq/_HTSeq.pyx -o src/_HTSeq.c')
+            c(cython+' --version')
         except SubprocessError:
             if os.path.isfile('src/_HTSeq.c'):
                 p('Cython not found, but transpiled file found')
             else:
                 raise
+        else:
+            c(cython+' src/HTSeq/_HTSeq.pyx -o src/_HTSeq.c')
 
         # SWIG
         p('SWIGging')
