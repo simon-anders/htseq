@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/simon-anders/htseq.svg?branch=master)](https://travis-ci.org/simon-anders/htseq)
+[![Build Status](https://travis-ci.org/simon-anders/htseq.svg?branch=pypi_CI)](https://travis-ci.org/simon-anders/htseq)
 
 # HTSeq
 HTSeq is a Python library to facilitate processing and analysis of data from high-throughput sequencing (HTS) experiments. 
