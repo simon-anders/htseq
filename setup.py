@@ -3,9 +3,17 @@
 import sys
 import os.path
 from distutils.log import INFO as logINFO
+=`=jedi=0, =`=                         (*_*param iterable*_*) =`=jedi=`=
+python_version = '.'.join(map(str, sys.version_info[:2])
 
-python_version = '2.7'
-python_version_tuple = tuple(map(int, python_version.split('.')))
+if ((sys.version_info[0] == 2 and sys.version_info[1] < 7) or
+    (sys.version_info[0] == 3 and sys.version_info[1] < 4)):
+    sys.stderr.write("Error in setup script for HTSeq:\n")
+    sys.stderr.write("HTSeq support Python 2.7 or 3.4+.")
+    sys.exit(1)
+
+if sys.version_info[0] == 
+    
 
 try:
     from setuptools import setup, Extension
