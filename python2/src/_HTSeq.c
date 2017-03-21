@@ -651,8 +651,8 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "src/HTSeq/_HTSeq.pyx",
-  "src/HTSeq/_HTSeq.pxd",
+  "python2/src/HTSeq/_HTSeq.pyx",
+  "python2/src/HTSeq/_HTSeq.pxd",
   "__init__.pxd",
   "type.pxd",
 };
@@ -2435,7 +2435,7 @@ static const char __pyx_k_assignment_to_qual_with_illegal[] = "assignment to qua
 static const char __pyx_k_chroms_must_be_a_list_or_a_dict[] = "'chroms' must be a list or a dict or 'auto'.";
 static const char __pyx_k_count_array_has_too_few_columns[] = "'count_array' has too few columns.";
 static const char __pyx_k_count_array_too_small_for_seque[] = "'count_array' too small for sequence.";
-static const char __pyx_k_home_fabio_university_postdoc_h[] = "/home/fabio/university/postdoc/htseq/htseq/src/HTSeq/_HTSeq.pyx";
+static const char __pyx_k_home_fabio_university_postdoc_h[] = "/home/fabio/university/postdoc/htseq/htseq/python2/src/HTSeq/_HTSeq.pyx";
 static const char __pyx_k_make_translation_table_for_comp[] = "_make_translation_table_for_complementation";
 static const char __pyx_k_numpy_core_multiarray_failed_to[] = "numpy.core.multiarray failed to import";
 static const char __pyx_k_seq_and_qualstr_do_not_have_the[] = "'seq' and 'qualstr' do not have the same length.";
