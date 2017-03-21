@@ -1,8 +1,16 @@
-include src/step_vector.h
 include VERSION
-include src/HTSeq/*
-include src/*.i
-include src/StepVector.py
-prune example_data
-prune test
+include MANIFEST.in
+include README.md
 exclude todo.txt
+
+include python*/src/step_vector.h
+include python*/src/HTSeq/*
+include python*/src/*.i
+include python*/src/StepVector.py
+
+prune example_data
+prune src
+prune HTSeq
+prune doc
+prune scripts
+prune test
