@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import sys
-import os.path
+import os
 from distutils.log import INFO as logINFO
 
 if ((sys.version_info[0] == 2 and sys.version_info[1] < 7) or
@@ -10,8 +10,15 @@ if ((sys.version_info[0] == 2 and sys.version_info[1] < 7) or
     sys.stderr.write("HTSeq support Python 2.7 or 3.4+.")
     sys.exit(1)
 
+# Manage python2/3 compatibility with symlinks
 py_maj = sys.version_info[0]
 py_fdn = 'python'+str(py_maj)+'/'
+print('symlinking folders for python'+str(py_maj))
+for fdn in ['src', 'HTSeq', 'doc', 'scripts', 'test']:
+    if os.path.islink(fdn):
+        os.unlink(fdn)
+    os.symlink(py_fdn+fdn, fdn)
+
 
 try:
     from setuptools import setup, Extension
@@ -129,13 +136,6 @@ class Preprocess_command(Command):
         p('moving swigged .py module')
         copy(pyswigged, py_fdn+'HTSeq/StepVector.py')
 
-        # Move into folder from python2/python3 folder
-        p('symlinking folders for python'+str(py_maj))
-        for fdn in ['src', 'HTSeq', 'doc', 'scripts', 'test']:
-            if os.path.islink(fdn):
-                os.unlink(fdn)
-            os.symlink(py_fdn+fdn, fdn)
-
         p('done')
 
 
@@ -167,12 +167,12 @@ setup(name='HTSeq',
       ext_modules=[
          Extension(
              'HTSeq._HTSeq',
-             [py_fdn+'src/_HTSeq.c'],
+             ['src/_HTSeq.c'],
              include_dirs=[numpy_include_dir],
              extra_compile_args=['-w']),
          Extension(
              'HTSeq._StepVector',
-             [py_fdn+'src/StepVector_wrap.cxx'],
+             ['src/StepVector_wrap.cxx'],
              extra_compile_args=['-w']),
       ],
       py_modules=[
