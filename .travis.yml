@@ -16,7 +16,6 @@ python:
 env:
  global:
   - SWIG=swig3.0
-  - PY_FDN="python$(python --version | cut -f2 -d' ' | cut -f1 -d.)"
  matrix:
   - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0'
   - CC=gcc PYSAM_VERSION='pysam==0.9.0'
@@ -44,4 +43,4 @@ install:
   - pip install '.[htseq-qa]'
  
 script:
-  - python $PY_FDN/test/test.py
+  - python .travis_test.py
