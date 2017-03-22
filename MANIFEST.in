@@ -1,13 +1,29 @@
+# Docs
 include VERSION
 include MANIFEST.in
 include README.md
 exclude todo.txt
 
-include python*/src/step_vector.h
+# Cython
 include python*/src/HTSeq/*
+include python*/src/*.c
+
+# SWIG
+include python*/src/step_vector.h
 include python*/src/*.i
 include python*/src/StepVector.py
+include python*/src/StepVector_wrap.cxx
 
+# Pure
+include python*/HTSeq/__init__.py
+include python*/HTSeq/_version.py
+include python*/HTSeq/_HTSeq_internal.py
+
+# Script
+include python*/HTSeq/scripts/*
+include python*/scripts/*
+
+# Symlinks
 prune example_data
 prune src
 prune HTSeq
