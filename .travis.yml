@@ -45,4 +45,4 @@ install:
   - pip install $PYPI HTSeq
  
 script:
-  - python test/test.py
+  - python .travis_test.py
