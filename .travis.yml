@@ -17,12 +17,13 @@ env:
  global:
   - SWIG=swig3.0
  matrix:
-  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://testpypi.python.org/pypi"
-  - CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://testpypi.python.org/pypi"
+  # NOTE: pysam 0.9 has a bug with Python 3 and requires Cython
+  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://testpypi.python.org/pypi" CYTHON_INSTALL='Cython'
+  - CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://testpypi.python.org/pypi" CYTHON_INSTALL='Cython'
+  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
+  - CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
   - CC=gcc-5 PYSAM_VERSION='pysam' PYPI="-i https://testpypi.python.org/pypi"
   - CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://testpypi.python.org/pypi"
-  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0' PYPI=""
-  - CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI=""
   - CC=gcc-5 PYSAM_VERSION='pysam' PYPI=""
   - CC=gcc PYSAM_VERSION='pysam' PYPI=""
 
@@ -40,6 +41,8 @@ before_install:
   - sudo apt-get install -y swig3.0
 
 install:
+  # NOTE: pysam 0.9 has a bug with Python 3 and requires Cython
+  - pip install $CYTHON_INSTALL
   - sed -i "s/pysam>=0.9.0/$PYSAM_VERSION/" requirements.txt
   - pip install -r requirements.txt
   - pip install $PYPI HTSeq
