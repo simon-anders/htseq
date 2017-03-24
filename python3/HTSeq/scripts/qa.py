@@ -130,7 +130,17 @@ def main():
         for a in readfile:
             if isAlnmntFile:
                 r = a.read
-            print i, "reads processed"
+        else:
+            r = a
+        if twoColumns and (isAlnmntFile and a.aligned):
+            r.add_bases_to_count_array( base_arr_A )
+            r.add_qual_to_count_array( qual_arr_A )
+        else:
+            r.add_bases_to_count_array( base_arr_U )
+            r.add_qual_to_count_array( qual_arr_U )
+        i += 1
+        if (i % 200000) == 0:
+            print(i, "reads processed")
     except:
         sys.stderr.write( "Error occured in: %s\n" %
             readfile.get_line_number_string() )
@@ -220,12 +230,10 @@ def main():
         norm=Normalize( 0, 1 ) )
         pyplot.axis( (0, readlen-1, 0, max_qual+1 ) )
         pyplot.xlabel( "position in read" )
+        pyplot.ylabel( "base-call quality score" )
 
 
     pyplot.savefig( outfilename )
-
-if __name__ == "__main__":
-    main()
 
 if __name__ == "__main__":
     main()
