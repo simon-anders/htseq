@@ -44,9 +44,9 @@ except NameError:
     pass  # Python < 2.2 doesn't have 'property'.
 
 try:
-    import builtins as __builtin__
+    import builtins
 except ImportError:
-    import __builtin__
+    import builtins
 
 def _swig_setattr_nondynamic(self, class_type, name, value, static=1):
     if (name == "thisown"):
@@ -83,14 +83,14 @@ def _swig_getattr(self, class_type, name):
 def _swig_repr(self):
     try:
         strthis = "proxy of " + self.this.__repr__()
-    except __builtin__.Exception:
+    except builtins.Exception:
         strthis = ""
     return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
 
 try:
     _object = object
     _newclass = 1
-except __builtin__.Exception:
+except builtins.Exception:
     class _object:
         pass
     _newclass = 0
@@ -110,11 +110,11 @@ class _Pair_int_float(_object):
     if _newclass:
         second = _swig_property(_StepVector._Pair_int_float_second_get, _StepVector._Pair_int_float_second_set)
 
-    def __init__(self, first_, second_):
+    def __init__(self, first_: 'long', second_: 'double'):
         this = _StepVector.new__Pair_int_float(first_, second_)
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
     __swig_destroy__ = _StepVector.delete__Pair_int_float
     __del__ = lambda self: None
@@ -128,17 +128,17 @@ class _StepVector_Iterator_float(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, _StepVector_Iterator_float, name)
     __repr__ = _swig_repr
 
-    def __init__(self, first, last_):
+    def __init__(self, first: 'step_vector< double >::const_iterator', last_: 'step_vector< double >::const_iterator'):
         this = _StepVector.new__StepVector_Iterator_float(first, last_)
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
 
-    def next(self):
+    def __next__(self) -> "std::pair< long,double >":
         return _StepVector._StepVector_Iterator_float_next(self)
 
-    def __iter__(self):
+    def __iter__(self) -> "step_vector_pystyle_iterator< double > *":
         return _StepVector._StepVector_Iterator_float___iter__(self)
     __swig_destroy__ = _StepVector.delete__StepVector_Iterator_float
     __del__ = lambda self: None
@@ -156,22 +156,22 @@ class _StepVector_float(_object):
         this = _StepVector.new__StepVector_float()
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
 
-    def set_value(self, arg2, to, value):
+    def set_value(self, arg2: 'long', to: 'long', value: 'double') -> "void":
         return _StepVector._StepVector_float_set_value(self, arg2, to, value)
 
-    def add_value(self, arg2, to, value):
+    def add_value(self, arg2: 'long', to: 'long', value: 'double') -> "void":
         return _StepVector._StepVector_float_add_value(self, arg2, to, value)
 
-    def get_all_values_pystyle(self):
+    def get_all_values_pystyle(self) -> "step_vector_pystyle_iterator< double >":
         return _StepVector._StepVector_float_get_all_values_pystyle(self)
 
-    def get_values_pystyle(self, arg2):
+    def get_values_pystyle(self, arg2: 'long') -> "step_vector_pystyle_iterator< double >":
         return _StepVector._StepVector_float_get_values_pystyle(self, arg2)
 
-    def num_values(self):
+    def num_values(self) -> "int":
         return _StepVector._StepVector_float_num_values(self)
     __swig_destroy__ = _StepVector.delete__StepVector_float
     __del__ = lambda self: None
@@ -196,11 +196,11 @@ class _Pair_int_int(_object):
     if _newclass:
         second = _swig_property(_StepVector._Pair_int_int_second_get, _StepVector._Pair_int_int_second_set)
 
-    def __init__(self, first_, second_):
+    def __init__(self, first_: 'long', second_: 'int'):
         this = _StepVector.new__Pair_int_int(first_, second_)
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
     __swig_destroy__ = _StepVector.delete__Pair_int_int
     __del__ = lambda self: None
@@ -214,17 +214,17 @@ class _StepVector_Iterator_int(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, _StepVector_Iterator_int, name)
     __repr__ = _swig_repr
 
-    def __init__(self, first, last_):
+    def __init__(self, first: 'step_vector< int >::const_iterator', last_: 'step_vector< int >::const_iterator'):
         this = _StepVector.new__StepVector_Iterator_int(first, last_)
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
 
-    def next(self):
+    def __next__(self) -> "std::pair< long,int >":
         return _StepVector._StepVector_Iterator_int_next(self)
 
-    def __iter__(self):
+    def __iter__(self) -> "step_vector_pystyle_iterator< int > *":
         return _StepVector._StepVector_Iterator_int___iter__(self)
     __swig_destroy__ = _StepVector.delete__StepVector_Iterator_int
     __del__ = lambda self: None
@@ -242,22 +242,22 @@ class _StepVector_int(_object):
         this = _StepVector.new__StepVector_int()
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
 
-    def set_value(self, arg2, to, value):
+    def set_value(self, arg2: 'long', to: 'long', value: 'int') -> "void":
         return _StepVector._StepVector_int_set_value(self, arg2, to, value)
 
-    def add_value(self, arg2, to, value):
+    def add_value(self, arg2: 'long', to: 'long', value: 'int') -> "void":
         return _StepVector._StepVector_int_add_value(self, arg2, to, value)
 
-    def get_all_values_pystyle(self):
+    def get_all_values_pystyle(self) -> "step_vector_pystyle_iterator< int >":
         return _StepVector._StepVector_int_get_all_values_pystyle(self)
 
-    def get_values_pystyle(self, arg2):
+    def get_values_pystyle(self, arg2: 'long') -> "step_vector_pystyle_iterator< int >":
         return _StepVector._StepVector_int_get_values_pystyle(self, arg2)
 
-    def num_values(self):
+    def num_values(self) -> "int":
         return _StepVector._StepVector_int_num_values(self)
     __swig_destroy__ = _StepVector.delete__StepVector_int
     __del__ = lambda self: None
@@ -281,11 +281,11 @@ class _Pair_int_bool(_object):
     if _newclass:
         second = _swig_property(_StepVector._Pair_int_bool_second_get, _StepVector._Pair_int_bool_second_set)
 
-    def __init__(self, first_, second_):
+    def __init__(self, first_: 'long', second_: 'bool'):
         this = _StepVector.new__Pair_int_bool(first_, second_)
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
     __swig_destroy__ = _StepVector.delete__Pair_int_bool
     __del__ = lambda self: None
@@ -299,17 +299,17 @@ class _StepVector_Iterator_bool(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, _StepVector_Iterator_bool, name)
     __repr__ = _swig_repr
 
-    def __init__(self, first, last_):
+    def __init__(self, first: 'step_vector< bool >::const_iterator', last_: 'step_vector< bool >::const_iterator'):
         this = _StepVector.new__StepVector_Iterator_bool(first, last_)
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
 
-    def next(self):
+    def __next__(self) -> "std::pair< long,bool >":
         return _StepVector._StepVector_Iterator_bool_next(self)
 
-    def __iter__(self):
+    def __iter__(self) -> "step_vector_pystyle_iterator< bool > *":
         return _StepVector._StepVector_Iterator_bool___iter__(self)
     __swig_destroy__ = _StepVector.delete__StepVector_Iterator_bool
     __del__ = lambda self: None
@@ -327,22 +327,22 @@ class _StepVector_bool(_object):
         this = _StepVector.new__StepVector_bool()
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
 
-    def set_value(self, arg2, to, value):
+    def set_value(self, arg2: 'long', to: 'long', value: 'bool') -> "void":
         return _StepVector._StepVector_bool_set_value(self, arg2, to, value)
 
-    def add_value(self, arg2, to, value):
+    def add_value(self, arg2: 'long', to: 'long', value: 'bool') -> "void":
         return _StepVector._StepVector_bool_add_value(self, arg2, to, value)
 
-    def get_all_values_pystyle(self):
+    def get_all_values_pystyle(self) -> "step_vector_pystyle_iterator< bool >":
         return _StepVector._StepVector_bool_get_all_values_pystyle(self)
 
-    def get_values_pystyle(self, arg2):
+    def get_values_pystyle(self, arg2: 'long') -> "step_vector_pystyle_iterator< bool >":
         return _StepVector._StepVector_bool_get_values_pystyle(self, arg2)
 
-    def num_values(self):
+    def num_values(self) -> "int":
         return _StepVector._StepVector_bool_num_values(self)
     __swig_destroy__ = _StepVector.delete__StepVector_bool
     __del__ = lambda self: None
@@ -366,11 +366,11 @@ class _Pair_int_obj(_object):
     if _newclass:
         second = _swig_property(_StepVector._Pair_int_obj_second_get, _StepVector._Pair_int_obj_second_set)
 
-    def __init__(self, first_, second_):
+    def __init__(self, first_: 'long', second_: 'AutoPyObjPtr'):
         this = _StepVector.new__Pair_int_obj(first_, second_)
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
     __swig_destroy__ = _StepVector.delete__Pair_int_obj
     __del__ = lambda self: None
@@ -384,17 +384,17 @@ class _StepVector_Iterator_obj(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, _StepVector_Iterator_obj, name)
     __repr__ = _swig_repr
 
-    def __init__(self, first, last_):
+    def __init__(self, first: 'step_vector< AutoPyObjPtr >::const_iterator', last_: 'step_vector< AutoPyObjPtr >::const_iterator'):
         this = _StepVector.new__StepVector_Iterator_obj(first, last_)
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
 
-    def next(self):
+    def __next__(self) -> "std::pair< long,AutoPyObjPtr >":
         return _StepVector._StepVector_Iterator_obj_next(self)
 
-    def __iter__(self):
+    def __iter__(self) -> "step_vector_pystyle_iterator< AutoPyObjPtr > *":
         return _StepVector._StepVector_Iterator_obj___iter__(self)
     __swig_destroy__ = _StepVector.delete__StepVector_Iterator_obj
     __del__ = lambda self: None
@@ -412,22 +412,22 @@ class _StepVector_obj(_object):
         this = _StepVector.new__StepVector_obj()
         try:
             self.this.append(this)
-        except __builtin__.Exception:
+        except builtins.Exception:
             self.this = this
 
-    def set_value(self, arg2, to, value):
+    def set_value(self, arg2: 'long', to: 'long', value: 'AutoPyObjPtr') -> "void":
         return _StepVector._StepVector_obj_set_value(self, arg2, to, value)
 
-    def add_value(self, arg2, to, value):
+    def add_value(self, arg2: 'long', to: 'long', value: 'AutoPyObjPtr') -> "void":
         return _StepVector._StepVector_obj_add_value(self, arg2, to, value)
 
-    def get_all_values_pystyle(self):
+    def get_all_values_pystyle(self) -> "step_vector_pystyle_iterator< AutoPyObjPtr >":
         return _StepVector._StepVector_obj_get_all_values_pystyle(self)
 
-    def get_values_pystyle(self, arg2):
+    def get_values_pystyle(self, arg2: 'long') -> "step_vector_pystyle_iterator< AutoPyObjPtr >":
         return _StepVector._StepVector_obj_get_values_pystyle(self, arg2)
 
-    def num_values(self):
+    def num_values(self) -> "int":
         return _StepVector._StepVector_obj_num_values(self)
     __swig_destroy__ = _StepVector.delete__StepVector_obj
     __del__ = lambda self: None
@@ -463,7 +463,7 @@ class StepVector( object ):
    """
 
    @classmethod
-   def create( cls, length = sys.maxint, typecode = 'd', start_index = 0 ):
+   def create( cls, length = sys.maxsize, typecode = 'd', start_index = 0 ):
       """Construct a StepVector of the given length, with indices starting
       at the given start_index and counting up to (but not including)
       start_index + length.
@@ -486,7 +486,7 @@ class StepVector( object ):
       elif typecode == 'O':
          swigclass = _StepVector_obj
       else:
-         raise ValueError, "unsupported typecode"
+         raise ValueError("unsupported typecode")
       obj = cls()
       obj._typecode = typecode
       obj._swigobj = swigclass( )    
@@ -510,21 +510,21 @@ class StepVector( object ):
                value.start == index.start and value.stop == index.stop:
             return
          else:
-            raise NotImplemented, "Stepvector-to-Stepvector assignment still missing"
+            raise NotImplemented("Stepvector-to-Stepvector assignment still missing")
       if isinstance( index, slice ):
          if index.step is not None and index.step != 1:
-             raise ValueError, "Striding slices (i.e., step != 1) are not supported"
+             raise ValueError("Striding slices (i.e., step != 1) are not supported")
          if index.start is None:
             start = self.start
          else:
             if index.start < self.start:
-               raise IndexError, "start too small"
+               raise IndexError("start too small")
             start = index.start
          if index.stop is None:
             stop = self.stop
          else:
             if index.stop > self.stop:
-               raise IndexError, "stop too large"
+               raise IndexError("stop too large")
             stop = index.stop
          self._swigobj.set_value( start, stop-1, value )
 # Note the "-1": The C++ object uses closed intervals, but we follow
@@ -548,7 +548,7 @@ class StepVector( object ):
       """
       startvals = self._swigobj.get_values_pystyle( self.start )
       prevstart = self.start
-      prevval = startvals.next().second
+      prevval = startvals.__next__().second
       for pair in startvals:
          stepstart, value = pair.first, pair.second
          if merge_steps and value == prevval:
@@ -579,18 +579,18 @@ class StepVector( object ):
       """
       if isinstance( index, slice ):
          if index.step is not None and index.step != 1:
-             raise ValueError, "Striding slices (i.e., step != 1) are not supported"
+             raise ValueError("Striding slices (i.e., step != 1) are not supported")
          if index.start is None:
             start = self.start
          else:
             if index.start < self.start:
-               raise IndexError, "start too small"
+               raise IndexError("start too small")
             start = index.start
          if index.stop is None:
             stop = self.stop
          else:
             if index.stop > self.stop:
-               raise IndexError, "stop too large"
+               raise IndexError("stop too large")
             stop = index.stop
          res = self.__class__()
          res._typecode = self.typecode
@@ -599,7 +599,7 @@ class StepVector( object ):
          res.stop = stop
          return res
       else:
-         return self._swigobj.get_values_pystyle( index ).next().second
+         return self._swigobj.get_values_pystyle( index ).__next__().second
 
    def __iter__( self ):
       """When asked to provide an iterator, a StepVector will yield all its
@@ -608,15 +608,15 @@ class StepVector( object ):
       into an ordinary list.
       """
       for start, stop, value in self.get_steps():
-         for i in xrange( start, stop ):
+         for i in range( start, stop ):
             yield value
 
    def __repr__( self ):
-      if self.start == -sys.maxint - 1:
+      if self.start == -sys.maxsize - 1:
          start_s = "-inf"
       else:
          start_s = str( self.start )
-      if self.stop == sys.maxint:
+      if self.stop == sys.maxsize:
          stop_s = "inf"
       else:
          stop_s = str( self.stop )
@@ -646,24 +646,24 @@ class StepVector( object ):
       """
       if self.start_index() != other.start_index() or len(self) != len(other) or \
             self.typecode() != other.typecode():
-         print "Mark A"
+         print("Mark A")
          return False
       selfsteps = self.get_steps()
       othrsteps = other.get_steps()
-      selfstart, selfstop, selfval = selfsteps.next()
-      othrstart, othrstop, othrval = othrsteps.next()
+      selfstart, selfstop, selfval = next(selfsteps)
+      othrstart, othrstop, othrval = next(othrsteps)
       while selfstop < self.start_index() + len(self) and \
             othrstop < other.start_index() + len(other):
          assert selfstart < othrstop and othrstart < selfstop
          if not( selfval == othrval ):
             return False
          if selfstop < othrstop:
-            selfstart, selfstop, selfval = selfsteps.next()
+            selfstart, selfstop, selfval = next(selfsteps)
          elif othrstop < selfstop:
-            othrstart, othrstop, othrval = othrsteps.next()
+            othrstart, othrstop, othrval = next(othrsteps)
          else:
-            selfstart, selfstop, selfval = selfsteps.next()
-            othrstart, othrstop, othrval = othrsteps.next()
+            selfstart, selfstop, selfval = next(selfsteps)
+            othrstart, othrstop, othrval = next(othrsteps)
       return True
 
    def __neq__( self, other ):
@@ -671,7 +671,7 @@ class StepVector( object ):
 
    def __reduce__( self ):
       if self.__class__ is not StepVector:
-         raise NotImplemented, "Attempting to pickle a subclass of StepVector without redefined __reduce__."
+         raise NotImplemented("Attempting to pickle a subclass of StepVector without redefined __reduce__.")
       return ( 
          _StepVector_unpickle, 
          ( self.stop - self.start, self._typecode, self.start ),

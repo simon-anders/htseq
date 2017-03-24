@@ -1,11 +1,24 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import sys
-import os.path
+import os
 from distutils.log import INFO as logINFO
 
-python_version = '2.7'
-python_version_tuple = tuple(map(int, python_version.split('.')))
+if ((sys.version_info[0] == 2 and sys.version_info[1] < 7) or
+   (sys.version_info[0] == 3 and sys.version_info[1] < 4)):
+    sys.stderr.write("Error in setup script for HTSeq:\n")
+    sys.stderr.write("HTSeq support Python 2.7 or 3.4+.")
+    sys.exit(1)
+
+# Manage python2/3 compatibility with symlinks
+py_maj = sys.version_info[0]
+py_fdn = 'python'+str(py_maj)+'/'
+print('symlinking folders for python'+str(py_maj))
+for fdn in ['src', 'HTSeq', 'doc', 'scripts', 'test']:
+    if os.path.islink(fdn):
+        os.unlink(fdn)
+    os.symlink(py_fdn+fdn, fdn)
+
 
 try:
     from setuptools import setup, Extension
@@ -42,13 +55,6 @@ except ImportError:
             ]
     )
 
-if ((sys.version_info[0] != python_version_tuple[0]) or
-    (sys.version_info[1] != python_version_tuple[1])):
-    sys.stderr.write("Error in setup script for HTSeq:\n")
-    sys.stderr.write("See the python3 branch on github for Python 3 support.\n")
-    sys.stderr.write("Please use Python 2.7.\n")
-    sys.exit(1)
-
 try:
     import numpy
 except ImportError:
@@ -63,7 +69,7 @@ numpy_include_dir = os.path.join(os.path.dirname(numpy.__file__),
 # Update version from VERSION file into module
 with open('VERSION') as fversion:
     version = fversion.readline().rstrip()
-with open('HTSeq/_version.py', 'wt') as fversion:
+with open(py_fdn+'HTSeq/_version.py', 'wt') as fversion:
     fversion.write('__version__ = "'+version+'"')
 
 
@@ -85,7 +91,10 @@ class Preprocess_command(Command):
         import os
         from shutil import copy
         from subprocess import check_call
-        from subprocess import CalledProcessError as SubprocessError
+        if py_maj == 2:
+            from subprocess import CalledProcessError as SubprocessError
+        else:
+            from subprocess import SubprocessError
 
         def c(x): return check_call(x, shell=True)
         def p(x): return self.announce(x, level=logINFO)
@@ -101,22 +110,33 @@ class Preprocess_command(Command):
             else:
                 raise
         else:
-            c(cython+' src/HTSeq/_HTSeq.pyx -o src/_HTSeq.c')
+            if py_maj == 2:
+                c(cython+' '+py_fdn+'src/HTSeq/_HTSeq.pyx -o '+py_fdn+'src/_HTSeq.c')
+            else:
+                c(cython+' -3 '+py_fdn+'src/HTSeq/_HTSeq.pyx -o '+py_fdn+'src/_HTSeq.c')
 
         # SWIG
         p('SWIGging')
         swig = os.getenv('SWIG', 'swig')
-        pyswigged = 'src/StepVector.py'
+        pyswigged = py_fdn+'src/StepVector.py'
         try:
-            c(swig+' -Wall -c++ -python src/StepVector.i')
+            if py_maj == 2:
+                c(swig+' -Wall -c++ -python '+py_fdn+'src/StepVector.i')
+            else:
+                p('correcting SWIG for python3')
+                c("2to3 --no-diffs --write --nobackups "+pyswigged)
+                c("sed -i 's/    import builtins as __builtin__/    import builtins/' "+pyswigged)
+                c("sed -i 's/\.next/.__next__/' "+pyswigged)
         except SubprocessError:
-            if (os.path.isfile('src/StepVector_wrap.cxx') and
-                    os.path.isfile('src/StepVector.py')):
+            if (os.path.isfile(py_fdn+'src/StepVector_wrap.cxx') and
+                    os.path.isfile(py_fdn+'src/StepVector.py')):
                 p('SWIG not found, but transpiled files found')
             else:
                 raise
         p('moving swigged .py module')
-        copy(pyswigged, 'HTSeq/StepVector.py')
+        copy(pyswigged, py_fdn+'HTSeq/StepVector.py')
+
+        p('done')
 
 
 class Build_with_preprocess(build_py):
