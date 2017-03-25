@@ -3,11 +3,9 @@
 # HTSeq
 HTSeq is a Python library to facilitate processing and analysis of data from high-throughput sequencing (HTS) experiments. 
 
-**NOTE**: htseq is currently undergoing a major update. The `master` (python2.7) and `python3` (python>=3.4) branches on github require `pysam>=0.9`, but the PyPI version refers to the last stable release, which is only compatible with `pysam<=0.8.0`.We will update the PyPI version within the next few weeks (hopefully!).
-
 ### Requirements
 To use `HTSeq` you will need:
-- `Python ==2.7` (see the `python3` branch for Python 3 support)
+- `Python 2.7`or `Python >= 3.4` (tested up to 3.6)
 - `numpy`
 - `pysam >= 0.9.0`
 
@@ -22,20 +20,18 @@ The latter packages are not required if you have already built `HTSeq` and are t
 
 ### Installation
 #### PIP
-Install all runtime and build dependencies. Because setuptools has historic issues with cython and optional dependencies, you need to install them before anything.
-```bash
-pip install Cython
-pip install 'matplotlib>=1.4'
-```
-
-To install `HTSeq` itself, you can download the source from github and run:
-```bash
-pip install .
-```
-or install directly from PyPI (once the new version becomes available):
+To install directly from PyPI:
 ```bash
 pip install HTSeq
 ```
+If this fails, please install all dependencies first:
+```bash
+pip install 'matplotlib>=1.4'
+pip install Cython
+pip install 'pysam>=0.9'
+pip install HTSeq
+```
+**NOTE**: `pysam==0.9.0` has a bug so that `pip Cython` is __required__ at installation. `pysam>=0.10.0` should build without Cython.
 
 #### Using setup.py (distutils/setuptools)
 Install the dependencies with your favourite tool (`pip`, `conda`, etc.).
