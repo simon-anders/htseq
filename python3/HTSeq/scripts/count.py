@@ -1,5 +1,5 @@
 import sys
-import optparse
+import argparse
 import itertools
 import warnings
 import traceback
@@ -23,7 +23,8 @@ def invert_strand(iv):
     return iv2
 
 
-def count_reads_in_features(sam_filename, gff_filename, samtype, order,
+def count_reads_in_features(sam_filename, gff_filename,
+                            samtype, order,
                             stranded, overlap_mode, feature_type, id_attribute,
                             quiet, minaqual, samout):
 
@@ -248,89 +249,93 @@ def my_showwarning(message, category, filename, lineno=None, line=None):
 
 def main():
 
-    optParser = optparse.OptionParser(
-
+    pa = argparse.ArgumentParser(
         usage="%prog [options] alignment_file gff_file",
-
         description="This script takes an alignment file in SAM/BAM format " +
         "and a feature file in GFF format and calculates for each feature " +
         "the number of reads mapping to it. See " +
         "http://www-huber.embl.de/users/anders/HTSeq/doc/count.html for details.",
-
         epilog="Written by Simon Anders (sanders@fs.tum.de), " +
         "European Molecular Biology Laboratory (EMBL). (c) 2010. " +
         "Released under the terms of the GNU General Public License v3. " +
         "Part of the 'HTSeq' framework, version %s." % HTSeq.__version__)
 
-    optParser.add_option("-f", "--format", type="choice", dest="samtype",
-                         choices=("sam", "bam"), default="sam",
-                         help="type of <alignment_file> data, either 'sam' or 'bam' (default: sam)")
+    pa.add_argument(
+            "sam_filename", dest="samfilename", type=str,
+            help="Path to the SAM file containing the mapped reads")
 
-    optParser.add_option("-r", "--order", type="choice", dest="order",
-                         choices=("pos", "name"), default="name",
-                         help="'pos' or 'name'. Sorting order of <alignment_file> (default: name). Paired-end sequencing " +
-                         "data must be sorted either by position or by read name, and the sorting order " +
-                         "must be specified. Ignored for single-end data.")
+    pa.add_argument(
+            "features_filename", dest="featuresfilename", type="str",
+            help="Path to the file containing the features")
 
-    optParser.add_option("-s", "--stranded", type="choice", dest="stranded",
-                         choices=("yes", "no", "reverse"), default="yes",
-                         help="whether the data is from a strand-specific assay. Specify 'yes', " +
-                         "'no', or 'reverse' (default: yes). " +
-                         "'reverse' means 'yes' with reversed strand interpretation")
+    pa.add_argument(
+            "-f", "--format", dest="samtype",
+            choices=("sam", "bam"), default="sam",
+            help="type of <alignment_file> data, either 'sam' or 'bam' (default: sam)")
 
-    optParser.add_option("-a", "--minaqual", type="int", dest="minaqual",
-                         default=10,
-                         help="skip all reads with alignment quality lower than the given " +
-                         "minimum value (default: 10)")
+    pa.add_argument(
+            "-r", "--order", dest="order",
+            choices=("pos", "name"), default="name",
+            help="'pos' or 'name'. Sorting order of <alignment_file> (default: name). Paired-end sequencing " +
+            "data must be sorted either by position or by read name, and the sorting order " +
+            "must be specified. Ignored for single-end data.")
 
-    optParser.add_option("-t", "--type", type="string", dest="featuretype",
-                         default="exon", help="feature type (3rd column in GFF file) to be used, " +
-                         "all features of other type are ignored (default, suitable for Ensembl " +
-                         "GTF files: exon)")
+    pa.add_argument(
+            "-s", "--stranded", dest="stranded",
+            choices=("yes", "no", "reverse"), default="yes",
+            help="whether the data is from a strand-specific assay. Specify 'yes', " +
+            "'no', or 'reverse' (default: yes). " +
+            "'reverse' means 'yes' with reversed strand interpretation")
 
-    optParser.add_option("-i", "--idattr", type="string", dest="idattr",
-                         default="gene_id", help="GFF attribute to be used as feature ID (default, " +
-                         "suitable for Ensembl GTF files: gene_id)")
+    pa.add_argument(
+            "-a", "--minaqual", type=int, dest="minaqual",
+            default=10,
+            help="skip all reads with alignment quality lower than the given " +
+            "minimum value (default: 10)")
 
-    optParser.add_option("-m", "--mode", type="choice", dest="mode",
-                         choices=("union", "intersection-strict",
-                                  "intersection-nonempty"),
-                         default="union", help="mode to handle reads overlapping more than one feature " +
-                         "(choices: union, intersection-strict, intersection-nonempty; default: union)")
+    pa.add_argument(
+            "-t", "--type", type=str, dest="featuretype",
+            default="exon", help="feature type (3rd column in GFF file) to be used, " +
+            "all features of other type are ignored (default, suitable for Ensembl " +
+            "GTF files: exon)")
 
-    optParser.add_option("-o", "--samout", type="string", dest="samout",
-                         default="", help="write out all SAM alignment records into an output " +
-                         "SAM file called SAMOUT, annotating each line with its feature assignment " +
-                         "(as an optional field with tag 'XF')")
+    pa.add_argument(
+            "-i", "--idattr", type=str, dest="idattr",
+            default="gene_id", help="GFF attribute to be used as feature ID (default, " +
+            "suitable for Ensembl GTF files: gene_id)")
 
-    optParser.add_option("-q", "--quiet", action="store_true", dest="quiet",
-                         help="suppress progress report")  # and warnings" )
+    pa.add_argument(
+            "-m", "--mode", dest="mode",
+            choices=("union", "intersection-strict", "intersection-nonempty"),
+            default="union", help="mode to handle reads overlapping more than one feature " +
+            "(choices: union, intersection-strict, intersection-nonempty; default: union)")
 
-    if len(sys.argv) == 1:
-        optParser.print_help()
-        sys.exit(1)
+    pa.add_argument(
+            "-o", "--samout", type=str, dest="samout",
+            default="", help="write out all SAM alignment records into an output " +
+            "SAM file called SAMOUT, annotating each line with its feature assignment " +
+            "(as an optional field with tag 'XF')")
 
-    (opts, args) = optParser.parse_args()
+    pa.add_argument(
+            "-q", "--quiet", action="store_true", dest="quiet",
+            help="suppress progress report")  # and warnings" )
 
-    if len(args) != 2:
-        sys.stderr.write(
-            sys.argv[0] + ": Error: Please provide two arguments.\n")
-        sys.stderr.write("  Call with '-h' to get usage information.\n")
-        sys.exit(1)
+    args = pa.parse_args()
 
     warnings.showwarning = my_showwarning
     try:
         count_reads_in_features(
-                args[0], args[1],
-                opts.samtype,
-                opts.order,
-                opts.stranded,
-                opts.mode,
-                opts.featuretype,
-                opts.idattr,
-                opts.quiet,
-                opts.minaqual,
-                opts.samout)
+                args.samfilename,
+                args.featuresfilename,
+                args.samtype,
+                args.order,
+                args.stranded,
+                args.mode,
+                args.featuretype,
+                args.idattr,
+                args.quiet,
+                args.minaqual,
+                args.samout)
     except:
         sys.stderr.write("  %s\n" % str(sys.exc_info()[1]))
         sys.stderr.write("  [Exception type: %s, raised in %s:%d]\n" %
