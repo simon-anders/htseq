@@ -25,7 +25,8 @@ def invert_strand(iv):
 
 def count_reads_in_features(sam_filename, gff_filename,
                             samtype, order,
-                            stranded, overlap_mode, feature_type, id_attribute,
+                            stranded, overlap_mode, multimapped_mode,
+                            feature_type, id_attribute,
                             quiet, minaqual, samout):
 
     def write_to_samout(r, assignment):
@@ -134,7 +135,8 @@ def count_reads_in_features(sam_filename, gff_filename,
                     if r.optional_field("NH") > 1:
                         nonunique += 1
                         write_to_samout(r, "__alignment_not_unique")
-                        continue
+                        if multimapped_mode == 'none':
+                            continue
                 except KeyError:
                     pass
                 if r.aQual < minaqual:
@@ -177,7 +179,8 @@ def count_reads_in_features(sam_filename, gff_filename,
                        (r[1] is not None and r[1].optional_field("NH") > 1)):
                         nonunique += 1
                         write_to_samout(r, "__alignment_not_unique")
-                        continue
+                        if multimapped_mode == 'none':
+                            continue
                 except KeyError:
                     pass
                 if ((r[0] and r[0].aQual < minaqual) or
@@ -194,8 +197,8 @@ def count_reads_in_features(sam_filename, gff_filename,
                             raise UnknownChrom
                         for iv2, fs2 in features[iv].steps():
                             fs = fs.union(fs2)
-                elif ((overlap_mode == "intersection-strict") or
-                     (overlap_mode == "intersection-nonempty")):
+                elif overlap_mode in ("intersection-strict",
+                                      "intersection-nonempty"):
                     fs = None
                     for iv in iv_seq:
                         if iv.chrom not in features.chrom_vectors:
@@ -217,7 +220,20 @@ def count_reads_in_features(sam_filename, gff_filename,
                     ambiguous += 1
                 else:
                     write_to_samout(r, list(fs)[0])
-                    counts[list(fs)[0]] += 1
+
+                if fs is not None and len(fs) > 0:
+                    if multimapped_mode == 'none' and len(fs) == 1:
+                        counts[list(fs)[0]] += 1
+                    elif multimapped_mode == 'all':
+                        for fsi in list(fs):
+                            counts[fsi] += 1
+                    elif multimapped_mode == 'fraction':
+                        weight = 1.0 / len(fs)
+                        for fsi in list(fs):
+                            counts[fsi] += weight
+                    else:
+                        sys.exit("Illegal multimap mode.")
+
             except UnknownChrom:
                 write_to_samout(r, "__no_feature")
                 empty += 1
@@ -311,6 +327,11 @@ def main():
             "(choices: union, intersection-strict, intersection-nonempty; default: union)")
 
     pa.add_argument(
+            "--nonunique", dest="multimap",
+            choices=("none", "all", "fraction"), default="none",
+            help="Whether to score reads that are not uniquely aligned")
+
+    pa.add_argument(
             "-o", "--samout", type=str, dest="samout",
             default="", help="write out all SAM alignment records into an output " +
             "SAM file called SAMOUT, annotating each line with its feature assignment " +
@@ -331,6 +352,7 @@ def main():
                 args.order,
                 args.stranded,
                 args.mode,
+                args.multimap,
                 args.featuretype,
                 args.idattr,
                 args.quiet,
