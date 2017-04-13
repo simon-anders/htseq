@@ -9,12 +9,14 @@ build_dir = "build/lib.%s-%s" % (distutils.util.get_platform(), sys.version[0:3]
 sys.path.insert(0, os.path.join(os.getcwd(), build_dir))
 import HTSeq
 
+py_fdn = 'python'+str(sys.version_info[0])
+
 
 def test_rst_file(filename):
     print("Doctest of %s:" % os.path.basename(filename))
     os.chdir("example_data")
     (failure_count, test_count) = doctest.testfile(
-            os.path.join("..", "doc", filename),
+            os.path.join("..", py_fdn, "doc", filename),
             module_relative=False)
     os.chdir("..")
 
