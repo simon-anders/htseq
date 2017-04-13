@@ -27,8 +27,10 @@ def test_rst_file(filename):
 
 ok = True
 if len(sys.argv) == 1:
-    print('RST files found:', glob.glob("../doc/*.rst"))
-    for fn in glob.glob("../doc/*.rst"):
+    pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+    rst_glob = os.path.join(pathname, '..', 'doc', '*.rst')
+    print('RST files found:', glob.glob(rst_glob))
+    for fn in glob.glob(rst_glob):
         ok &= test_rst_file(os.path.basename(fn))
         print()
     if not ok:
