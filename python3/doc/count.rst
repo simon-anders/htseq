@@ -101,8 +101,8 @@ was absent up to version 0.5.4). The special counters are:
   (set `S` as described above was empty).
    
 * ``__ambiguous``: reads (or read pairs) which could have been assigned to more than 
-  one feature and hence were not counted for any of these (set `S`
-  had mroe than one element).
+  one feature and hence were not counted for any of these, unless the
+  ``--nonunique all`` option was used (set `S` had more than one element).
   
 * ``__too_low_aQual``: reads (or read pairs) which were skipped due to the ``-a``
   option, see below
@@ -113,7 +113,9 @@ was absent up to version 0.5.4). The special counters are:
   These reads are recognized from the ``NH`` optional SAM field tag. 
   (If the aligner does not set this field, multiply aligned reads will 
   be counted multiple times, unless they getv filtered out by due to the ``-a`` option.)
-  
+  Note that if the ``--nonunique all`` option was used, these reads (or read pairs)
+  are still assigned to features.
+
 
 *Important:* The default for strandedness is *yes*. If your RNA-Seq data has not been made
 with a strand-specific protocol, this causes half of the reads to be lost.
@@ -184,6 +186,12 @@ Options
    Mode to handle reads overlapping more than one feature. Possible values for
    `<mode>` are ``union``, ``intersection-strict`` and ``intersection-nonempty``
    (default: ``union``)
+
+.. cmdoption:: --nonunique=<nonunique mode>
+
+   Mode to handle reads that align to or are assigned to more than one feature
+   in the overlap `<mode>` of choice (see -m option). `<nonunique mode>` are
+   ``none`` and ``all`` (default: ``none``)
 
 .. cmdoption:: -o <samout>, --samout=<samout>
 
