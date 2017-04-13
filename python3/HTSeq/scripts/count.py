@@ -25,7 +25,8 @@ def invert_strand(iv):
 
 def count_reads_in_features(sam_filename, gff_filename,
                             samtype, order,
-                            stranded, overlap_mode, multimapped_mode,
+                            stranded, overlap_mode,
+                            multimapped_mode,
                             feature_type, id_attribute,
                             quiet, minaqual, samout):
 
@@ -212,6 +213,7 @@ def count_reads_in_features(sam_filename, gff_filename,
                                     fs = fs.intersection(fs2)
                 else:
                     sys.exit("Illegal overlap mode.")
+
                 if fs is None or len(fs) == 0:
                     write_to_samout(r, "__no_feature")
                     empty += 1
@@ -227,10 +229,6 @@ def count_reads_in_features(sam_filename, gff_filename,
                     elif multimapped_mode == 'all':
                         for fsi in list(fs):
                             counts[fsi] += 1
-                    elif multimapped_mode == 'fraction':
-                        weight = 1.0 / len(fs)
-                        for fsi in list(fs):
-                            counts[fsi] += weight
                     else:
                         sys.exit("Illegal multimap mode.")
 
@@ -328,8 +326,9 @@ def main():
 
     pa.add_argument(
             "--nonunique", dest="multimap",
-            choices=("none", "all", "fraction"), default="none",
-            help="Whether to score reads that are not uniquely aligned")
+            choices=("none", "all"), default="none",
+            help="Whether to score reads that are not uniquely aligned " +
+            "or ambiguously assigned to features")
 
     pa.add_argument(
             "-o", "--samout", type=str, dest="samout",
