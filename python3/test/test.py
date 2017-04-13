@@ -8,14 +8,15 @@ build_dir = "build/lib.%s-%s" % (distutils.util.get_platform(), sys.version[0:3]
 
 sys.path.insert(0, os.path.join(os.getcwd(), build_dir))
 import HTSeq
-os.chdir("example_data")
 
 
 def test_rst_file(filename):
     print("Doctest of %s:" % os.path.basename(filename))
+    os.chdir("example_data")
     (failure_count, test_count) = doctest.testfile(
             os.path.join("..", "doc", filename),
             module_relative=False)
+    os.chdir("..")
 
     if failure_count == 0:
         print("All %d tests passed." % test_count)
@@ -29,7 +30,7 @@ ok = True
 if len(sys.argv) == 1:
     pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
     rst_glob = os.path.join(pathname, '..', 'doc', '*.rst')
-    print('RST files found:', glob.glob(rst_glob))
+    print('RST files found in glob ', rst_glob+':', glob.glob(rst_glob))
     for fn in glob.glob(rst_glob):
         ok &= test_rst_file(os.path.basename(fn))
         print()
