@@ -20,21 +20,21 @@ alt="counter for iweb" ></a></div></noscript>
 <!-- End of StatCounter Code -->
 '''
 
-def process_file( fn ):
-   lines = open( fn ).readlines()
-   for i in xrange(len(lines)):
-      if lines[i].count( 'statcounter' ) > 0:
+def process_file(fn):
+   lines = open(fn).readlines()
+   for i in range(len(lines)):
+      if lines[i].count('statcounter') > 0:
          return
-   for i in xrange(len(lines)):
-      if lines[i].count( '<\body>' ) > 0:
+   for i in range(len(lines)):
+      if lines[i].count('<\body>') > 0:
          break
-   lines.insert( i, counter_code )
-   f = open( fn, 'w' )
+   lines.insert(i, counter_code)
+   f = open(fn, 'w')
    for l in lines:
-      f.write( l )
+      f.write(l)
    f.close()
       
-for fn in glob.glob( "_build/html/*html" ):
-   process_file( fn )      
+for fn in glob.glob("_build/html/*html"):
+   process_file(fn)      
 
    

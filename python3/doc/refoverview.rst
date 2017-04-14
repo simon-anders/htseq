@@ -65,7 +65,7 @@ Special features for SAM/BAM files
 
 The class :class:`CigarOperation` offers a convenient way to handle the information encoded in the CIGAR field of SAM files.
 
-The functions :func:`pair_SAM_alignments` and :func:`pair_SAM_alignments_with_buffer` help to ``pair up'' the records
+The functions :func:`pair_SAM_alignments` and :func:`pair_SAM_alignments_with_buffer` help to ``pair up`` the records
 in a SAM file that describe a pair of alignments for mated reads from the same DNA fragment.
 
 Similarly, the function :func:`bundle_multiple_alignments` bundles multiple alignment record pertaining to the same read or read pair.

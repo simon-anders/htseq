@@ -49,7 +49,8 @@ copyright = u'2010, Simon Anders'
 # built documents.
 #
 # The short X.Y version.
-version = open( "../VERSION" ).readlines()[0].rstrip()
+with open('../../VERSION', 'rt') as f:
+    version = f.readline().rstrip()
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -190,7 +191,7 @@ latex_documents = [
 #latex_use_modindex = True
 
 
-
+html_theme = "classic"
 html_theme_options = {
     "sidebarbgcolor": "#006666",
     "sidebarlinkcolor": "#FFFEFF",
