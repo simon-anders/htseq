@@ -145,7 +145,7 @@ def main():
         sys.stderr.write( "Error occured in: %s\n" %
             readfile.get_line_number_string() )
         raise
-    print i, "reads processed"
+    print(i, "reads processed")
 
 
     # **** Normalize result ****
