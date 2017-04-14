@@ -4,6 +4,50 @@
 Version history
 ***************
 
+Version 0.7.2
+=============
+
+2017-03-24
+
+This release effectively merges the Python2 and Python3 branches.
+
+Enhancements:
+
+- ``pip install HTSeq`` works for both Python 2.7 and 3.4+
+
+
+Version 0.7.1
+=============
+
+2017-03-16
+
+Enhancements:
+
+- installs from PyPI
+
+
+Version 0.7.0
+=============
+
+2017-02-07
+
+Enhancements:
+
+- understands SAMtools optional field B (used sometimes in STAR aligner)
+- write fasta files in a single line
+- better docstrings thanks to SWIG 3
+
+Bugfixes:
+
+- fixed tests and docs in .rst files
+
+Support bumps:
+
+- supports pysam >=0.9.0
+
+New maintainer: Fabio Zanini.
+
+
 Version 0.6.1
 =============
 
