@@ -123,8 +123,9 @@ def count_reads_in_features(sam_filename, gff_filename,
         i = 0
         for r in read_seq:
             if i > 0 and i % 100000 == 0 and not quiet:
-                sys.stderr.write("%d SAM alignment record%s processed.\n" % (
-                    i, "s" if not pe_mode else " pairs"))
+                sys.stderr.write(
+                    "%d SAM alignment record%s processed.\n" %
+                    (i, "s" if not pe_mode else " pairs"))
 
             i += 1
             if not pe_mode:
@@ -154,22 +155,24 @@ def count_reads_in_features(sam_filename, gff_filename,
             else:
                 if r[0] is not None and r[0].aligned:
                     if stranded != "reverse":
-                        iv_seq = (co.ref_iv for co in r[
-                                  0].cigar if co.type == "M" and co.size > 0)
+                        iv_seq = (co.ref_iv for co in r[0].cigar
+                                  if co.type == "M" and co.size > 0)
                     else:
-                        iv_seq = (invert_strand(co.ref_iv) for co in r[
-                                  0].cigar if co.type == "M" and co.size > 0)
+                        iv_seq = (invert_strand(co.ref_iv) for co in r[0].cigar
+                                  if co.type == "M" and co.size > 0)
                 else:
                     iv_seq = tuple()
                 if r[1] is not None and r[1].aligned:
                     if stranded != "reverse":
                         iv_seq = itertools.chain(
                                 iv_seq,
-                                (invert_strand(co.ref_iv) for co in r[1].cigar if co.type == "M" and co.size > 0))
+                                (invert_strand(co.ref_iv) for co in r[1].cigar
+                                if co.type == "M" and co.size > 0))
                     else:
                         iv_seq = itertools.chain(
                                 iv_seq,
-                                (co.ref_iv for co in r[1].cigar if co.type == "M" and co.size > 0))
+                                (co.ref_iv for co in r[1].cigar
+                                 if co.type == "M" and co.size > 0))
                 else:
                     if (r[0] is None) or not (r[0].aligned):
                         write_to_samout(r, "__not_aligned")
@@ -243,8 +246,8 @@ def count_reads_in_features(sam_filename, gff_filename,
         raise
 
     if not quiet:
-        sys.stderr.write("%d SAM %s processed.\n" % (
-            i, "alignments " if not pe_mode else "alignment pairs"))
+        sys.stderr.write("%d SAM %s processed.\n" %
+            (i, "alignments " if not pe_mode else "alignment pairs"))
 
     if samoutfile is not None:
         samoutfile.close()
