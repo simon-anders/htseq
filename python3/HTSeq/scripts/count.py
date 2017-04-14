@@ -224,8 +224,9 @@ def count_reads_in_features(sam_filename, gff_filename,
                     write_to_samout(r, list(fs)[0])
 
                 if fs is not None and len(fs) > 0:
-                    if multimapped_mode == 'none' and len(fs) == 1:
-                        counts[list(fs)[0]] += 1
+                    if multimapped_mode == 'none':
+                        if len(fs) == 1:
+                            counts[list(fs)[0]] += 1
                     elif multimapped_mode == 'all':
                         for fsi in list(fs):
                             counts[fsi] += 1
@@ -264,7 +265,7 @@ def my_showwarning(message, category, filename, lineno=None, line=None):
 def main():
 
     pa = argparse.ArgumentParser(
-        usage="%prog [options] alignment_file gff_file",
+        usage="%(prog)s [options] alignment_file gff_file",
         description="This script takes an alignment file in SAM/BAM format " +
         "and a feature file in GFF format and calculates for each feature " +
         "the number of reads mapping to it. See " +
@@ -275,11 +276,11 @@ def main():
         "Part of the 'HTSeq' framework, version %s." % HTSeq.__version__)
 
     pa.add_argument(
-            "sam_filename", dest="samfilename", type=str,
+            "samfilename", type=str,
             help="Path to the SAM file containing the mapped reads")
 
     pa.add_argument(
-            "features_filename", dest="featuresfilename", type="str",
+            "featuresfilename", type=str,
             help="Path to the file containing the features")
 
     pa.add_argument(
@@ -325,7 +326,7 @@ def main():
             "(choices: union, intersection-strict, intersection-nonempty; default: union)")
 
     pa.add_argument(
-            "--nonunique", dest="multimap",
+            "--nonunique", dest="nonunique", type=str,
             choices=("none", "all"), default="none",
             help="Whether to score reads that are not uniquely aligned " +
             "or ambiguously assigned to features")
@@ -351,7 +352,7 @@ def main():
                 args.order,
                 args.stranded,
                 args.mode,
-                args.multimap,
+                args.nonunique,
                 args.featuretype,
                 args.idattr,
                 args.quiet,
