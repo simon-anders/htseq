@@ -1,7 +1,7 @@
 .. _contrib:
 
 **********************
-Notes for Contributers
+Notes for Contributors
 **********************
 
 If you intend to contribute to the development of HTSeq, these notes will
