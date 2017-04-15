@@ -16,8 +16,6 @@ The source code is on Github_. To check out the repository, use
   
   git clone https://github.com/simon-anders/htseq.git 
    
-To browse the repository, see here_.
-  
 .. _Github: https://github.com/simon-anders/htseq
 
 Languages
@@ -54,14 +52,12 @@ Build process
 
 HTSeq follows the standard python packaging guidelines and relies on a
 ``setup.py`` script that is simultaneously compatible withPython 2 and 3. To
-build the code, run:
+build the code, run::
 
-::
   python setup.py build
 
-and to install:
+and to install::
 
-::
   python setup.py install
 
 If you are not modifying the low-level C/C++/Cython interfaces, you can do
@@ -75,9 +71,8 @@ To test during development, HTSeq relies on Continuous Integration (CI), at
 the moment Travis CI is set up.
 
 To build the documentation, Sphinx_ was used. Just go into the appropriate
-``doc`` folder and call:
+``doc`` folder and call::
 
-::
   make html
 
 to regenerate the documentation. Docs are stored on readthedocs_.
@@ -88,9 +83,8 @@ to regenerate the documentation. Docs are stored on readthedocs_.
 Distributing
 ------------
 
-To wrap up a package, call:
+To wrap up a package, call::
 
-::
   python setup.py sdist
  
 This makes a directory ``dists`` and in there, a tarball with all the source
