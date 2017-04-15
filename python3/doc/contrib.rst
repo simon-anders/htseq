@@ -1,7 +1,7 @@
 .. _contrib:
 
 **********************
-Notes for Contributers
+Notes for Contributors
 **********************
 
 If you intend to contribute to the development of HTSeq, these notes will
@@ -10,20 +10,20 @@ help you to get started.
 Source code
 -----------
 
-The source code is on an Subversion repository, hosted on SourceForge.
-
-To check out the repository, use
+The source code is on Github_. To check out the repository, use
   
 ::
   
-  svn co https://htseq.svn.sourceforge.net/svnroot/htseq/trunk htseq 
+  git clone https://github.com/simon-anders/htseq.git 
    
-To browse the repository, see here_.
-  
-.. _here: http://htseq.svn.sourceforge.net/viewvc/htseq/
+.. _Github: https://github.com/simon-anders/htseq
 
 Languages
 ---------
+
+HTSeq is mostly written in Python and is compatible with both Python 2.7 and
+Python 3.4 and above. However, the codebases for Python 2/3 are separate and
+development happens mainly on the Python 3 branch.
 
 A good part of HTSeq is actually not written in Python but in 
 Cython_. In case you don't know it yet: Cython, a fork from Pyrex, is a
@@ -50,50 +50,54 @@ part.
 Build process
 -------------
 
-I do not want to burden the user with having to install 
-SWIG or Cython. Both these tools work by generating C/C++ code which then can
-be compiled without the need of any files from SWIG or Cython. Hence, I've
-divided the build process into two steps:
+HTSeq follows the standard python packaging guidelines and relies on a
+``setup.py`` script that is simultaneously compatible withPython 2 and 3. To
+build the code, run::
 
-* Step 1: Generate the C/C++ files from the SWIG and Cython source files.
-  This is done by the calling ``make`` in the ``src`` directory. Note that
-  the ``Makefile`` there contains only calls to ``cython`` and ``swig`` but
-  not to the C compiler. (Note: I am using Cython 0.11. Compiling with
-  Cython 0.12 does not work at the moment, but I will update at some point.)
-  
-* Step 2: The C files are compiled and copied together with the Python source
-  files into a ``build`` directory. This is done by calling ``python setup.py build``
-  in the root directory. It creates (as usual for a setup.py script) a new
-  directory ``build`` and in it a subdirectory for the machine architecture,
-  which then contains the package directory. 
-  
-To test during development, set the ``PYTHONPATH`` to point to the maschine-specific
-directory in the ``build`` directory, so that Python can find the ``HTSeq`` directory
-that ``setup.py build`` puts there. Whenever you make a change, call the shell
-script ``build_it``, which contains just two lines: the first calls ``make`` in ``src``,
-the second calls ``setup.py build``.
+  python setup.py build
+
+and to install::
+
+  python setup.py install
+
+If you are not modifying the low-level C/C++/Cython interfaces, you can do
+without Cython and SWIG. This is how users normally install HTSeq using
+``pip``. If you do modify those files, the ``setup.py`` has a preprocessing
+step that calls Cython and/or SWIG if these programs are found. You set
+the ``SWIG`` and ``CYTHON`` environment variables to point to your executables
+if you have special requirements.
+    
+To test during development, HTSeq relies on Continuous Integration (CI), at
+the moment Travis CI is set up.
+
+To build the documentation, Sphinx_ was used. Just go into the appropriate
+``doc`` folder and call::
+
+  make html
+
+to regenerate the documentation. Docs are stored on readthedocs_.
+
+.. _Sphinx: http://www.sphinx-doc.org/
+.. _readthedocs: https://readthedocs.org/
 
 Distributing
 ------------
 
-To wrap up a package, call ``build_it`` (or at least ``make`` in ``src``) 
-and then ``setup.py sdist``. This makes a directory ``dists`` and in there,
-a tarball with all the source files (Python and C/C++) and all kinds of other stuff
-(unfortunately including the ``example_files`` directory, that I hence always delete manually
-before running ``setup.py sdist`` to keep the package lean). The tarball contains, when unpacked
-the ``setup.py`` script, which allows installing with ``setup.py install``.
+To wrap up a package, call::
 
-I am using setuptools_ (and not distutils_) so that I can make Python eggs with
-``setup.py bdist_egg``. For Windows binaries, I use ``setup.py bdist_wininst --compiler=mingw32``
-on my virtual Windows box.
-
-.. _setuptools: http://peak.telecommunity.com/DevCenter/setuptools
-.. _distutils: http://docs.python.org/library/distutils.html
+  python setup.py sdist
+ 
+This makes a directory ``dists`` and in there, a tarball with all the source
+files (Python and C/C++). If you are a maintainer of HTSeq, you can upload
+this file onto PyPI on the testing server. Then, you should run the Tracis CI
+tests that try to install HTSeq directly from PyPI (without the source code).
+If all goes well, you can upload the tar file onto the live PyPI server.
 
 Files
 -----
 
-The package contains the following source files:
+The package contains source files for Python 2 and 3 in separate folders.
+Within each of those folders, the following files are found:
 
 ``HTSeq/__init__.py``:
    The outer face of HTSeq. This file defines the name space of HTSeq and contains
@@ -142,28 +146,18 @@ The package contains the following source files:
 ``scripts/htseq-count`` and ``scripts/htseq-qa``:
    Short stubs to call the scripts from the command line simply as, e.g., ``htseq-qa``.
 
+``doc/``:
+   this documentation, in Sphinx reStructuredText format, and a Makefile to drive
+   Sphinx. 
+
+``test/test.py``
+  Performs all the deoctests in the documentation, using the example data in the
+  ``example_data`` directory.
 
 Furthermore, there are these files to support development:
 
-``src/Makefile``:
-  Generates C/C++ files from SWIG and Cython source files but does no C/C++ compiling.
-  
 ``setup.py``:
   A typical setuptools setup.py file.
-  
-``build_it``:
-  A three-line shell script that
-  * generates a file ``HTSeq/_version.py`` from the file ``VERSION``.
-  * calls ``make`` in ``src`` to process ``src/Makefile``
-  * runs ``setup.py build`` (see above)
-  
-``clean``:
-  Another two-line shell script to first call ``make clean`` in ``src`` and then
-  delete whatever ``setup.py`` may have written.
-  
-``test.py``
-  Performs all the deoctests in the documentation, using the example data in the
-  ``example_data`` directory.
   
 Finally, there are these files
 
@@ -179,14 +173,10 @@ Finally, there are these files
 ``LICENCE``:
   The GPL, v3
   
-``README``:
+``README.md``:
   Points the user to the web site.      
   
 and these directories
 
-``doc/``:
-   this documentation, in Sphinx reStructuredText format, and a Makefile to drive
-   Sphinx. 
-   
 ``example_files/``:   
    a few example files to be use by the doctests in the documentation.
