@@ -23,13 +23,13 @@ def invert_strand(iv):
     return iv2
 
 
-def count_reads_in_features(sam_filename, gff_filename,
+def count_reads_in_features(sam_filenames, gff_filename,
                             samtype, order,
                             stranded, overlap_mode,
                             feature_type, id_attribute,
-                            quiet, minaqual, samout):
+                            quiet, minaqual, samouts):
 
-    def write_to_samout(r, assignment):
+    def write_to_samout(r, assignment, samoutfile):
         if samoutfile is None:
             return
         if not pe_mode:
@@ -39,19 +39,23 @@ def count_reads_in_features(sam_filename, gff_filename,
                 samoutfile.write(read.original_sam_line.rstrip() +
                                  "\tXF:Z:" + assignment + "\n")
 
-    if samout != "":
-        samoutfile = open(samout, "w")
+    if samouts != "":
+        if len(samouts) != len(sam_filenames):
+            raise ValueError('Select the same number of SAM input and output files')
+        # FIXME: keeping many files open is not great, OS will complain
+        samoutfiles = [open(samout, "w")]
     else:
-        samoutfile = None
+        samoutfiles = [None] * len(sam_filenames)
+
+    # Try to open samfiles to fail early in case any of them is not there
+    if (len(sam_filenames) != 1) or (sam_filenames[0] != '-'):
+        for sam_filename in sam_filenames:
+            with open(sam_filename):
+                pass
 
     features = HTSeq.GenomicArrayOfSets("auto", stranded != "no")
-    counts = {}
-
-    # Try to open samfile to fail early in case it is not there
-    if sam_filename != "-":
-        open(sam_filename).close()
-
     gff = HTSeq.GFF_Reader(gff_filename)
+    counts = {}
     i = 0
     try:
         for f in gff:
@@ -90,163 +94,181 @@ def count_reads_in_features(sam_filename, gff_filename,
     else:
         raise ValueError("Unknown input format %s specified." % samtype)
 
-    try:
-        if sam_filename != "-":
-            read_seq_file = SAM_or_BAM_Reader(sam_filename)
-            read_seq = read_seq_file
-            first_read = next(iter(read_seq))
-        else:
-            read_seq_file = SAM_or_BAM_Reader(sys.stdin)
-            read_seq_iter = iter(read_seq_file)
-            first_read = next(read_seq_iter)
-            read_seq = itertools.chain([first_read], read_seq_iter)
-        pe_mode = first_read.paired_end
-    except:
-        sys.stderr.write(
-            "Error occured when reading beginning of SAM/BAM file.\n")
-        raise
-
-    try:
-        if pe_mode:
-            if order == "name":
-                read_seq = HTSeq.pair_SAM_alignments(read_seq)
-            elif order == "pos":
-                read_seq = HTSeq.pair_SAM_alignments_with_buffer(read_seq)
+    counts_all = []
+    empty_all = []
+    ambiguous_all = []
+    notaligned_all = []
+    lowqual_all = []
+    nonunique_all = []
+    for isam, (sam_filename, samoutfile) in enumerate(zip(sam_filenames, samoutfiles)):
+        try:
+            if sam_filename != "-":
+                read_seq_file = SAM_or_BAM_Reader(sam_filename)
+                read_seq = read_seq_file
+                first_read = next(iter(read_seq))
             else:
-                raise ValueError("Illegal order specified.")
-        empty = 0
-        ambiguous = 0
-        notaligned = 0
-        lowqual = 0
-        nonunique = 0
-        i = 0
-        for r in read_seq:
-            if i > 0 and i % 100000 == 0 and not quiet:
-                sys.stderr.write(
-                    "%d SAM alignment record%s processed.\n" %
-                    (i, "s" if not pe_mode else " pairs"))
+                read_seq_file = SAM_or_BAM_Reader(sys.stdin)
+                read_seq_iter = iter(read_seq_file)
+                first_read = next(read_seq_iter)
+                read_seq = itertools.chain([first_read], read_seq_iter)
+            pe_mode = first_read.paired_end
+        except:
+            sys.stderr.write(
+                "Error occured when reading beginning of SAM/BAM file.\n")
+            raise
 
-            i += 1
-            if not pe_mode:
-                if not r.aligned:
-                    notaligned += 1
-                    write_to_samout(r, "__not_aligned")
-                    continue
-                try:
-                    if r.optional_field("NH") > 1:
-                        nonunique += 1
-                        write_to_samout(r, "__alignment_not_unique")
-                        continue
-                except KeyError:
-                    pass
-                if r.aQual < minaqual:
-                    lowqual += 1
-                    write_to_samout(r, "__too_low_aQual")
-                    continue
-                if stranded != "reverse":
-                    iv_seq = (co.ref_iv for co in r.cigar if co.type ==
-                              "M" and co.size > 0)
+        try:
+            if pe_mode:
+                if order == "name":
+                    read_seq = HTSeq.pair_SAM_alignments(read_seq)
+                elif order == "pos":
+                    read_seq = HTSeq.pair_SAM_alignments_with_buffer(read_seq)
                 else:
-                    iv_seq = (invert_strand(co.ref_iv)
-                              for co in r.cigar if (co.type == "M" and
-                                                    co.size > 0))
-            else:
-                if r[0] is not None and r[0].aligned:
-                    if stranded != "reverse":
-                        iv_seq = (co.ref_iv for co in r[0].cigar
-                                  if co.type == "M" and co.size > 0)
-                    else:
-                        iv_seq = (invert_strand(co.ref_iv) for co in r[0].cigar
-                                  if co.type == "M" and co.size > 0)
-                else:
-                    iv_seq = tuple()
-                if r[1] is not None and r[1].aligned:
-                    if stranded != "reverse":
-                        iv_seq = itertools.chain(
-                                iv_seq,
-                                (invert_strand(co.ref_iv) for co in r[1].cigar
-                                if co.type == "M" and co.size > 0))
-                    else:
-                        iv_seq = itertools.chain(
-                                iv_seq,
-                                (co.ref_iv for co in r[1].cigar
-                                 if co.type == "M" and co.size > 0))
-                else:
-                    if (r[0] is None) or not (r[0].aligned):
-                        write_to_samout(r, "__not_aligned")
+                    raise ValueError("Illegal order specified.")
+            empty = 0
+            ambiguous = 0
+            notaligned = 0
+            lowqual = 0
+            nonunique = 0
+            i = 0
+            for r in read_seq:
+                if i > 0 and i % 100000 == 0 and not quiet:
+                    sys.stderr.write(
+                        "%d SAM alignment record%s processed.\n" %
+                        (i, "s" if not pe_mode else " pairs"))
+
+                i += 1
+                if not pe_mode:
+                    if not r.aligned:
                         notaligned += 1
+                        write_to_samout(r, "__not_aligned", samoutfile)
                         continue
+                    try:
+                        if r.optional_field("NH") > 1:
+                            nonunique += 1
+                            write_to_samout(r, "__alignment_not_unique", samoutfile)
+                            continue
+                    except KeyError:
+                        pass
+                    if r.aQual < minaqual:
+                        lowqual += 1
+                        write_to_samout(r, "__too_low_aQual", samoutfile)
+                        continue
+                    if stranded != "reverse":
+                        iv_seq = (co.ref_iv for co in r.cigar if co.type ==
+                                  "M" and co.size > 0)
+                    else:
+                        iv_seq = (invert_strand(co.ref_iv)
+                                  for co in r.cigar if (co.type == "M" and
+                                                        co.size > 0))
+                else:
+                    if r[0] is not None and r[0].aligned:
+                        if stranded != "reverse":
+                            iv_seq = (co.ref_iv for co in r[0].cigar
+                                      if co.type == "M" and co.size > 0)
+                        else:
+                            iv_seq = (invert_strand(co.ref_iv) for co in r[0].cigar
+                                      if co.type == "M" and co.size > 0)
+                    else:
+                        iv_seq = tuple()
+                    if r[1] is not None and r[1].aligned:
+                        if stranded != "reverse":
+                            iv_seq = itertools.chain(
+                                    iv_seq,
+                                    (invert_strand(co.ref_iv) for co in r[1].cigar
+                                    if co.type == "M" and co.size > 0))
+                        else:
+                            iv_seq = itertools.chain(
+                                    iv_seq,
+                                    (co.ref_iv for co in r[1].cigar
+                                     if co.type == "M" and co.size > 0))
+                    else:
+                        if (r[0] is None) or not (r[0].aligned):
+                            write_to_samout(r, "__not_aligned", samoutfile)
+                            notaligned += 1
+                            continue
+                    try:
+                        if ((r[0] is not None and r[0].optional_field("NH") > 1) or
+                           (r[1] is not None and r[1].optional_field("NH") > 1)):
+                            nonunique += 1
+                            write_to_samout(r, "__alignment_not_unique", samoutfile)
+                            continue
+                    except KeyError:
+                        pass
+                    if ((r[0] and r[0].aQual < minaqual) or
+                       (r[1] and r[1].aQual < minaqual)):
+                        lowqual += 1
+                        write_to_samout(r, "__too_low_aQual", samoutfile)
+                        continue
+
                 try:
-                    if ((r[0] is not None and r[0].optional_field("NH") > 1) or
-                       (r[1] is not None and r[1].optional_field("NH") > 1)):
-                        nonunique += 1
-                        write_to_samout(r, "__alignment_not_unique")
-                        continue
-                except KeyError:
-                    pass
-                if ((r[0] and r[0].aQual < minaqual) or
-                   (r[1] and r[1].aQual < minaqual)):
-                    lowqual += 1
-                    write_to_samout(r, "__too_low_aQual")
-                    continue
+                    if overlap_mode == "union":
+                        fs = set()
+                        for iv in iv_seq:
+                            if iv.chrom not in features.chrom_vectors:
+                                raise UnknownChrom
+                            for iv2, fs2 in features[iv].steps():
+                                fs = fs.union(fs2)
+                    elif overlap_mode in ("intersection-strict",
+                                          "intersection-nonempty"):
+                        fs = None
+                        for iv in iv_seq:
+                            if iv.chrom not in features.chrom_vectors:
+                                raise UnknownChrom
+                            for iv2, fs2 in features[iv].steps():
+                                if ((len(fs2) > 0) or
+                                   (overlap_mode == "intersection-strict")):
+                                    if fs is None:
+                                        fs = fs2.copy()
+                                    else:
+                                        fs = fs.intersection(fs2)
+                    else:
+                        sys.exit("Illegal overlap mode.")
 
-            try:
-                if overlap_mode == "union":
-                    fs = set()
-                    for iv in iv_seq:
-                        if iv.chrom not in features.chrom_vectors:
-                            raise UnknownChrom
-                        for iv2, fs2 in features[iv].steps():
-                            fs = fs.union(fs2)
-                elif overlap_mode in ("intersection-strict",
-                                      "intersection-nonempty"):
-                    fs = None
-                    for iv in iv_seq:
-                        if iv.chrom not in features.chrom_vectors:
-                            raise UnknownChrom
-                        for iv2, fs2 in features[iv].steps():
-                            if ((len(fs2) > 0) or
-                               (overlap_mode == "intersection-strict")):
-                                if fs is None:
-                                    fs = fs2.copy()
-                                else:
-                                    fs = fs.intersection(fs2)
-                else:
-                    sys.exit("Illegal overlap mode.")
+                    if fs is None or len(fs) == 0:
+                        write_to_samout(r, "__no_feature", samoutfile)
+                        empty += 1
+                    elif len(fs) > 1:
+                        write_to_samout(r, "__ambiguous[" + '+'.join(fs) + "]",
+                                        samoutfile)
+                        ambiguous += 1
+                    else:
+                        write_to_samout(r, list(fs)[0], samoutfile)
+                        counts[list(fs)[0]] += 1
 
-                if fs is None or len(fs) == 0:
-                    write_to_samout(r, "__no_feature")
+                except UnknownChrom:
+                    write_to_samout(r, "__no_feature", samoutfile)
                     empty += 1
-                elif len(fs) > 1:
-                    write_to_samout(r, "__ambiguous[" + '+'.join(fs) + "]")
-                    ambiguous += 1
-                else:
-                    write_to_samout(r, list(fs)[0])
-                    counts[list(fs)[0]] += 1
 
-            except UnknownChrom:
-                write_to_samout(r, "__no_feature")
-                empty += 1
+        except:
+            sys.stderr.write("Error occured when processing SAM input (%s):\n" %
+                             read_seq_file.get_line_number_string())
+            raise
 
-    except:
-        sys.stderr.write("Error occured when processing SAM input (%s):\n" %
-                         read_seq_file.get_line_number_string())
-        raise
+        if not quiet:
+            sys.stderr.write("%d SAM %s processed.\n" %
+                (i, "alignments " if not pe_mode else "alignment pairs"))
 
-    if not quiet:
-        sys.stderr.write("%d SAM %s processed.\n" %
-            (i, "alignments " if not pe_mode else "alignment pairs"))
+        if samoutfile is not None:
+            samoutfile.close()
 
-    if samoutfile is not None:
-        samoutfile.close()
+        counts_all.append(counts.copy())
+        for fn in counts:
+            counts[fn] = 0
+        empty_all.append(empty)
+        ambiguous_all.append(ambiguous)
+        lowqual_all.append(lowqual)
+        notaligned_all.append(notaligned)
+        nonunique_all.append(nonunique)
 
     for fn in sorted(counts.keys()):
         print("%s\t%d" % (fn, counts[fn]))
-    print("__no_feature\t%d" % empty)
-    print("__ambiguous\t%d" % ambiguous)
-    print("__too_low_aQual\t%d" % lowqual)
-    print("__not_aligned\t%d" % notaligned)
-    print("__alignment_not_unique\t%d" % nonunique)
+        print('\t'.join([fn] + [str(c[fn]) for c in counts_all]))
+    print('\t'.join(["__no_feature"] + [str(c) for c in empty_all]))
+    print('\t'.join(["__ambguous"] + [str(c) for c in ambiguous_all]))
+    print('\t'.join(["__too_low_aQual"] + [str(c) for c in lowqual_all]))
+    print('\t'.join(["__not_aligned"] + [str(c) for c in notaligned_all]))
+    print('\t'.join(["__alignment_not_unique"] + [str(c) for c in nonunique_all]))
 
 
 def my_showwarning(message, category, filename, lineno=None, line=None):
@@ -267,8 +289,9 @@ def main():
         "Part of the 'HTSeq' framework, version %s." % HTSeq.__version__)
 
     pa.add_argument(
-            "samfilename", type=str,
-            help="Path to the SAM file containing the mapped reads")
+            "samfilenames", nargs='+', type=str,
+            help="Path to the SAM files containing the mapped reads. " +
+            "If '-' is selected, read from standard input")
 
     pa.add_argument(
             "featuresfilename", type=str,
@@ -331,7 +354,7 @@ def main():
     warnings.showwarning = my_showwarning
     try:
         count_reads_in_features(
-                args.samfilename,
+                args.samfilenames,
                 args.featuresfilename,
                 args.samtype,
                 args.order,
