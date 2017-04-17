@@ -27,6 +27,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
                             samtype, order,
                             stranded, overlap_mode,
                             feature_type, id_attribute,
+                            additional_attributes,
                             quiet, minaqual, samouts):
 
     def write_to_samout(r, assignment, samoutfile):
@@ -42,10 +43,10 @@ def count_reads_in_features(sam_filenames, gff_filename,
     if samouts != "":
         if len(samouts) != len(sam_filenames):
             raise ValueError('Select the same number of SAM input and output files')
-        # FIXME: keeping many files open is not great, OS will complain
-        samoutfiles = [open(samout, "w")]
-    else:
-        samoutfiles = [None] * len(sam_filenames)
+        # Try to open samout files early in case any of them has issues
+        for samout in samouts:
+            with open(samout, 'w'):
+                pass
 
     # Try to open samfiles to fail early in case any of them is not there
     if (len(sam_filenames) != 1) or (sam_filenames[0] != '-'):
@@ -56,6 +57,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
     features = HTSeq.GenomicArrayOfSets("auto", stranded != "no")
     gff = HTSeq.GFF_Reader(gff_filename)
     counts = {}
+    attributes = {}
     i = 0
     try:
         for f in gff:
@@ -71,6 +73,9 @@ def count_reads_in_features(sam_filenames, gff_filename,
                                      (f.name, f.iv))
                 features[f.iv] += feature_id
                 counts[f.attr[id_attribute]] = 0
+                attributes[f.attr[id_attribute]] = [
+                        f.attr[attr] if attr in f.attr else ''
+                        for attr in additional_attributes]
             i += 1
             if i % 100000 == 0 and not quiet:
                 sys.stderr.write("%d GFF lines processed.\n" % i)
@@ -100,7 +105,12 @@ def count_reads_in_features(sam_filenames, gff_filename,
     notaligned_all = []
     lowqual_all = []
     nonunique_all = []
-    for isam, (sam_filename, samoutfile) in enumerate(zip(sam_filenames, samoutfiles)):
+    for isam, (sam_filename) in enumerate(sam_filenames):
+        if samouts != '':
+            samoutfile = open(samouts[isam], 'w')
+        else:
+            samoutfile = None
+
         try:
             if sam_filename != "-":
                 read_seq_file = SAM_or_BAM_Reader(sam_filename)
@@ -241,12 +251,14 @@ def count_reads_in_features(sam_filenames, gff_filename,
                     empty += 1
 
         except:
-            sys.stderr.write("Error occured when processing SAM input (%s):\n" %
-                             read_seq_file.get_line_number_string())
+            sys.stderr.write(
+                "Error occured when processing SAM input (%s):\n" %
+                read_seq_file.get_line_number_string())
             raise
 
         if not quiet:
-            sys.stderr.write("%d SAM %s processed.\n" %
+            sys.stderr.write(
+                "%d SAM %s processed.\n" %
                 (i, "alignments " if not pe_mode else "alignment pairs"))
 
         if samoutfile is not None:
@@ -261,14 +273,14 @@ def count_reads_in_features(sam_filenames, gff_filename,
         notaligned_all.append(notaligned)
         nonunique_all.append(nonunique)
 
+    pad = ['' for attr in additional_attributes]
     for fn in sorted(counts.keys()):
-        print("%s\t%d" % (fn, counts[fn]))
-        print('\t'.join([fn] + [str(c[fn]) for c in counts_all]))
-    print('\t'.join(["__no_feature"] + [str(c) for c in empty_all]))
-    print('\t'.join(["__ambguous"] + [str(c) for c in ambiguous_all]))
-    print('\t'.join(["__too_low_aQual"] + [str(c) for c in lowqual_all]))
-    print('\t'.join(["__not_aligned"] + [str(c) for c in notaligned_all]))
-    print('\t'.join(["__alignment_not_unique"] + [str(c) for c in nonunique_all]))
+        print('\t'.join([fn] + attributes[fn] + [str(c[fn]) for c in counts_all]))
+    print('\t'.join(["__no_feature"] + pad + [str(c) for c in empty_all]))
+    print('\t'.join(["__ambguous"] + pad + [str(c) for c in ambiguous_all]))
+    print('\t'.join(["__too_low_aQual"] + pad + [str(c) for c in lowqual_all]))
+    print('\t'.join(["__not_aligned"] + pad + [str(c) for c in notaligned_all]))
+    print('\t'.join(["__alignment_not_unique"] + pad + [str(c) for c in nonunique_all]))
 
 
 def my_showwarning(message, category, filename, lineno=None, line=None):
@@ -334,14 +346,19 @@ def main():
             "suitable for Ensembl GTF files: gene_id)")
 
     pa.add_argument(
+            "--additional-attr", type=str, nargs='+',
+            default=(), help="Additional feature attributes (default: none, " +
+            "suitable for Ensembl GTS files: gene_name)")
+
+    pa.add_argument(
             "-m", "--mode", dest="mode",
             choices=("union", "intersection-strict", "intersection-nonempty"),
             default="union", help="mode to handle reads overlapping more than one feature " +
             "(choices: union, intersection-strict, intersection-nonempty; default: union)")
 
     pa.add_argument(
-            "-o", "--samout", type=str, dest="samout",
-            default="", help="write out all SAM alignment records into an output " +
+            "-o", "--samout", type=str, dest="samouts", nargs='+',
+            default='', help="write out all SAM alignment records into an output " +
             "SAM file called SAMOUT, annotating each line with its feature assignment " +
             "(as an optional field with tag 'XF')")
 
@@ -362,9 +379,10 @@ def main():
                 args.mode,
                 args.featuretype,
                 args.idattr,
+                args.additional_attr,
                 args.quiet,
                 args.minaqual,
-                args.samout)
+                args.samouts)
     except:
         sys.stderr.write("  %s\n" % str(sys.exc_info()[1]))
         sys.stderr.write("  [Exception type: %s, raised in %s:%d]\n" %
