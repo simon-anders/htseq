@@ -4,27 +4,33 @@
 Prequisites and installation
 ****************************
 
-HTSeq is available from the `Python Package Index (PyPI)`_. Download HTSeq from the
+HTSeq is available from the `Python Package Index (PyPI)`_:
 
-.. _`Python Package Index (PyPI)`: http://pypi.python.org/
+To use HTSeq, you need Python_ 2.7 or 3.4 or above (3.0-3.3 are not supported), 
+together with NumPy_, a commonly used Python package for numerical calculations,
+and Pysam_, a Python interface to samtools_. To make plots, e.g. via `htseq-qa`,
+you will need matplotlib_, a plotting library. 
 
-  `HTSeq package download page on PyPI`_,
+At the moment, HTSeq supports Linux and OSX but not Windows operating systems,
+because one of the key dependencies, Pysam_, lacks automatic support and none
+of the HTSeq authors have access to such a machine. However, it *might* work
+with some work, if you need support for this open an issue on our Github_ page.
 
-.. _`HTSeq package download page on PyPI`: http://pypi.python.org/pypi/HTSeq
- 
-where you will find various version of the package. 
+HTSeq follows install conventions of many Python packages. In the best case, it
+should install from PyPI like this::
 
-To use HTSeq, you need at least version 2.5 of Python_ (Python 3 does not work yet), 
-together with NumPy_,
-a commonly used Python package for numerical calculations,
-and matplotlib_, a plotting library. 
+ pip install HTSeq
 
+If this does not work, please open an issue on Github_ and also try the instructions
+below.
+
+.. _`Python Package Index (PyPI)`: http://pypi.python.org/pypi/HTSeq
 .. _Python: http://www.python.org/
 .. _NumPy: http://numpy.scipy.org/
+.. _Pysam: https://github.com/pysam-developers/pysam
+.. _samtools: http://www.htslib.org/
 .. _matplotlib: http://matplotlib.org/
-
-HTSeq can be installed like any other Python package. For users unfamiliar with this,
-more detailled instructions are given below.
+.. _Github: https://github.com/simon-anders/htseq
 
 
 Installation on Linux
