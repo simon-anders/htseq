@@ -28,14 +28,13 @@ from high-throughput sequencing assays.
 Paper
 =====
 
-HTSeq is described in the following publication (which is currently under review but already
-available as preprint):
+HTSeq is described in the following publication:
 
   | Simon Anders, Paul Theodor Pyl, Wolfgang Huber
   | *HTSeq --- A Python framework to work with high-throughput sequencing data*
-  | bioRxiv preprint (2014), `doi: 10.1101/002824`_
+  | Bioinformatics (2014), in print, online at `doi:10.1093/bioinformatics/btu638`_
 
-.. _`doi: 10.1101/002824`: http://dx.doi.org/10.1101/002824
+.. _`doi:10.1093/bioinformatics/btu638`: https://doi.org/10.1093/bioinformatics/btu638
 
 If you use HTSeq in research, please cite this paper in your publication.   
 
