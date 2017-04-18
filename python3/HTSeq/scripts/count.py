@@ -291,8 +291,8 @@ def main():
 
     pa = argparse.ArgumentParser(
         usage="%(prog)s [options] alignment_file gff_file",
-        description="This script takes an alignment file in SAM/BAM format " +
-        "and a feature file in GFF format and calculates for each feature " +
+        description="This script takes one or more alignment files in SAM/BAM " +
+        "format and a feature file in GFF format and calculates for each feature " +
         "the number of reads mapping to it. See " +
         "http://www-huber.embl.de/users/anders/HTSeq/doc/count.html for details.",
         epilog="Written by Simon Anders (sanders@fs.tum.de), " +
@@ -302,7 +302,7 @@ def main():
 
     pa.add_argument(
             "samfilenames", nargs='+', type=str,
-            help="Path to the SAM files containing the mapped reads. " +
+            help="Path to the SAM/BAM files containing the mapped reads. " +
             "If '-' is selected, read from standard input")
 
     pa.add_argument(
