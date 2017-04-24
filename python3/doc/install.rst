@@ -7,9 +7,11 @@ Prequisites and installation
 HTSeq is available from the `Python Package Index (PyPI)`_:
 
 To use HTSeq, you need Python_ 2.7 or 3.4 or above (3.0-3.3 are not supported), 
-together with NumPy_, a commonly used Python package for numerical calculations,
-and Pysam_, a Python interface to samtools_. To make plots, e.g. via `htseq-qa`,
-you will need matplotlib_, a plotting library. 
+together with:
+
+- NumPy_, a commonly used Python package for numerical calculations
+- Pysam_, a Python interface to samtools_.
+- To make plots you will need matplotlib_, a plotting library. 
 
 At the moment, HTSeq supports Linux and OSX but not Windows operating systems,
 because one of the key dependencies, Pysam_, lacks automatic support and none
@@ -36,34 +38,40 @@ below.
 Installation on Linux
 =====================
 
-Make sure that you the standard GNU build environment installed, as well as Python together with its development headers and numpy and matplotlib. Users of Ubuntu Linux simply type::
+You can choose to install HTSeq via your distribution packages or via `pip`. The former
+is generally recommended but might be updated less often than the `pip` version.
 
-   sudo apt-get install build-essential python2.7-dev python-numpy python-matplotlib
+Distribution package manager
+----------------------------
 
-This command installs the required packages as listed (or simply does nothing if they are already installed.
+- Ubuntu (e.g. for Python 2.7)::
 
-For users of RedHat or RedHat-derived distros (Fedora, CentOS), the equivalent command
-seems to be (untested)::
+ sudo apt-get install build-essential python2.7-dev python-numpy python-matplotlib python-pysam python-htseq
 
-   sudo yum groupinstall "Development Tools"
-   sudo yum install python-devel numpy python-matplotlib
+- Arch (from either official repos or the AUR)::
 
-To install HTSeq itself, download the *source* package from the `HTSeq PyPI page`_, unpack the tarball,
-go into the directory with the unpacked files and type there
+  sudo pacman -S python python-numpy python-matplotlib
+  sudo aura -A python-pysam python-htseq
 
-.. _`HTSeq PyPI page`: http://pypi.python.org/pypi/HTSeq
+PIP
+---
+PIP should take care of the requirements for you::
 
-::
+  pip install HTSeq
 
-   python setup.py install --user
 
-to install HTSeq for the user currently logged in. To make HTSeq available to all users, use instead::
+Installing from GIT
+-------------------
+If you want to install a development version, just clone the git repository, switch to the branch/commit
+you wish, and use ``setuptools``::
 
    python setup.py build
-   sudo python setup.py install
+   python setup.py install
+
+Typical setuptools options are available (e.g. ``--prefix``, ``--user``).
 
 To test the installation, change to another director than the build directory, start Python
-(by typing ``python``) and then try whether typing ``import HTSeq`` causes an error meesage.
+(by typing ``python`` or ``python2.7``) and then try whether typing ``import HTSeq`` causes an error meesage.
 
 Installation on MacOS X
 =======================
