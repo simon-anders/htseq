@@ -46,12 +46,12 @@ Distribution package manager
 
 - Ubuntu (e.g. for Python 2.7)::
 
- sudo apt-get install build-essential python2.7-dev python-numpy python-matplotlib python-pysam python-htseq
+   sudo apt-get install build-essential python2.7-dev python-numpy python-matplotlib python-pysam python-htseq
 
-- Arch (from either official repos or the AUR)::
+- Arch (e.g. using ``aura``, you can grab the AUR packages otherwise)::
 
-  sudo pacman -S python python-numpy python-matplotlib
-  sudo aura -A python-pysam python-htseq
+    sudo pacman -S python python-numpy python-matplotlib
+    sudo aura -A python-pysam python-htseq
 
 PIP
 ---
