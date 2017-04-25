@@ -151,7 +151,7 @@ setup(name='HTSeq',
       author_email='sanders@fs.tum.de',
       maintainer='Fabio Zanini',
       maintainer_email='fabio.zanini@stanford.edu',
-      url='http://www-huber.embl.de/users/anders/HTSeq/',
+      url='https://github.com/simon-anders/htseq',
       description="A framework to process and analyze data from " +
                   "high-throughput sequencing (HTS) assays",
       license='GPL3',

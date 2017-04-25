@@ -1,6 +1,6 @@
 """HTSeq is a package to process high-throughput sequencing data.
 
-See http://www-huber.embl.de/users/anders/HTSeq for documentation.
+See htseq.readthedocs.io/en/master/index.html for documentation.
 """
 
 import itertools, warnings, os, shlex

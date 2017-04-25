@@ -260,7 +260,7 @@ def main():
         description="This script takes an alignment file in SAM/BAM format " +
         "and a feature file in GFF format and calculates for each feature " +
         "the number of reads mapping to it. See " +
-        "http://www-huber.embl.de/users/anders/HTSeq/doc/count.html for details.",
+        "http://htseq.readthedocs.io/en/master/count.html for details.",
         epilog="Written by Simon Anders (sanders@fs.tum.de), " +
         "European Molecular Biology Laboratory (EMBL). (c) 2010. " +
         "Released under the terms of the GNU General Public License v3. " +
