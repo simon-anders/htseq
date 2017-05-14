@@ -57,6 +57,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
    cdef public bint not_primary_alignment
    cdef public bint failed_platform_qc
    cdef public bint pcr_or_optical_duplicate
+   cdef public bint supplementary
    cdef readonly str original_sam_line
    cdef int _flag
    cdef public list optional_fields

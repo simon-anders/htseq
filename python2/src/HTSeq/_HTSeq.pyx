@@ -1292,6 +1292,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       a.not_primary_alignment = read.is_secondary
       a.failed_platform_qc = read.is_qcfail
       a.pcr_or_optical_duplicate = read.is_duplicate
+      a.supplementary = read.is_supplementary
       a.original_sam_line = ""
       a.optional_fields = read.tags
       if read.is_paired:
@@ -1330,6 +1331,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       a.not_primary_alignment = read.is_secondary
       a.failed_platform_qc = read.is_qcfail
       a.pcr_or_optical_duplicate = read.is_duplicate
+      a.supplementary = read.is_supplementary
       a.original_sam_line = ""
       a.optional_fields = read.tags
       if read.is_paired:
@@ -1433,6 +1435,7 @@ cdef class SAM_Alignment( AlignmentWithSequenceReversal ):
       alnmt.not_primary_alignment = flagint & 0x0100 > 0
       alnmt.failed_platform_qc = flagint & 0x0200 > 0
       alnmt.pcr_or_optical_duplicate = flagint & 0x0400 > 0
+      alnmt.supplementary = flagint & 0x0800 > 0
 
       return alnmt
 
