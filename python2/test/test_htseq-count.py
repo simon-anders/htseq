@@ -14,4 +14,13 @@ output = sp.check_output(call)
 with open('example_data/yeast_RNASeq_excerpt_withNH_counts.tsv', 'r') as f:
     expected = f.read()
 
+#assert output == expected
+if output == expected:
+    sys.exit(0)
+
+for out, exp in zip(output.split('\n'), expected.split('\n')):
+    print(out, exp)
+    if out != exp:
+        break
+
 assert output == expected
