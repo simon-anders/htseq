@@ -26,6 +26,7 @@ def invert_strand(iv):
 def count_reads_in_features(sam_filename, gff_filename,
                             samtype, order,
                             stranded, overlap_mode,
+                            multimapped_mode,
                             feature_type, id_attribute,
                             quiet, minaqual, samout):
 
@@ -136,7 +137,8 @@ def count_reads_in_features(sam_filename, gff_filename,
                     if r.optional_field("NH") > 1:
                         nonunique += 1
                         write_to_samout(r, "__alignment_not_unique")
-                        continue
+                        if multimapped_mode == 'none':
+                            continue
                 except KeyError:
                     pass
                 if r.aQual < minaqual:
@@ -181,7 +183,8 @@ def count_reads_in_features(sam_filename, gff_filename,
                        (r[1] is not None and r[1].optional_field("NH") > 1)):
                         nonunique += 1
                         write_to_samout(r, "__alignment_not_unique")
-                        continue
+                        if multimapped_mode == 'none':
+                            continue
                 except KeyError:
                     pass
                 if ((r[0] and r[0].aQual < minaqual) or
@@ -222,7 +225,16 @@ def count_reads_in_features(sam_filename, gff_filename,
                     ambiguous += 1
                 else:
                     write_to_samout(r, list(fs)[0])
-                    counts[list(fs)[0]] += 1
+
+                if fs is not None and len(fs) > 0:
+                    if multimapped_mode == 'none':
+                        if len(fs) == 1:
+                            counts[list(fs)[0]] += 1
+                    elif multimapped_mode == 'all':
+                        for fsi in list(fs):
+                            counts[fsi] += 1
+                    else:
+                        sys.exit("Illegal multimap mode.")
 
             except UnknownChrom:
                 write_to_samout(r, "__no_feature")
@@ -317,6 +329,12 @@ def main():
             "(choices: union, intersection-strict, intersection-nonempty; default: union)")
 
     pa.add_argument(
+            "--nonunique", dest="nonunique", type=str,
+            choices=("none", "all"), default="none",
+            help="Whether to score reads that are not uniquely aligned " +
+            "or ambiguously assigned to features")
+
+    pa.add_argument(
             "-o", "--samout", type=str, dest="samout",
             default="", help="write out all SAM alignment records into an output " +
             "SAM file called SAMOUT, annotating each line with its feature assignment " +
@@ -337,6 +355,7 @@ def main():
                 args.order,
                 args.stranded,
                 args.mode,
+                args.nonunique,
                 args.featuretype,
                 args.idattr,
                 args.quiet,

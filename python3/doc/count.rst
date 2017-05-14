@@ -19,12 +19,12 @@ each exon as a feature, e.g., in order to check for alternative splicing.
 For comparative ChIP-Seq, the features might be binding region from a 
 pre-determined list.
 
-Special care must be taken to decide how to deal with reads that overlap more
-than one feature. The ``htseq-count`` script allows to choose between three
-modes. Of course, if none of these fits your needs, you can write your own
-script with HTSeq. See the chapter :ref:`tour` for a step-by-step guide on 
-how to do so. See also the FAQ at the end, if the following explanation seems 
-to technical.
+Special care must be taken to decide how to deal with reads that align to or
+overlap with more than one feature. The ``htseq-count`` script allows to
+choose between three modes. Of course, if none of these fits your needs,
+you can write your own script with HTSeq. See the chapter :ref:`tour` for a
+step-by-step guide on how to do so. See also the FAQ at the end, if the
+following explanation seems too technical.
 
 The three overlap resolution modes of ``htseq-count`` work as follows. For 
 each position `i` in the read, a set `S(i)` is defined as the set of all 
@@ -38,11 +38,26 @@ features overlapping position `i`. Then, consider the set `S`, which is
 * the intersection of all non-empty sets `S(i)` for mode ``intersection-nonempty``.
 
 If `S` contains precisely one feature, the read (or read pair) is counted for this feature. If
-it contains more than one feature, the read (or read pair) is counted as ``ambiguous`` (and
-not counted for any features), and if ``S`` is empty, the read (or read pair) is counted
-as ``no_feature``. 
+`S` is empty, the read (or read pair) is counted as ``no_feature``. If `S`
+contains more than one feature, ``htseq-count`` behaves differently based on
+the ``--nonunique`` option:
 
-The following figure illustrates the effect of these three modes:
+* ``--nonunique none`` (default): the read (or read pair) is counted as
+  ``ambiguous`` and not counted for any features. Also, if the read (or read
+  pair) aligns to more than one location in the reference, it is scored as
+  ``alignment_not_unique``.
+
+* ``--nonunique all``: the read (or read pair) is counted as ``ambiguous``
+  and is also counted in all features to which it was assigned. Also, if the
+  read (or read pair) aligns to more than one location in the reference, it is
+  scored as ``alignment_not_unique`` and also separately for each location.
+
+Notice that when using ``--nonunique all`` the sum of all counts will not
+be equal to the number of reads (or read pairs), because those with multiple
+alignments or overlaps get scored multiple times.
+
+The following figure illustrates the effect of these three modes and the
+``--nonunique`` option:
 
 .. image:: count_modes.png
 
@@ -86,8 +101,8 @@ was absent up to version 0.5.4). The special counters are:
   (set `S` as described above was empty).
    
 * ``__ambiguous``: reads (or read pairs) which could have been assigned to more than 
-  one feature and hence were not counted for any of these (set `S`
-  had mroe than one element).
+  one feature and hence were not counted for any of these, unless the
+  ``--nonunique all`` option was used (set `S` had more than one element).
   
 * ``__too_low_aQual``: reads (or read pairs) which were skipped due to the ``-a``
   option, see below
@@ -98,7 +113,9 @@ was absent up to version 0.5.4). The special counters are:
   These reads are recognized from the ``NH`` optional SAM field tag. 
   (If the aligner does not set this field, multiply aligned reads will 
   be counted multiple times, unless they getv filtered out by due to the ``-a`` option.)
-  
+  Note that if the ``--nonunique all`` option was used, these reads (or read pairs)
+  are still assigned to features.
+
 
 *Important:* The default for strandedness is *yes*. If your RNA-Seq data has not been made
 with a strand-specific protocol, this causes half of the reads to be lost.
@@ -169,6 +186,12 @@ Options
    Mode to handle reads overlapping more than one feature. Possible values for
    `<mode>` are ``union``, ``intersection-strict`` and ``intersection-nonempty``
    (default: ``union``)
+
+.. cmdoption:: --nonunique=<nonunique mode>
+
+   Mode to handle reads that align to or are assigned to more than one feature
+   in the overlap `<mode>` of choice (see -m option). `<nonunique mode>` are
+   ``none`` and ``all`` (default: ``none``)
 
 .. cmdoption:: -o <samout>, --samout=<samout>
 
