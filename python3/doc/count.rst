@@ -53,24 +53,25 @@ Usage
 After you have installed HTSeq (see :ref:`install`), you can run ``htseq-count`` from
 the command line::
 
-   htseq-count [options] <alignment_file> <gff_file>
+   htseq-count [options] <alignment_files> <gff_file>
    
-If the file ``htseq-qa`` is not in your path, you can, alternatively, call the script with
+If the file ``htseq-count`` is not in your path, you can, alternatively, call the script with
 
 ::
    
-   python -m HTSeq.scripts.count [options] <alignment_file> <gff_file>
+   python -m HTSeq.scripts.count [options] <alignment_files> <gff_file>
    
-The ``<alignment_file>`` contains the aligned reads in the SAM format. (Note that the 
-SAMtools_ contain Perl scripts to convert most alignment formats to SAM.)
-Make sure to use a splicing-aware aligner such as TopHat. HTSeq-count makes 
+The ``<alignment_files>`` are one or more files containing the aligned reads in SAM format.
+(SAMtools_ contain Perl scripts to convert most alignment formats to SAM.)
+Make sure to use a splicing-aware aligner such as STAR_. HTSeq-count makes 
 full use of the information in the CIGAR field.
 
-To read from standard input, use ``-`` as ``<alignment_file>``.
+To read from standard input, use ``-`` as ``<alignment_files>``.
 
 If you have paired-end data, pay attention to the ``-r`` option described below.
          
-.. _SAMtools: http://samtools.sourceforge.net/
+.. _SAMtools: http://www.htslib.org/
+.. _STAR: https://github.com/alexdobin/STAR
 
 The ``<gff_file>`` contains the features in the `GFF format`_.
 
@@ -163,6 +164,13 @@ Options
    feature ID will be considered as parts of the same feature. The feature ID
    is used to identity the counts in the output table. The default, suitable 
    for RNA-Seq analysis using an Ensembl GTF file, is ``gene_id``. 
+
+.. cmdoption:: --additional-attr=<id attributes>
+
+   Additional feature attributes, which will be printed as an additional column
+   after the primary attribute column but before the counts column(s). The
+   default is none, a suitable value to get gene names using an Ensembl GTF
+   file is ``gene_name``.
 
 .. cmdoption::  -m <mode>, --mode=<mode>  
 

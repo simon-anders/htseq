@@ -348,7 +348,7 @@ def main():
     pa.add_argument(
             "--additional-attr", type=str, nargs='+',
             default=(), help="Additional feature attributes (default: none, " +
-            "suitable for Ensembl GTS files: gene_name)")
+            "suitable for Ensembl GTF files: gene_name)")
 
     pa.add_argument(
             "-m", "--mode", dest="mode",
