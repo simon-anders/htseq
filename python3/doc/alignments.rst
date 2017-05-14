@@ -191,7 +191,7 @@ object you typically never call the constructor yourself.
       A list of :class:`CigarOperation` objects, as parsed from the extended CIGAR string. See
       :class:`CigarOperation` for details.
    
-   .. attribute:: SAM_Alignment.nor_primary_alignment
+   .. attribute:: SAM_Alignment.not_primary_alignment
    
       A boolean. Whether the alignment is not primary. (See SAM format reference, flag 0x0100.)
 
