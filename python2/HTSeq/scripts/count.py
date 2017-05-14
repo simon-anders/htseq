@@ -290,7 +290,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
     for fn in sorted(counts.keys()):
         print('\t'.join([fn] + attributes[fn] + [str(c[fn]) for c in counts_all]))
     print('\t'.join(["__no_feature"] + pad + [str(c) for c in empty_all]))
-    print('\t'.join(["__ambguous"] + pad + [str(c) for c in ambiguous_all]))
+    print('\t'.join(["__ambiguous"] + pad + [str(c) for c in ambiguous_all]))
     print('\t'.join(["__too_low_aQual"] + pad + [str(c) for c in lowqual_all]))
     print('\t'.join(["__not_aligned"] + pad + [str(c) for c in notaligned_all]))
     print('\t'.join(["__alignment_not_unique"] + pad + [str(c) for c in nonunique_all]))
