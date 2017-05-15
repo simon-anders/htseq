@@ -42,14 +42,7 @@ before_install:
   - sudo apt-get install -y swig3.0
 
 install:
-  # setuptools < 18.0 has issues with Cython as a dependency
-  - pip install Cython
-  - [ $PYSAM_VERSION] && sed -i "s/pysam>=0.9.0,<=0.11.1/$PYSAM_VERSION/" setup.py
-  # old setuptools also has a bug for extras, but it still compiles
-  - pip install '.[htseq-qa]'
+  - ./.travis_install.sh
  
 script:
-  - python .travis_test.py
-  # try and make wheels
-  - [ $DOCKER_IMAGE ] && docker run --rm -v `pwd`:/io $DOCKER_IMAGE /io/buildwheels.sh
-  - [ $DOCKER_IMAGE ] && ls wheelhouse/
+  - ./.travis_test.sh
