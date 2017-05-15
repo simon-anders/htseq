@@ -10,7 +10,7 @@ fi
 PYTHON=${PYTHON:-python}
 echo "python: ${PYTHON}"
 
-py_fdn="python$(python -c 'from __future__ import print_function; import sys; print(sys.version_info[0])')/"
+py_fdn="python$(python --version 2>&1 | cut -f2 -d ' ' | cut -f1 -d'.')/"
 echo "py_fdn: ${py_fdn}"
 
 echo 'Running tests...'
