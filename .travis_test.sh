@@ -1,5 +1,5 @@
 #!/bin/bash
-py_fdn="python$(python -c 'from __future__ import print_function; import sys; print(sys.version_info[0])')"
+py_fdn="python$(python -c 'from __future__ import print_function; import sys; print(sys.version_info[0])')/"
 echo "py_fdn: ${py_fdn}"
 
 echo 'Running tests...'
