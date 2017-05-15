@@ -31,11 +31,11 @@ try:
         setup_requires=[
               'Cython',
               'numpy',
-              'pysam>=0.9.0',
+              'pysam>=0.9.0,<=0.11.1',
         ],
         install_requires=[
             'numpy',
-            'pysam>=0.9.0',
+            'pysam>=0.9.0,<=0.11.1',
         ],
         extras_require={
             'htseq-qa': ['matplotlib>=1.4']

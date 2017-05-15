@@ -23,6 +23,12 @@ env:
   - CC=gcc PYSAM_VERSION='pysam==0.10.0'
   - CC=gcc-5 PYSAM_VERSION='pysam'
   - CC=gcc PYSAM_VERSION='pysam'
+  include:
+    services:
+      - docker
+    env:
+      - DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+      - CC=gcc
 
 addons:
   apt:
@@ -40,9 +46,12 @@ before_install:
 install:
   # setuptools < 18.0 has issues with Cython as a dependency
   - pip install Cython
-  - sed -i "s/pysam>=0.9.0/$PYSAM_VERSION/" setup.py
+  - [ $PYSAM_VERSION] && sed -i "s/pysam>=0.9.0,<=0.11.1/$PYSAM_VERSION/" setup.py
   # old setuptools also has a bug for extras, but it still compiles
   - pip install '.[htseq-qa]'
  
 script:
   - python .travis_test.py
+  # try and make wheels
+  - [ $DOCKER_IMAGE ] && docker run --rm -v `pwd`:/io $DOCKER_IMAGE /io/buildwheels.sh
+  - [ $DOCKER_IMAGE ] && ls wheelhouse/
