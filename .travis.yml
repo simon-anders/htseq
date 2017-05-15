@@ -13,6 +13,9 @@ python:
   - "3.5"
   - "3.6"
 
+services:
+  - docker
+
 env:
  global:
   - SWIG=swig3.0
@@ -23,12 +26,7 @@ env:
   - CC=gcc PYSAM_VERSION='pysam==0.10.0'
   - CC=gcc-5 PYSAM_VERSION='pysam'
   - CC=gcc PYSAM_VERSION='pysam'
-  include:
-    services:
-      - docker
-    env:
-      - DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
-      - CC=gcc
+  - CC=gcc DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
 
 addons:
   apt:
