@@ -28,17 +28,15 @@ rm -r /opt/python/cp26*
 # Python 3.3 is not supported:
 rm -r /opt/python/cp33*
 
+# Install packages and test them
 PYBINS="/opt/python/*/bin"
 for PYBIN in ${PYBINS}; do
-    ${PYBIN}/pip install -r /io/requirements.txt
-    ${PYBIN}/pip wheel /io/ -w wheelhouse/
+    ${PYBIN}/pip install HTSeq --no-index -f /io/wheelhouse
+    (cd /io; DOCKER_IMAGE='' PYTHON=${PYBIN}/python /io/.travis_test.sh)
+    if [ $? != 0 ]; then
+        exit 1
+    fi
     # FIXME
     break
 done
 
-for whl in wheelhouse/*.whl; do
-    auditwheel repair -L . $whl -w /io/wheelhouse/
-done
-
-# Created files are owned by root, so fix permissions.
-chown -R --reference=/io/setup.py /io/wheelhouse/
