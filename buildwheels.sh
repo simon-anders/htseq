@@ -32,8 +32,6 @@ PYBINS="/opt/python/*/bin"
 for PYBIN in ${PYBINS}; do
     ${PYBIN}/pip install -r /io/requirements.txt
     ${PYBIN}/pip wheel /io/ -w wheelhouse/
-    # FIXME
-    break
 done
 
 for whl in wheelhouse/*.whl; do
