@@ -32,7 +32,7 @@ rm -r /opt/python/cp33*
 PYBINS="/opt/python/*/bin"
 for PYBIN in ${PYBINS}; do
     ${PYBIN}/pip install HTSeq --no-index -f /io/wheelhouse
-    (cd /io; ls; DOCKER_IMAGE='' PYTHON=${PYBIN}/python PATH=/opt/python/cp27-cp27m/bin:${PATH} ./.travis_test.sh)
+    (cd /io; ls; DOCKER_IMAGE='' PYTHON=${PYBIN}/python PATH=${PYBIN}:${PATH} ./.travis_test.sh)
     if [ $? != 0 ]; then
         exit 1
     fi
