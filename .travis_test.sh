@@ -2,9 +2,7 @@
 # Wheels are already tested in docker image
 if [ $DOCKER_IMAGE ]; then
   docker run --rm -v $(pwd):/io $DOCKER_IMAGE /io/testwheels.sh
-  if [ $? != 0 ]; then
-      exit 1
-  fi
+  exit $?
 fi
 
 PYTHON=${PYTHON:-python}
