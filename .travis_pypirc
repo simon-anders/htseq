@@ -1,0 +1,8 @@
+[distutils]
+index-servers=
+    testpypi
+
+[testpypi]
+repository = https://testpypi.python.org/pypi
+username = TESTPYPI_USER
+password = TESTPYPI_PWD

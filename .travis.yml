@@ -86,3 +86,6 @@ install:
  
 script:
   - ./.travis_test.sh
+
+after_success:
+  - ./.travis_deploy.sh
