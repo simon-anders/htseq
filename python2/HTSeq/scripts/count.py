@@ -24,7 +24,8 @@ def invert_strand(iv):
 
 
 def count_reads_in_features(sam_filenames, gff_filename,
-                            samtype, order,
+                            samtype,
+                            order, max_buffer_size,
                             stranded, overlap_mode,
                             multimapped_mode,
                             feature_type, id_attribute,
@@ -133,7 +134,9 @@ def count_reads_in_features(sam_filenames, gff_filename,
                 if order == "name":
                     read_seq = HTSeq.pair_SAM_alignments(read_seq)
                 elif order == "pos":
-                    read_seq = HTSeq.pair_SAM_alignments_with_buffer(read_seq)
+                    read_seq = HTSeq.pair_SAM_alignments_with_buffer(
+                            read_seq,
+                            max_buffer_size=max_buffer_size)
                 else:
                     raise ValueError("Illegal order specified.")
             empty = 0
@@ -335,6 +338,14 @@ def main():
             "must be specified. Ignored for single-end data.")
 
     pa.add_argument(
+            "--max-reads-in-buffer", dest="max_buffer_size", type=int,
+            default=3000000,
+            help="When <alignment_file> is paired end sorted by position, " +
+            "allow only so many reads to stay in memory until the mates are " +
+            "found (raising this number will use more memory). Has no effect " +
+            "for single end or paired end sorted by name")
+
+    pa.add_argument(
             "-s", "--stranded", dest="stranded",
             choices=("yes", "no", "reverse"), default="yes",
             help="whether the data is from a strand-specific assay. Specify 'yes', " +
@@ -394,6 +405,7 @@ def main():
                 args.featuresfilename,
                 args.samtype,
                 args.order,
+                args.max_buffer_size,
                 args.stranded,
                 args.mode,
                 args.nonunique,

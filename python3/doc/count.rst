@@ -149,6 +149,13 @@ Options
   ensures that most alignment mates appear close to each other in the data 
   and hence the  buffer is much less likely to overflow.
 
+.. cmdoption::  --max-reads-in-buffer=<number>
+
+  When <alignment_file> is paired end sorted by position, allow only so many
+  reads to stay in memory until the mates are found (raising this number will use
+  more memory). Has no effect for single end or paired end sorted by name.
+  (default: ``3000000``)
+
 .. cmdoption:: -s <yes/no/reverse>, --stranded=<yes/no/reverse>
 
    whether the data is from a strand-specific assay (default: ``yes``)
