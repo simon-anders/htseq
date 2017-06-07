@@ -154,7 +154,7 @@ Options
   When <alignment_file> is paired end sorted by position, allow only so many
   reads to stay in memory until the mates are found (raising this number will use
   more memory). Has no effect for single end or paired end sorted by name.
-  (default: ``3000000``)
+  (default: ``30000000``)
 
 .. cmdoption:: -s <yes/no/reverse>, --stranded=<yes/no/reverse>
 

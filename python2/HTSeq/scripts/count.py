@@ -339,7 +339,7 @@ def main():
 
     pa.add_argument(
             "--max-reads-in-buffer", dest="max_buffer_size", type=int,
-            default=3000000,
+            default=30000000,
             help="When <alignment_file> is paired end sorted by position, " +
             "allow only so many reads to stay in memory until the mates are " +
             "found (raising this number will use more memory). Has no effect " +
