@@ -23,24 +23,19 @@ def test_pickle():
     import pickle
 
     print('Test pickling and inpickling')
-    fn = 'example_data/pickle_test.pickle'
     pickles = [
             {'name': 'HTSeq.Sequence',
              'object': HTSeq.Sequence(b'ACTG', 'sequence')},
             ]
 
     for pic in pickles:
-        with open(fn, 'w') as f:
-            print('Pickling '+pic['name'])
-            pickle.dump(pic['object'], f)
-            print('Done')
+        print('Pickling '+pic['name'])
+        pickled = pickle.dumps(pic['object'])
+        print('Done')
 
-        with open(fn, 'r') as f:
-            print('Unpickling '+pic['name'])
-            pickle.load(f)
-            print('Done')
-
-    os.remove(fn)
+        print('Unpickling '+pic['name'])
+        pickle.loads(pickled)
+        print('Done')
 
 
 if len(sys.argv) == 1:
