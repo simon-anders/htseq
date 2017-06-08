@@ -18,13 +18,13 @@ else
       exit 1
   fi
   
-  sed -i "s/pysam>=0.9.0,<=0.11.1/$PYSAM_VERSION/" setup.py
+  sed -i "s/pysam>=0.9.0/$PYSAM_VERSION/" setup.py
   if [ $? != 0 ]; then
       exit 1
   fi
   
   # old setuptools also has a bug for extras, but it still compiles
-  pip install '.[htseq-qa]'
+  pip install -v '.[htseq-qa]'
   if [ $? != 0 ]; then
       exit 1
   fi
