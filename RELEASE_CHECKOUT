@@ -1,0 +1,22 @@
+- change version in VERSION
+- python2 setup.py build; python setup.py build
+  (this makes _version.py and SWIGs _HTSeq.c)
+- git add ...
+- git commit ...
+- git tag <new-version>_RC1
+- git push htseq
+
+(wait for CI to complete)
+
+If all well:
+- python setup.py register -r testpypi
+  (or whatever the test repo is called in .pypirc)
+- python setup.py sdist; mv dist/HTSeq...tar.gz dist/HTSeq...dev1.tar.gz
+- upload the file manually to testpypi
+- restart the CI build on the CI_pypi branch
+
+If all well:
+- python setup.py register -r pypi
+  (or whatever the production repo is called in .pypirc)
+- upload the file manually to pypi
+- restart the CI build on the CI_pypi branch
