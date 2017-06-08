@@ -13,6 +13,13 @@ echo "py_fdn: ${py_fdn}"
 
 echo 'Running tests...'
 
+echo 'General tests...'
+${PYTHON} "${py_fdn}test/test_other.py"
+if [ $? != 0 ]; then
+    exit 1
+fi
+echo 'done!'
+
 echo 'Doctests...'
 ${PYTHON} "${py_fdn}test/test.py"
 if [ $? != 0 ]; then
