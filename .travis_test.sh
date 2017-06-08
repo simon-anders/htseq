@@ -14,7 +14,7 @@ echo "py_fdn: ${py_fdn}"
 echo 'Running tests...'
 
 echo 'General tests...'
-${PYTHON} "${py_fdn}test/test_other.py"
+${PYTHON} "${py_fdn}test/test_general.py"
 if [ $? != 0 ]; then
     exit 1
 fi

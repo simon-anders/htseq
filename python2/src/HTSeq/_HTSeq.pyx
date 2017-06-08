@@ -661,6 +661,16 @@ cdef class Sequence( object ):
       else:
          new_name = self.name + "[part]"
       return Sequence( self.seq[ item ], new_name )
+
+    def __getstate__(self):
+        return {'seq': self.seq,
+                'name': self.name,
+                'descr': self.descr}
+
+    def __setstate__(self, state):
+        self.seq = state['seq']
+        self.name = state['name']
+        self.descr = state['descr']
    
    def write_to_fasta_file( self, fasta_file, characters_per_line=70 ):
       """Write sequence to file in FASTA format.
