@@ -4,6 +4,21 @@
 Version history
 ***************
 
+Version 0.8.0
+=============
+2017-06-07
+
+This release adds a few options to ``htseq-count``:
+
+- ``--nonunique`` handles non-uniquely mapped reads
+- ``--additional-attr`` adds an optional column to the output (typically for human-readable gene names)
+- ``--max-reads-in-buffer`` allows increasing the buffer size when working with paired end, coordinate sorted files
+
+Moreover, ``htseq-count`` can now take more than one input file and prints the output with one column per input file.
+
+Finally, parts of the code have been streamlined or modernized, documentation has been moved to readthedocs,
+and other minor changes.
+
 Version 0.7.2
 =============
 

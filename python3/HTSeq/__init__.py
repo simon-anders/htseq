@@ -591,7 +591,6 @@ class GenomicArrayOfSets(GenomicArray):
 # paired-end handling
 ###########################
 
-
 def pair_SAM_alignments(alignments, bundle=False):
 
     mate_missing_count = [0]
@@ -654,7 +653,7 @@ def pair_SAM_alignments(alignments, bundle=False):
                       mate_missing_count[0])
 
 
-def pair_SAM_alignments_with_buffer(alignments, max_buffer_size=3000000):
+def pair_SAM_alignments_with_buffer(alignments, max_buffer_size=30000000):
 
     almnt_buffer = {}
     ambiguous_pairing_counter = 0
