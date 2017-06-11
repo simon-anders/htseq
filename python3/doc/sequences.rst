@@ -323,7 +323,7 @@ iterator of ``Sequence`` objects.
 .. class:: FastaReader( filename_or_sequence )
 
    As daughter class of ``FileOrSequence``, ``FastaReader`` can be instantiated
-   with either a filename, or with a sequence. See :class:`FileOrSequence` for details.
+   with either a filename, or with a list of sequences. See :class:`FileOrSequence` for details.
    
 Example 1
    The typical use for FastaReader is to go through a FASTA file and do something with
