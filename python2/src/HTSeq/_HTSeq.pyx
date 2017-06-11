@@ -681,6 +681,9 @@ cdef class Sequence(object):
         self.name = state['name']
         self.descr = state['descr']
 
+    def __reduce__(self):
+        return (self.__class__, (self.seq, self.name), self.__getstate__())
+
     def write_to_fasta_file(self, fasta_file, characters_per_line=70):
         """Write sequence to file in FASTA format.
 

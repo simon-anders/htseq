@@ -25,7 +25,8 @@ def test_pickle():
     print('Test pickling and inpickling')
     pickles = [
             {'name': 'HTSeq.Sequence',
-             'object': HTSeq.Sequence(b'ACTG', 'sequence')},
+             'object': HTSeq.Sequence(b'ACTG', 'sequence'),
+             'assert_properties': ('seq', 'name', 'descr')},
             ]
 
     for pic in pickles:
@@ -34,8 +35,14 @@ def test_pickle():
         print('Done')
 
         print('Unpickling '+pic['name'])
-        pickle.loads(pickled)
+        unpick = pickle.loads(pickled)
         print('Done')
+
+        if 'assert_properties' in pic:
+            print('Checking serialized/deserialized')
+            for prop in pic['assert_properties']:
+                assert getattr(pic['object'], prop) == getattr(unpick, prop)
+            print('Done')
 
 
 if len(sys.argv) == 1:
