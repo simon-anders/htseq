@@ -1326,7 +1326,8 @@ cdef class SAM_Alignment(AlignmentWithSequenceReversal):
         a.original_sam_line = ""
         a.optional_fields = read.tags
         if read.is_paired:
-            if not read.mate_is_unmapped:
+            # These two should be but are not always consistent
+            if (not read.mate_is_unmapped) and (read.mrnm != -1):
                 strand = "-" if read.mate_is_reverse else "+"
                 a.mate_start = GenomicPosition(
                     samfile.getrname(read.mrnm), read.mpos, strand)
@@ -1369,7 +1370,8 @@ cdef class SAM_Alignment(AlignmentWithSequenceReversal):
         a.original_sam_line = ""
         a.optional_fields = read.tags
         if read.is_paired:
-            if not read.mate_is_unmapped:
+            # These two should be but are not always consistent
+            if (not read.mate_is_unmapped) and (read.mrnm != -1):
                 strand = "-" if read.mate_is_reverse else "+"
                 a.mate_start = GenomicPosition(samfile.getrname(
                     read.mrnm), read.next_reference_start, strand)
