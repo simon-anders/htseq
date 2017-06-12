@@ -20,6 +20,14 @@ def test_fasta_parser():
     print("Test passed")
 
 
+def test_bam_inconsistent_mate():
+    print('Test inconsistent BAM file')
+    bamfile = HTSeq.BAM_Reader("example_data/inconsistent_mate.bam")
+    for read in bamfile:
+        pass
+    print("Test passed")
+
+
 def test_pickle():
     import pickle
 
@@ -44,10 +52,12 @@ def test_pickle():
             for prop in pic['assert_properties']:
                 assert getattr(pic['object'], prop) == getattr(unpick, prop)
             print('Done')
+    print("Test passed")
 
 
 if len(sys.argv) == 1:
     test_fasta_parser()
+    test_bam_inconsistent_mate()
     test_pickle()
 else:
     print("Wrong usage")
