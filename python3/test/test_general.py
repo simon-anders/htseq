@@ -21,11 +21,11 @@ def test_fasta_parser():
 
 def test_fastq_parser():
     print("Test Fastq parser")
-    for seq in HTSeq.FastaReader('example_data/fastqEx.fastq'):
+    for seq in HTSeq.FastqReader('example_data/fastqEx.fastq'):
         pass
     print("Test passed")
     print("Test Fastq parser on gzip input")
-    for seq in HTSeq.FastaReader('example_data/fastqExgzip.fastq.gz'):
+    for seq in HTSeq.FastqReader('example_data/fastqExgzip.fastq.gz'):
         pass
     print("Test passed")
 
