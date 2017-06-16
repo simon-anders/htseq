@@ -20,6 +20,17 @@ def test_fasta_parser():
     print("Test passed")
 
 
+def test_fastq_parser():
+    print("Test Fastq parser")
+    for seq in HTSeq.FastaReader('example_data/fastqEx.fastq'):
+        pass
+    print("Test passed")
+    print("Test Fastq parser on gzip input")
+    for seq in HTSeq.FastaReader('example_data/fastqExgzip.fastq.gz'):
+        pass
+    print("Test passed")
+
+
 def test_bam_inconsistent_mate():
     print('Test inconsistent BAM file')
     bamfile = HTSeq.BAM_Reader("example_data/inconsistent_mate.bam")
@@ -57,6 +68,7 @@ def test_pickle():
 
 if len(sys.argv) == 1:
     test_fasta_parser()
+    test_fastq_parser()
     test_bam_inconsistent_mate()
     test_pickle()
 else:

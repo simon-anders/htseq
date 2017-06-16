@@ -53,7 +53,7 @@ class FileOrSequence(object):
         self.line_no = 1
         if isinstance(self.fos, str):
             if self.fos.lower().endswith((".gz", ".gzip")):
-                lines = gzip.open(self.fos)
+                lines = gzip.open(self.fos, 'rt')
             else:
                 lines = open(self.fos)
         else:
