@@ -299,7 +299,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
     print('\t'.join(["__alignment_not_unique"] + pad + [str(c) for c in nonunique_all]))
 
 
-def my_showwarning(message, category, filename, lineno=None, line=None):
+def my_showwarning(message, category, filename, lineno=None, file=None, line=None):
     sys.stderr.write("Warning: %s\n" % message)
 
 
