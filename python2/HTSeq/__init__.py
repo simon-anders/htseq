@@ -277,14 +277,21 @@ class FastaReader( FileOrSequence ):
    to a file-like object with content in FASTA format.
    It can generate an iterator over the sequences.
    """
+
+   def __init__(self, file_, raw_iterator=False):
+      FileOrSequence.__init__(self, file_)
+      self.raw_iterator = raw_iterator
    
    def __iter__( self ):
       seq = None
       for line in FileOrSequence.__iter__( self ):
          if line.startswith( ">" ):
             if seq:
-               s = Sequence( seq, name )
-               s.descr = descr
+               if self.raw_iterator:
+                  s = (seq, name, descr)
+               else:
+                  s = Sequence( seq, name )
+                  s.descr = descr
                yield s
             mo = _re_fasta_header_line.match( line )
             name = mo.group(1)
@@ -294,8 +301,11 @@ class FastaReader( FileOrSequence ):
             assert seq is not None, "FASTA file does not start with '>'."
             seq += line[:-1]
       if seq is not None:
-         s = Sequence( seq, name )
-         s.descr = descr
+         if self.raw_iterator:
+            s = (seq, name, descr)
+         else:
+            s = Sequence( seq, name )
+            s.descr = descr
          yield s
          
    def get_sequence_lengths( self ):   
@@ -362,11 +372,12 @@ class FastqReader( FileOrSequence ):
    qual_scale is one of "phred", "solexa", "solexa-old".
    """
 
-   def __init__( self, file_, qual_scale = "phred" ):
+   def __init__( self, file_, qual_scale = "phred", raw_iterator=False):
       FileOrSequence.__init__( self, file_ )
       self.qual_scale = qual_scale
       if qual_scale not in ( "phred", "solexa", "solexa-old" ):
          raise ValueError, "Illegal quality scale."
+      self.raw_iterator = raw_iterator
       
    def __iter__( self ):
       fin = FileOrSequence.__iter__( self )
@@ -394,8 +405,12 @@ class FastqReader( FileOrSequence ):
             raise ValueError( "Primary and secondary ID line in FASTQ"
                "disagree." )
                
-         yield SequenceWithQualities( seq[:-1], id1[1:-1], qual[:-1], 
-            self.qual_scale )
+         if self.raw_iterator:
+            s = (seq[:-1], id1[1:-1], qual[:-1], self.qual_scale)
+         else:
+            s = SequenceWithQualities( seq[:-1], id1[1:-1], qual[:-1], 
+               self.qual_scale )
+         yield s
 
 class BowtieReader( FileOrSequence ):
    """A BowtieFile object is associated with a Bowtie output file that 

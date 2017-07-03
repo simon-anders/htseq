@@ -18,6 +18,11 @@ def test_fasta_parser():
     for seq in HTSeq.FastaReader('example_data/fastaExLong.fa'):
         pass
     print("Test passed")
+    print("Test Fasta parser (raw iterator)")
+    for seq in HTSeq.FastaReader('example_data/fastaExLong.fa',
+                                 raw_iterator=True):
+        pass
+    print("Test passed")
 
 
 def test_fastq_parser():
@@ -27,6 +32,11 @@ def test_fastq_parser():
     print("Test passed")
     print("Test Fastq parser on gzip input")
     for seq in HTSeq.FastqReader('example_data/fastqExgzip.fastq.gz'):
+        pass
+    print("Test passed")
+    print("Test Fastq parser on gzip input (raw iterator)")
+    for seq in HTSeq.FastqReader('example_data/fastqExgzip.fastq.gz',
+                                 raw_iterator=True):
         pass
     print("Test passed")
 
