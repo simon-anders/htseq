@@ -318,9 +318,9 @@ Trimming reads
 ===============
 
 The FastaReader class allows to read and parse a FASTA file. It can generates an
-iterator of ``Sequence`` objects.
+iterator of ``Sequence`` objects or a faster, simpler iterator of string tuples.
 
-.. class:: FastaReader( filename_or_sequence )
+.. class:: FastaReader( filename_or_sequence, raw_iterator=False )
 
    As daughter class of ``FileOrSequence``, ``FastaReader`` can be instantiated
    with either a filename, or with a list of sequences. See :class:`FileOrSequence` for details.
@@ -342,14 +342,22 @@ Example 2
       >>> sequences["sequence1"].seq
       b'AGTACGTAGTCGCTGCTGCTACGGGCGCTAGCTAGTACGTCACGACGTAGATGCTAGCTGACTAAACGATGC'
 
+Example 3
+   One can use ``raw_iterator=True`` to maximize parsing speed at the expense of
+   not getting a nice ``Sequence`` instance but rather only a tuple::
+   
+      >>> sequences = dict( (s[1], s[0]) for s in HTSeq.FastaReader("fastaEx.fa", raw_iterator=True) )
+      >>> sequences["sequence1"]
+      'AGTACGTAGTCGCTGCTGCTACGGGCGCTAGCTAGTACGTCACGACGTAGATGCTAGCTGACTAAACGATGC'
 
 ``FastqReader``
 ===============
 
 The **FastqReader** class works similar to :class:`FastaReader`. It reads a Fastq file
-and generates an iterator over :class:`SequenceWithQualities` objects.
+and generates an iterator over :class:`SequenceWithQualities` objects or a faster,
+simpler iterator of tuples.
 
-.. class:: FastqReader( filename_or_sequence, qual_scale="phred" )
+.. class:: FastqReader( filename_or_sequence, qual_scale="phred", raw_iterator=False )
 
    As daughter class of ``FileOrSequence``, ``FastaReader`` can be instantiated
    with either a filename, or with a sequence. See :class:`FileOrSequence` for details.

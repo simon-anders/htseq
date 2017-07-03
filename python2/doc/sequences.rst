@@ -342,6 +342,14 @@ Example 2
       >>> sequences["sequence1"].seq
       'AGTACGTAGTCGCTGCTGCTACGGGCGCTAGCTAGTACGTCACGACGTAGATGCTAGCTGACTAAACGATGC'
 
+Example 3
+   One can use ``raw_iterator=True`` to maximize parsing speed at the expense of
+   not getting a nice ``Sequence`` instance but rather only a tuple::
+   
+      >>> sequences = dict( (s[1], s[0]) for s in HTSeq.FastaReader("fastaEx.fa", raw_iterator=True) )
+      >>> sequences["sequence1"]
+      'AGTACGTAGTCGCTGCTGCTACGGGCGCTAGCTAGTACGTCACGACGTAGATGCTAGCTGACTAAACGATGC'
+
 
 ``FastqReader``
 ===============
