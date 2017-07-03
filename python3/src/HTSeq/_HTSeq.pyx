@@ -1097,7 +1097,9 @@ cigar_operation_names = {
     'N': 'skipped',
     'S': 'soft-clipped',
     'H': 'hard-clipped',
-    'P': 'padded'}
+    'P': 'padded',
+    '=': 'sequence-matched',
+    'X': 'sequence-mismatched'}
 
 cdef class CigarOperation(object):
 
@@ -1125,7 +1127,7 @@ cdef class CigarOperation(object):
     def check(CigarOperation self):
         cdef int qlen = self.query_to - self.query_from
         cdef int rlen = self.ref_iv.length
-        if self.type == 'M':
+        if self.type == 'M' or self.type == '=' or self.type == 'X':
             if not (qlen == self.size and rlen == self.size):
                 return False
         elif self.type == 'I' or self.type == 'S':
@@ -1168,9 +1170,9 @@ cpdef list build_cigar_list(list cigar_pairs, int ref_left=0, str chrom="", str 
     qpos = 0
     res = []
     for code, size in cigar_pairs:
-        if code == 'M':
+        if code == 'M' or code == '=' or code == 'X':
             res.append(CigarOperation(
-                'M', size, rpos, rpos + size, qpos, qpos + size, chrom, strand))
+                code, size, rpos, rpos + size, qpos, qpos + size, chrom, strand))
             rpos += size
             qpos += size
         elif code == 'I':
