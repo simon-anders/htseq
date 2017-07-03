@@ -1148,7 +1148,7 @@ cdef class CigarOperation(object):
             return False
         return True
 
-_re_cigar_codes = re.compile('(['+''.join(cigar_operation_names.keys())+'])')
+_re_cigar_codes = re.compile('([MIDNSHP=X])')
 
 cpdef list parse_cigar(str cigar_string, int ref_left=0, str chrom="", str strand="."):
     cdef list split_cigar, cl

@@ -350,6 +350,7 @@ Example 3
       >>> sequences["sequence1"]
       'AGTACGTAGTCGCTGCTGCTACGGGCGCTAGCTAGTACGTCACGACGTAGATGCTAGCTGACTAAACGATGC'
 
+
 ``FastqReader``
 ===============
 
