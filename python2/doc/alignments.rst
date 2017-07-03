@@ -360,7 +360,9 @@ objects in the list.
            'M': 'matched',
            'N': 'skipped',
            'P': 'padded',
-           'S': 'soft-clipped'}
+           'S': 'soft-clipped',
+           'X': 'sequence-mismatched',
+           '=': 'sequence-matched'}
            
    .. attribute:: CigarOperation.size
    

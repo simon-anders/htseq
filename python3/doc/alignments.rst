@@ -357,13 +357,15 @@ objects in the list.
       .. doctest::
       
           >>> sorted(HTSeq.cigar_operation_names.items())    #doctest:+NORMALIZE_WHITESPACE
-          [('D', 'deleted'),
+          [('=', 'sequence-matched'),
+           ('D', 'deleted'),
            ('H', 'hard-clipped'),
            ('I', 'inserted'),
            ('M', 'matched'),
            ('N', 'skipped'),
            ('P', 'padded'),
-           ('S', 'soft-clipped')]
+           ('S', 'soft-clipped'),
+           ('X', 'sequence-mismatched')]
            
    .. attribute:: CigarOperation.size
    
