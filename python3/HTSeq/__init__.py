@@ -320,7 +320,7 @@ class FastaReader(FileOrSequence):
             if self.raw_iterator:
                 s = (seq, name, descr)
             else:
-                s = Sequence(seq, name)
+                s = Sequence(seq.encode(), name)
                 s.descr = descr
             yield s
 
