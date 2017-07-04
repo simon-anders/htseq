@@ -28,11 +28,17 @@ rm -r /opt/python/cp26*
 # Python 3.3 is not supported:
 rm -r /opt/python/cp33*
 
-# Install packages and test them
+# Deploy packages
+VERSION=$(cat /io/VERSION)
 PYBINS="/opt/python/*/bin"
 for PYBIN in ${PYBINS}; do
+    PYVER=$(basename $(dirname $(dirname ${PYBIN})))
     ${PYBIN}/pip install twine
     ${PYBIN}/twine register
+    if [ $? != 0 ]; then
+        exit 1
+    fi
+    ${PYBIN}/twine upload /io/wheelhouse/HTSeq-${VERSION}-${PYVER}-manilinux1_x86_64.whl
     if [ $? != 0 ]; then
         exit 1
     fi

@@ -1,29 +1,33 @@
 #!/bin/bash
-# Wheels are already tested in docker image
-if [ $DOCKER_IMAGE ]; then
-  docker run --rm -v $(pwd):/io $DOCKER_IMAGE /io/deloywheels.sh
+# only deploy builds for a release_<sematic-version>_RC?? tag to testpypi
+if [ -z $TRAVIS_TAG ]; then
+  exit 0
+fi
+TAG1=$(echo $TRAVIS_TAG | cut -f1 -d_)
+TAG2=$(echo $TRAVIS_TAG | cut -f2 -d_)
+TAG3=$(echo $TRAVIS_TAG | cut -f3 -d_)
+if [ -z $TAG2 ] || [ -z $TAG3 ]; then
+  exit 0;
+fi
+if [ $TAG1 != 'release' ] || [ $TAG2 != $(cat VERSION) ]; then
+  exit 0;
+fi
+
+# do not deploy outside of manylinux1
+if [ -z $DOCKER_IMAGE ]; then
+  exit 0
+fi
+
+
+# deploy onto pypitest unless you have no RC
+if [ ${TAG3:0:2} == 'RC' ]; then
+  TWINE_REPOSITORY='https://testpypi.python.org/pypi'
+  echo 'Deploying to testpypi'
 else
- exit 0
+  #FIXME
+  #TWINE_REPOSITORY='https://pypi.python.org/pypi'
+  echo 'Deploying to production pypi'
 fi
-
-PYTHON=${PYTHON:-python}
-echo "python: ${PYTHON}"
-
-py_fdn="python$(${PYTHON} --version 2>&1 | cut -f2 -d ' ' | cut -f1 -d'.')/"
-echo "py_fdn: ${py_fdn}"
-
-echo 'Running tests...'
-
-echo 'Doctests...'
-${PYTHON} "${py_fdn}test/test.py"
-if [ $? != 0 ]; then
-    exit 1
-fi
-echo 'done!'
-
-echo 'htseq-count...'
-${PYTHON} "${py_fdn}test/test_htseq-count.py"
-if [ $? != 0 ]; then
-    exit 1
-fi
-echo 'done!'
+   
+# Wheels are already tested in docker image
+docker run -e TWINE_REPOSITORY -e TWINE_USERNAME -e TWINE_PASSWORD --rm -v $(pwd):/io $DOCKER_IMAGE /io/deloywheels.sh 
