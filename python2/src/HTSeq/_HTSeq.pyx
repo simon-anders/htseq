@@ -1419,9 +1419,6 @@ cdef class SAM_Alignment(AlignmentWithSequenceReversal):
         if flagint & 0x0004:     # flag "query sequence is unmapped"
             iv = None
             cigarlist = None
-            if rname != "*":     # flag "query sequence is unmapped"
-                warnings.warn(
-                    "Malformed SAM line: RNAME != '*' although flag bit &0x0004 set")
         else:
             if rname == "*":
                 raise ValueError, "Malformed SAM line: RNAME == '*' although flag bit &0x0004 cleared"
@@ -1451,9 +1448,6 @@ cdef class SAM_Alignment(AlignmentWithSequenceReversal):
 
         if flagint & 0x0001:         # flag "read is paired in sequencing"
             if flagint & 0x0008:      # flag "mate is unmapped"
-                if mrnm != "*":
-                    warnings.warn(
-                        "Malformed SAM line: MRNM != '*' although flag bit &0x0008 set")
                 alnmt.mate_start = None
             else:
                 if mrnm == "*":
@@ -1467,9 +1461,6 @@ cdef class SAM_Alignment(AlignmentWithSequenceReversal):
                 if alnmt.mate_start.chrom == "=":
                     if alnmt.iv is not None:
                         alnmt.mate_start.chrom = alnmt.iv.chrom
-                    else:
-                        warnings.warn(
-                            "Malformed SAM line: MRNM == '=' although read is not aligned.")
             if flagint & 0x0040:
                 alnmt.pe_which = intern("first")
             elif flagint & 0x0080:
