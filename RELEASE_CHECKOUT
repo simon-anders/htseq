@@ -3,7 +3,7 @@
   (this makes _version.py and SWIGs _HTSeq.c)
 - git add ...
 - git commit ...
-- git tag <new-version>_RC1
+- git tag release_<semantic-version>_RC1
 - git push htseq
 
 (wait for CI to complete)
