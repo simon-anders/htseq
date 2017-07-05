@@ -19,6 +19,9 @@ matrix:
       sudo: required
     - env: CC=gcc PYSAM_VERSION='pysam'
       python: 2.7
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam'
+      python: 2.7
       os: linux
       dist: trusty
       sudo: required
