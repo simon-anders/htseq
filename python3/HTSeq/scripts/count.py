@@ -56,6 +56,10 @@ def count_reads_in_features(sam_filenames, gff_filename,
             with open(sam_filename):
                 pass
 
+    # CIGAR match characters (including alignment match, sequence match, and
+    # sequence mismatch
+    com = ('M', '=', 'X')
+
     features = HTSeq.GenomicArrayOfSets("auto", stranded != "no")
     gff = HTSeq.GFF_Reader(gff_filename)
     counts = {}
@@ -170,20 +174,20 @@ def count_reads_in_features(sam_filenames, gff_filename,
                         write_to_samout(r, "__too_low_aQual", samoutfile)
                         continue
                     if stranded != "reverse":
-                        iv_seq = (co.ref_iv for co in r.cigar if co.type ==
-                                  "M" and co.size > 0)
+                        iv_seq = (co.ref_iv for co in r.cigar if co.type in com
+                                  and co.size > 0)
                     else:
                         iv_seq = (invert_strand(co.ref_iv)
-                                  for co in r.cigar if (co.type == "M" and
+                                  for co in r.cigar if (co.type in com and
                                                         co.size > 0))
                 else:
                     if r[0] is not None and r[0].aligned:
                         if stranded != "reverse":
                             iv_seq = (co.ref_iv for co in r[0].cigar
-                                      if co.type == "M" and co.size > 0)
+                                      if co.type in com and co.size > 0)
                         else:
                             iv_seq = (invert_strand(co.ref_iv) for co in r[0].cigar
-                                      if co.type == "M" and co.size > 0)
+                                      if co.type in com and co.size > 0)
                     else:
                         iv_seq = tuple()
                     if r[1] is not None and r[1].aligned:
@@ -191,12 +195,12 @@ def count_reads_in_features(sam_filenames, gff_filename,
                             iv_seq = itertools.chain(
                                     iv_seq,
                                     (invert_strand(co.ref_iv) for co in r[1].cigar
-                                    if co.type == "M" and co.size > 0))
+                                    if co.type in com and co.size > 0))
                         else:
                             iv_seq = itertools.chain(
                                     iv_seq,
                                     (co.ref_iv for co in r[1].cigar
-                                     if co.type == "M" and co.size > 0))
+                                     if co.type in com and co.size > 0))
                     else:
                         if (r[0] is None) or not (r[0].aligned):
                             write_to_samout(r, "__not_aligned", samoutfile)
