@@ -208,6 +208,16 @@ Options
    in the overlap `<mode>` of choice (see -m option). `<nonunique mode>` are
    ``none`` and ``all`` (default: ``none``)
 
+.. cmdoption:: --secondary-alignments=<mode>
+
+   Mode to handle secondary alignments (SAM flag 0x100). `<mode>` can be
+   ``score`` and ``ignore`` (default: ``score``)
+
+.. cmdoption:: --supplementary-alignments=<mode>
+
+   Mode to handle supplementary/chimeric alignments (SAM flag 0x800). `<mode>`
+   can be ``score`` and ``ignore`` (default: ``score``)
+
 .. cmdoption:: -o <samout>, --samout=<samout>
 
    write out all SAM alignment records into an output SAM

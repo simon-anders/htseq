@@ -25,13 +25,15 @@ fi
 
 # deploy onto pypitest unless you have no RC
 if [ ${TAG3:0:2} == 'RC' ]; then
+  TWINE_PASSWORD=${TWINE_PASSWORD_TESTPYPI}
   TWINE_REPOSITORY='https://testpypi.python.org/pypi'
   echo 'Deploying to testpypi'
 else
   #FIXME
+  #TWINE_PASSWORD=${TWINE_PASSWORD_PYPI}
   #TWINE_REPOSITORY='https://pypi.python.org/pypi'
   echo 'Deploying to production pypi'
 fi
    
 # Wheels are already tested in docker image
-docker run -e TWINE_REPOSITORY -e TWINE_USERNAME -e TWINE_PASSWORD --rm -v $(pwd):/io $DOCKER_IMAGE /io/deloywheels.sh 
+docker run -e TWINE_REPOSITORY -e TWINE_USERNAME -e TWINE_PASSWORD --rm -v $(pwd):/io $DOCKER_IMAGE /io/deploywheels.sh 
