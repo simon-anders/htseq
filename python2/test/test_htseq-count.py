@@ -28,6 +28,15 @@ tests = [
         'example_data/Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz',
         ],
     'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_twocolumns.tsv'},
+    {'call': [
+        'htseq-count',
+        '-m', 'intersection-nonempty',
+        '--nonunique', 'none',
+        '--secondary-alignments', 'ignore',
+        'example_data/yeast_RNASeq_excerpt_withNH.sam',
+        'example_data/Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz',
+        ],
+    'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_ignore_secondary.tsv'},
     ]
 
 

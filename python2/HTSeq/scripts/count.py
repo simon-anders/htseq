@@ -28,6 +28,8 @@ def count_reads_in_features(sam_filenames, gff_filename,
                             order, max_buffer_size,
                             stranded, overlap_mode,
                             multimapped_mode,
+                            secondary_alignment_mode,
+                            supplementary_alignment_mode,
                             feature_type, id_attribute,
                             additional_attributes,
                             quiet, minaqual, samouts):
@@ -161,6 +163,12 @@ def count_reads_in_features(sam_filenames, gff_filename,
                         notaligned += 1
                         write_to_samout(r, "__not_aligned", samoutfile)
                         continue
+                    if ((secondary_alignment_mode == 'ignore') and
+                       r.not_primary_alignment):
+                        continue
+                    if ((supplementary_alignment_mode == 'ignore') and
+                       r.supplementary):
+                        continue
                     try:
                         if r.optional_field("NH") > 1:
                             nonunique += 1
@@ -206,6 +214,12 @@ def count_reads_in_features(sam_filenames, gff_filename,
                             write_to_samout(r, "__not_aligned", samoutfile)
                             notaligned += 1
                             continue
+                    if ((secondary_alignment_mode == 'ignore') and
+                       r[0].not_primary_alignment):
+                        continue
+                    if ((supplementary_alignment_mode == 'ignore') and
+                       r[0].supplementary):
+                        continue
                     try:
                         if ((r[0] is not None and r[0].optional_field("NH") > 1) or
                            (r[1] is not None and r[1].optional_field("NH") > 1)):
@@ -391,6 +405,16 @@ def main():
             "or ambiguously assigned to features")
 
     pa.add_argument(
+            "--secondary-alignments", dest="secondary_alignments", type=str,
+            choices=("score", "ignore"), default="score",
+            help="Whether to score secondary alignments (0x100 flag)")
+
+    pa.add_argument(
+            "--supplementary-alignments", dest="supplementary_alignments", type=str,
+            choices=("score", "ignore"), default="score",
+            help="Whether to score supplementary alignments (0x800 flag)")
+
+    pa.add_argument(
             "-o", "--samout", type=str, dest="samouts", nargs='+',
             default="", help="write out all SAM alignment records into an output " +
             "SAM file called SAMOUT, annotating each line with its feature assignment " +
@@ -413,6 +437,8 @@ def main():
                 args.stranded,
                 args.mode,
                 args.nonunique,
+                args.secondary_alignments,
+                args.supplementary_alignments,
                 args.featuretype,
                 args.idattr,
                 args.additional_attr,
