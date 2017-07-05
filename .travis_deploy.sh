@@ -1,20 +1,24 @@
 #!/bin/bash
 # only deploy builds for a release_<sematic-version>_RC?? tag to testpypi
 if [ -z $TRAVIS_TAG ]; then
+  echo 'No TRAVIS_TAG, exit'
   exit 0
 fi
 TAG1=$(echo $TRAVIS_TAG | cut -f1 -d_)
 TAG2=$(echo $TRAVIS_TAG | cut -f2 -d_)
 TAG3=$(echo $TRAVIS_TAG | cut -f3 -d_)
 if [ -z $TAG2 ] || [ -z $TAG3 ]; then
+  echo 'No TAG2 or TAG3, exit'
   exit 0;
 fi
 if [ $TAG1 != 'release' ] || [ $TAG2 != $(cat VERSION) ]; then
+  echo 'No release tag or wrong version, exit'
   exit 0;
 fi
 
 # do not deploy outside of manylinux1
 if [ -z $DOCKER_IMAGE ]; then
+  echo 'Not inside manylinux docker image, exit'
   exit 0
 fi
 
