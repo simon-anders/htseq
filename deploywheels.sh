@@ -32,13 +32,17 @@ rm -r /opt/python/cp33*
 HTSEQ_VERSION=$(cat /io/VERSION)
 PYBINS="/opt/python/*/bin"
 for PYBIN in ${PYBINS}; do
-    PYVER=$(basename $(dirname $(dirname ${PYBIN})))
+    PYVER=$(basename $(dirname ${PYBIN}))
+    echo "PYVER=$PYVER"
+    echo "TWINE_REPOSITORY=$TWINE_REPOSITORY"
+    echo "TWINE_USERNAME=$TWINE_USERNAME"
+    echo "TWINE_PASSWORD-0-3=${TWINE_PASSWORD:0:3}"
     ${PYBIN}/pip install twine
-    ${PYBIN}/twine register /io/wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYVER}-manilinux1_x86_64.whl
+    ${PYBIN}/twine register /io/wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYVER}-manylinux1_x86_64.whl
     if [ $? != 0 ]; then
         exit 1
     fi
-    ${PYBIN}/twine upload /io/wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYVER}-manilinux1_x86_64.whl
+    ${PYBIN}/twine upload /io/wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYVER}-manylinux1_x86_64.whl
     if [ $? != 0 ]; then
         exit 1
     fi

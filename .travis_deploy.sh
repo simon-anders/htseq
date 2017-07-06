@@ -41,12 +41,16 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   # OSX deployment
   echo "Deploying for OSX"
   HTSEQ_VERSION=$(cat VERSION)
+  echo "TWINE_REPOSITORY=$TWINE_REPOSITORY"
+  echo "TWINE_USERNAME=$TWINE_USERNAME"
+  echo "TWINE_PASSWORD-0-3=${TWINE_PASSWORD:0:3}"
+  pip --version
   pip install twine
-  twine register wheelhouse/HTSeq-${HTSEQ_VERSION}-OSX_x86_64.whl
+  twine register wheelhouse/HTSeq-${HTSEQ_VERSION}-cp27-cp27m-macosx_10_11_x86_64.whl
   if [ $? != 0 ]; then
       exit 1
   fi
-  twine upload wheelhouse/HTSeq-${HTSEQ_VERSION}-OSX_x86_64.whl
+  twine upload wheelhouse/HTSeq-${HTSEQ_VERSION}-cp27-cp27m-macosx_10_11_x86_64.whl
   if [ $? != 0 ]; then
       exit 1
   fi

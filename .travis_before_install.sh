@@ -17,6 +17,9 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   bash "miniconda.sh" -b -p $HOME/miniconda
   export PATH="$HOME/miniconda/bin:$PATH"
   source $HOME/miniconda/bin/activate
+  # Use pip from conda
+  conda install pip
+  pip --version
 
 else
   echo "OS not recognized: $TRAVIS_OS_NAME"
