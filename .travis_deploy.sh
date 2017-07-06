@@ -41,6 +41,10 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   # OSX deployment
   #TODO
   echo "Deploying for OSX (TODO)"
+  pip install twine
+  pip wheel . wheelhouse/
+  twine register wheelhouse/HTSeq-${VERSION}-OSX_x86_64.whl
+  twine register wheelhouse/HTSeq-${VERSION}-OSX_x86_64.whl
 else
   echo "No DOCKER_IMAGE and not OSX, we should not be here!"
   exit 1
