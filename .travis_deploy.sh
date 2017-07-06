@@ -43,6 +43,7 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   echo "Deploying for OSX (TODO)"
   pip install twine
   pip wheel . wheelhouse/
+  ls wheelhouse
   twine register wheelhouse/HTSeq-${VERSION}-OSX_x86_64.whl
   twine register wheelhouse/HTSeq-${VERSION}-OSX_x86_64.whl
 else
