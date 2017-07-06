@@ -17,11 +17,10 @@ if [ $TAG1 != 'release' ] || [ $TAG2 != $(cat VERSION) ]; then
 fi
 
 # do not deploy outside of manylinux1
-if [ -z $DOCKER_IMAGE ]; then
-  echo 'Not inside manylinux docker image, exit'
+if [ -z $DOCKER_IMAGE ] && [ $TRAVIS_OS_NAME != 'osx' ]; then
+  echo 'Not inside manylinux docker image and not OSX, exit'
   exit 0
 fi
-
 
 # deploy onto pypitest unless you have no RC
 if [ ${TAG3:0:2} == 'RC' ]; then
@@ -35,5 +34,14 @@ else
   echo 'Deploying to production pypi'
 fi
    
-# Wheels are already tested in docker image
-docker run -e TWINE_REPOSITORY -e TWINE_USERNAME -e TWINE_PASSWORD --rm -v $(pwd):/io $DOCKER_IMAGE /io/deploywheels.sh 
+if [ $DOCKER_IMAGE ]; then
+  # Wheels are already tested in docker image
+  docker run -e TWINE_REPOSITORY -e TWINE_USERNAME -e TWINE_PASSWORD --rm -v $(pwd):/io $DOCKER_IMAGE /io/deploywheels.sh 
+elif [ $TRAVIS_OS_NAME == 'osx' ]; then
+  # OSX deployment
+  #TODO
+  echo "Deploying for OSX (TODO)"
+else
+  echo "No DOCKER_IMAGE and not OSX, we should not be here!"
+  exit 1
+fi
