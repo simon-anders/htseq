@@ -29,16 +29,16 @@ rm -r /opt/python/cp26*
 rm -r /opt/python/cp33*
 
 # Deploy packages
-VERSION=$(cat /io/VERSION)
+HTSEQ_VERSION=$(cat /io/VERSION)
 PYBINS="/opt/python/*/bin"
 for PYBIN in ${PYBINS}; do
     PYVER=$(basename $(dirname $(dirname ${PYBIN})))
     ${PYBIN}/pip install twine
-    ${PYBIN}/twine register
+    ${PYBIN}/twine register /io/wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYVER}-manilinux1_x86_64.whl
     if [ $? != 0 ]; then
         exit 1
     fi
-    ${PYBIN}/twine upload /io/wheelhouse/HTSeq-${VERSION}-${PYVER}-manilinux1_x86_64.whl
+    ${PYBIN}/twine upload /io/wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYVER}-manilinux1_x86_64.whl
     if [ $? != 0 ]; then
         exit 1
     fi

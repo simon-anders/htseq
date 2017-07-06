@@ -39,13 +39,23 @@ if [ $DOCKER_IMAGE ]; then
   docker run -e TWINE_REPOSITORY -e TWINE_USERNAME -e TWINE_PASSWORD --rm -v $(pwd):/io $DOCKER_IMAGE /io/deploywheels.sh 
 elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   # OSX deployment
-  #TODO
-  echo "Deploying for OSX (TODO)"
+  echo "Deploying for OSX"
+  HTSEQ_VERSION=$(cat VERSION)
   pip install twine
   pip wheel . wheelhouse/
+  if [ $? != 0 ]; then
+      exit 1
+  fi
+  #FIXME
   ls wheelhouse
-  twine register wheelhouse/HTSeq-${VERSION}-OSX_x86_64.whl
-  twine register wheelhouse/HTSeq-${VERSION}-OSX_x86_64.whl
+  twine register wheelhouse/HTSeq-${HTSEQ_VERSION}-OSX_x86_64.whl
+  if [ $? != 0 ]; then
+      exit 1
+  fi
+  twine upload wheelhouse/HTSeq-${HTSEQ_VERSION}-OSX_x86_64.whl
+  if [ $? != 0 ]; then
+      exit 1
+  fi
 else
   echo "No DOCKER_IMAGE and not OSX, we should not be here!"
   exit 1
