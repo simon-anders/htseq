@@ -42,12 +42,6 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   echo "Deploying for OSX"
   HTSEQ_VERSION=$(cat VERSION)
   pip install twine
-  pip wheel . wheelhouse/
-  if [ $? != 0 ]; then
-      exit 1
-  fi
-  #FIXME
-  ls wheelhouse
   twine register wheelhouse/HTSeq-${HTSEQ_VERSION}-OSX_x86_64.whl
   if [ $? != 0 ]; then
       exit 1
