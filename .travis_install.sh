@@ -18,7 +18,14 @@ else
       exit 1
   fi
   
-  sed -i "s/pysam>=0.9.0/$PYSAM_VERSION/" setup.py
+  if [ $TRAVIS_OS_NAME == 'linux' ]; then
+    sed -i "s|pysam>=0.9.0|$PYSAM_VERSION|" setup.py
+  elif [ $TRAVIS_OS_NAME == 'osx' ]; then
+    sed -i "" "s|pysam>=0.9.0|$PYSAM_VERSION|" setup.py
+  else
+    echo "OS not recognized: $TRAVIS_OS_NAME"
+    exit 1
+  fi
   if [ $? != 0 ]; then
       exit 1
   fi

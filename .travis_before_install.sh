@@ -6,7 +6,6 @@ if [ $TRAVIS_OS_NAME == 'linux' ]; then
   sudo apt-get install -y swig3.0
 elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   echo "Installing deps for OSX"
-  #TODO
   if [ $PYTHON_VERSION == "2.7" ]; then
     CONDA_VER='2'
   elif [ $PYTHON_VERSION == "3.6" ]; then
@@ -20,6 +19,6 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   source $HOME/miniconda/bin/activate
 
 else
- echo "OS not recognized: $TRAVIS_OS_NAME"
- exit 1
+  echo "OS not recognized: $TRAVIS_OS_NAME"
+  exit 1
 fi
