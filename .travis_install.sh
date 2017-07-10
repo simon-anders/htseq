@@ -12,6 +12,13 @@ if [ $DOCKER_IMAGE ]; then
 
 # compile normally
 else
+  if [ $TRAVIS_OS_NAME == 'osx' ]; then
+    echo "$PATH"
+    export PATH="$HOME/miniconda/bin:$PATH"
+    echo "$PATH"
+    source $HOME/miniconda/bin/activate
+  fi
+
   # setuptools < 18.0 has issues with Cython as a dependency
   pip install Cython
   if [ $? != 0 ]; then

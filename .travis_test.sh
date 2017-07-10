@@ -5,7 +5,16 @@ if [ $DOCKER_IMAGE ]; then
   exit $?
 fi
 
-PYTHON=${PYTHON:-python}
+if [ $TRAVIS_OS_NAME == 'osx' ]; then
+  echo "$PATH"
+  export PATH="$HOME/miniconda/bin:$PATH"
+  echo "$PATH"
+  source $HOME/miniconda/bin/activate
+  PYTHON="$HOME/miniconda/bin/python$PYTHON_VERSION"
+else
+  PYTHON=${PYTHON:-python}
+fi
+
 echo "python: ${PYTHON}"
 
 py_fdn="python$(${PYTHON} --version 2>&1 | cut -f2 -d ' ' | cut -f1 -d'.')/"

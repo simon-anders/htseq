@@ -44,6 +44,10 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   echo "TWINE_REPOSITORY=$TWINE_REPOSITORY"
   echo "TWINE_USERNAME=$TWINE_USERNAME"
   echo "TWINE_PASSWORD-0-3=${TWINE_PASSWORD:0:3}"
+  echo "$PATH"
+  export PATH="$HOME/miniconda/bin:$PATH"
+  echo "$PATH"
+  source $HOME/miniconda/bin/activate
   pip --version
   pip install twine
   twine register wheelhouse/HTSeq-${HTSEQ_VERSION}-cp27-cp27m-macosx_10_11_x86_64.whl
