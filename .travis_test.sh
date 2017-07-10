@@ -6,9 +6,7 @@ if [ $DOCKER_IMAGE ]; then
 fi
 
 if [ $TRAVIS_OS_NAME == 'osx' ]; then
-  echo "$PATH"
   export PATH="$HOME/miniconda/bin:$PATH"
-  echo "$PATH"
   source $HOME/miniconda/bin/activate
   PYTHON="$HOME/miniconda/bin/python$PYTHON_VERSION"
 else

@@ -13,10 +13,10 @@ if [ $DOCKER_IMAGE ]; then
 # compile normally
 else
   if [ $TRAVIS_OS_NAME == 'osx' ]; then
-    echo "$PATH"
     export PATH="$HOME/miniconda/bin:$PATH"
-    echo "$PATH"
     source $HOME/miniconda/bin/activate
+    # Somehow we need this to execute the setup.py at all...
+    pip install numpy
   fi
 
   # setuptools < 18.0 has issues with Cython as a dependency
