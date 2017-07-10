@@ -43,16 +43,26 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   HTSEQ_VERSION=$(cat VERSION)
   echo "TWINE_REPOSITORY=$TWINE_REPOSITORY"
   echo "TWINE_USERNAME=$TWINE_USERNAME"
-  echo "TWINE_PASSWORD-0-3=${TWINE_PASSWORD:0:3}"
+  echo "TWINE_PASSWORD=$TWINE_PASSWORD"
   export PATH="$HOME/miniconda/bin:$PATH"
   source $HOME/miniconda/bin/activate
   pip --version
   pip install twine
-  twine register wheelhouse/HTSeq-${HTSEQ_VERSION}-cp27-cp27m-macosx_10_11_x86_64.whl
+  if [ $PYTHON_VERSION == '2.7' ]; then
+    PYARCH='cp27-27m'
+  elif [ $PYTHON_VERSION == '3.6' ]; then
+    PYARCH='cp36-36m'
+  else
+    echo "Python version not recognized"
+    exit 1
+  fi
+
+  ls wheelhouse
+  twine register -r "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYARCH}-macosx_10_11_x86_64.whl
   if [ $? != 0 ]; then
       exit 1
   fi
-  twine upload wheelhouse/HTSeq-${HTSEQ_VERSION}-cp27-cp27m-macosx_10_11_x86_64.whl
+  twine upload  -r "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYARCH}-macosx_10_11_x86_64.whl
   if [ $? != 0 ]; then
       exit 1
   fi
