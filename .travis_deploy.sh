@@ -50,9 +50,9 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   pip --version
   pip install twine
   if [ $PYTHON_VERSION == '2.7' ]; then
-    PYARCH='cp27-27m'
+    PYARCH='cp27-cp27m'
   elif [ $PYTHON_VERSION == '3.6' ]; then
-    PYARCH='cp36-36m'
+    PYARCH='cp36-cp36m'
   else
     echo "Python version not recognized"
     exit 1
