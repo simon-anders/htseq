@@ -32,8 +32,8 @@ fi
 if [ ${TAG3:0:2} == 'RC' ]; then
   TWINE_PASSWORD=${TWINE_PASSWORD_TESTPYPI}
   #TWINE_REPOSITORY='https://testpypi.python.org/pypi'
-  #TWINE_REPOSITORY='https://test.pypi.org/legacy/'
-  TWINE_REPOSITORY='https://test.pypi.org'
+  TWINE_REPOSITORY='https://test.pypi.org/legacy/'
+  #TWINE_REPOSITORY='https://test.pypi.org'
   echo 'Deploying to testpypi'
 else
   #FIXME
