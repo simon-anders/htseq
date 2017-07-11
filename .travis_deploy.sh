@@ -36,7 +36,8 @@ fi
    
 if [ $DOCKER_IMAGE ]; then
   # Wheels are already tested in docker image
-  docker run -e TWINE_REPOSITORY -e TWINE_USERNAME -e TWINE_PASSWORD --rm -v $(pwd):/io $DOCKER_IMAGE /io/deploywheels.sh 
+  docker run -e TWINE_REPOSITORY="$TWINE_REPOSITORY" -e TWINE_USERNAME="$TWINE_USERNAME" -e TWINE_PASSWORD="$TWINE_PASSWORD" --rm -v $(pwd):/io $DOCKER_IMAGE /io/deploywheels.sh 
+
 elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   # OSX deployment
   echo "Deploying for OSX"
@@ -57,12 +58,15 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
     exit 1
   fi
 
+  echo "Contents of wheelhouse:"
   ls wheelhouse
-  twine register -r "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYARCH}-macosx_10_11_x86_64.whl
+  TWINE_WHEEL=$(ls wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYARCH}*.whl)
+  echo "TWINE_WHEEL=$TWINE_WHEEL"
+  twine register -r "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
   if [ $? != 0 ]; then
       exit 1
   fi
-  twine upload  -r "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYARCH}-macosx_10_11_x86_64.whl
+  twine upload  -r "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
   if [ $? != 0 ]; then
       exit 1
   fi
