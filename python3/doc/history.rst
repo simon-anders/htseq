@@ -6,6 +6,27 @@ Version history
 
 Version 0.8.0
 =============
+2017-07-11
+
+This release adds a few options to ``htseq-count``:
+
+- ``--secondary-alignments`` handles secondary alignments coming from the same read
+- ``--supplementary-alignments`` handles supplementary alignments (aka chimeric reads)
+
+Raw but fast iterators for FASTA and FASTQ files have been added.
+
+Support for the SAM CIGAR flags ``=`` and ``X`` (sequence match and mismatch) has been added.
+
+``Sequence`` objects can now be pickled/serialized.
+
+Binaries for linux and OSX are now provided on PyPI.
+
+Automation of the release process has been greatly extended, including OSX continuous integration builds.
+
+Several bugs have been fixed, and some parts of the code have been linted or modernized.
+
+Version 0.8.0
+=============
 2017-06-07
 
 This release adds a few options to ``htseq-count``:

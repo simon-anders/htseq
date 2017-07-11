@@ -31,14 +31,11 @@ fi
 # deploy onto pypitest unless you have no RC
 if [ ${TAG3:0:2} == 'RC' ]; then
   TWINE_PASSWORD=${TWINE_PASSWORD_TESTPYPI}
-  #TWINE_REPOSITORY='https://testpypi.python.org/pypi'
   TWINE_REPOSITORY='https://test.pypi.org/legacy/'
-  #TWINE_REPOSITORY='https://test.pypi.org'
   echo 'Deploying to testpypi'
 else
-  #FIXME
-  #TWINE_PASSWORD=${TWINE_PASSWORD_PYPI}
-  #TWINE_REPOSITORY='https://pypi.python.org/pypi'
+  TWINE_PASSWORD=${TWINE_PASSWORD_PYPI}
+  TWINE_REPOSITORY='https://upload.pypi.org/legacy/'
   echo 'Deploying to production pypi'
 fi
    
