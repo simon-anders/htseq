@@ -31,7 +31,9 @@ fi
 # deploy onto pypitest unless you have no RC
 if [ ${TAG3:0:2} == 'RC' ]; then
   TWINE_PASSWORD=${TWINE_PASSWORD_TESTPYPI}
-  TWINE_REPOSITORY='https://testpypi.python.org/pypi'
+  #TWINE_REPOSITORY='https://testpypi.python.org/pypi'
+  #TWINE_REPOSITORY='https://test.pypi.org/legacy/'
+  TWINE_REPOSITORY='https://test.pypi.org'
   echo 'Deploying to testpypi'
 else
   #FIXME
@@ -68,10 +70,11 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   ls wheelhouse
   TWINE_WHEEL=$(ls wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYARCH}*.whl)
   echo "TWINE_WHEEL=$TWINE_WHEEL"
-  twine register --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
-  if [ $? != 0 ]; then
-      exit 1
-  fi
+  # FIXME: no explicit register needed??
+  #twine register --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
+  #if [ $? != 0 ]; then
+  #    exit 1
+  #fi
   twine upload  --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
   if [ $? != 0 ]; then
       exit 1

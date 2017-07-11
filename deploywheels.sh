@@ -38,10 +38,11 @@ for PYBIN in ${PYBINS}; do
     echo "TWINE_USERNAME=$TWINE_USERNAME"
     echo "TWINE_PASSWORD=$TWINE_PASSWORD"
     ${PYBIN}/pip install twine
-    ${PYBIN}/twine register --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" /io/wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYVER}-manylinux1_x86_64.whl
-    if [ $? != 0 ]; then
-        exit 1
-    fi
+    # FIXME: no explicit register needed??
+    #${PYBIN}/twine register --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" /io/wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYVER}-manylinux1_x86_64.whl
+    #if [ $? != 0 ]; then
+    #    exit 1
+    #fi
     ${PYBIN}/twine upload --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" /io/wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYVER}-manylinux1_x86_64.whl
     if [ $? != 0 ]; then
         exit 1
