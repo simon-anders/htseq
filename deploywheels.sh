@@ -28,7 +28,7 @@ rm -r /opt/python/cp26*
 # Python 3.3 is not supported:
 rm -r /opt/python/cp33*
 
-# Deploy packages
+# Deploy binary packages
 HTSEQ_VERSION=$(cat /io/VERSION)
 PYBINS="/opt/python/*/bin"
 for PYBIN in ${PYBINS}; do
@@ -49,3 +49,5 @@ for PYBIN in ${PYBINS}; do
     fi
 done
 
+# Deploy source code
+${PYBIN}/twine upload --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" /io/wheelhouse/HTSeq-${HTSEQ_VERSION}.tar.gz

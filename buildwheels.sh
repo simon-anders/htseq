@@ -28,6 +28,7 @@ rm -r /opt/python/cp26*
 # Python 3.3 is not supported:
 rm -r /opt/python/cp33*
 
+# Build wheels
 PYBINS="/opt/python/*/bin"
 for PYBIN in ${PYBINS}; do
     ${PYBIN}/pip install -r /io/requirements.txt
@@ -40,3 +41,6 @@ done
 
 # Created files are owned by root, so fix permissions.
 chown -R --reference=/io/setup.py /io/wheelhouse/
+
+# Build source dist
+${PYBIN}/python /io/setup.py sdist --dist-dir /io/wheelhouse/
