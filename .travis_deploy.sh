@@ -16,9 +16,15 @@ if [ $TAG1 != 'release' ] || [ $TAG2 != $(cat VERSION) ]; then
   exit 0;
 fi
 
-# do not deploy outside of manylinux1
+# do not deploy on linux outside of manylinux1
 if [ -z $DOCKER_IMAGE ] && [ $TRAVIS_OS_NAME != 'osx' ]; then
   echo 'Not inside manylinux docker image and not OSX, exit'
+  exit 0
+fi
+
+# OSX only deploys on latest pysam
+if [ $TRAVIS_OS_NAME == 'osx' ] && [ $PYSAM_VERSION != 'pysam' ];
+  echo "OSX on older pysam, exit"
   exit 0
 fi
 
@@ -62,11 +68,11 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   ls wheelhouse
   TWINE_WHEEL=$(ls wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYARCH}*.whl)
   echo "TWINE_WHEEL=$TWINE_WHEEL"
-  twine register -r "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
+  twine register --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
   if [ $? != 0 ]; then
       exit 1
   fi
-  twine upload  -r "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
+  twine upload  --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
   if [ $? != 0 ]; then
       exit 1
   fi
