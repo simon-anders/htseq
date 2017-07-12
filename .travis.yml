@@ -1,51 +1,182 @@
-dist: trusty
-
-sudo: required
-
 notifications:
   email: false
 
 language: python
 
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-
 env:
  global:
   - SWIG=swig3.0
- matrix:
-  # NOTE: pysam 0.9 has a bug with Python 3 and requires Cython
-  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://testpypi.python.org/pypi" CYTHON_INSTALL='Cython'
-  - CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://testpypi.python.org/pypi" CYTHON_INSTALL='Cython'
-  - CC=gcc-5 PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
-  - CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
-  - CC=gcc-5 PYSAM_VERSION='pysam' PYPI="-i https://testpypi.python.org/pypi"
-  - CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://testpypi.python.org/pypi"
-  - CC=gcc-5 PYSAM_VERSION='pysam' PYPI=""
-  - CC=gcc PYSAM_VERSION='pysam' PYPI=""
 
-addons:
-  apt:
-    sources:
-     - ubuntu-toolchain-r-test
-    packages:
-     - gcc-5
-     - g++-5
+matrix:
+  include:
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://test.pypi.org/legacy/"
+      python: 2.7
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://test.pypi.org/legacy/"
+      python: 3.4
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://test.pypi.org/legacy/"
+      python: 3.5
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://test.pypi.org/legacy/"
+      python: 3.6
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='2.7' PYPI="-i https://test.pypi.org/legacy/"
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='3.6' PYPI="-i https://test.pypi.org/legacy/"
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="-i https://test.pypi.org/legacy/"
+      python: 2.7
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="-i https://test.pypi.org/legacy/"
+      python: 3.4
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="-i https://test.pypi.org/legacy/"
+      python: 3.5
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="-i https://test.pypi.org/legacy/"
+      python: 3.6
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='2.7' PYPI="-i https://test.pypi.org/legacy/"
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='3.6' PYPI="-i https://test.pypi.org/legacy/"
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+      python: 2.7
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+      python: 3.4
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+      python: 3.5
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+      python: 3.6
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='2.7' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='3.6' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI=""
+      python: 2.7
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI=""
+      python: 3.4
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI=""
+      python: 3.5
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI=""
+      python: 3.6
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='2.7' PYPI=""
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='3.6' PYPI=""
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI=""
+      python: 2.7
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI=""
+      python: 3.4
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI=""
+      python: 3.5
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI=""
+      python: 3.6
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='2.7' PYPI=""
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='3.6' PYPI=""
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
+      python: 2.7
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
+      python: 3.4
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
+      python: 3.5
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
+      python: 3.6
+      os: linux
+      dist: trusty
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='2.7' PYPI="" CYTHON_INSTALL='Cython'
+      language: generic
+      os: osx
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='3.6' PYPI="" CYTHON_INSTALL='Cython'
+      language: generic
+      os: osx
 
 before_install:
-  - sudo add-apt-repository ppa:nschloe/swig-backports -y
-  - sudo apt-get -qq update
-  - sudo apt-get install -y swig3.0
+  - ./.travis_before_install.sh
 
 install:
   # NOTE: pysam 0.9 has a bug with Python 3 and requires Cython
-  - pip install $CYTHON_INSTALL
-  - sed -i "s/pysam>=0.9.0/$PYSAM_VERSION/" requirements.txt
-  - pip install -r requirements.txt
-  - pip install $PYPI HTSeq
+  - ./.travis_test.sh
+  # FIXME
+  #- pip install $CYTHON_INSTALL
+  #- sed -i "s/pysam>=0.9.0/$PYSAM_VERSION/" requirements.txt
+  #- pip install -r requirements.txt
+  #- pip install $PYPI HTSeq
  
 script:
-  - python .travis_test.py
+  - ./.travis_test.sh
