@@ -43,4 +43,5 @@ done
 chown -R --reference=/io/setup.py /io/wheelhouse/
 
 # Build source dist
-${PYBIN}/python /io/setup.py sdist --dist-dir /io/wheelhouse/
+cd /io
+${PYBIN}/python setup.py sdist --dist-dir /io/wheelhouse/
