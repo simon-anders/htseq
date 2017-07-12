@@ -15,20 +15,15 @@ else
   if [ $TRAVIS_OS_NAME == 'osx' ]; then
     export PATH="$HOME/miniconda/bin:$PATH"
     source $HOME/miniconda/bin/activate
-    # Somehow we need this to execute the setup.py at all...
-    pip install numpy
   fi
 
   # setuptools < 18.0 has issues with Cython as a dependency
-  pip install Cython
-  if [ $? != 0 ]; then
-      exit 1
-  fi
+  pip install "$CYTHON_INSTALL"
   
   if [ $TRAVIS_OS_NAME == 'linux' ]; then
-    sed -i "s|pysam>=0.9.0|$PYSAM_VERSION|" setup.py
+    sed -i "s|pysam>=0.9.0|$PYSAM_VERSION|" requirements.txt
   elif [ $TRAVIS_OS_NAME == 'osx' ]; then
-    sed -i "" "s|pysam>=0.9.0|$PYSAM_VERSION|" setup.py
+    sed -i "" "s|pysam>=0.9.0|$PYSAM_VERSION|" requirements.txt
   else
     echo "OS not recognized: $TRAVIS_OS_NAME"
     exit 1
@@ -36,22 +31,20 @@ else
   if [ $? != 0 ]; then
       exit 1
   fi
+
+  pip install -r requirements.txt
   
-  # old setuptools also has a bug for extras, but it still compiles
-  pip install -v '.[htseq-qa]'
+  pip install $PYPI HTSeq
   if [ $? != 0 ]; then
       exit 1
   fi
 fi
 
-# OSX makes wheels as well
-if [ $TRAVIS_OS_NAME == 'osx' ]; then
-  mkdir wheelhouse
-  pip wheel . -w wheelhouse/
-  if [ $? != 0 ]; then
-      exit 1
-  fi
-  #FIXME
-  ls wheelhouse
-fi
-
+## OSX makes wheels as well
+#if [ $TRAVIS_OS_NAME == 'osx' ]; then
+#  mkdir wheelhouse
+#  pip wheel . -w wheelhouse/
+#  if [ $? != 0 ]; then
+#      exit 1
+#  fi
+#fi

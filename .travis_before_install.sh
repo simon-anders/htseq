@@ -4,6 +4,7 @@ if [ $TRAVIS_OS_NAME == 'linux' ]; then
   sudo add-apt-repository ppa:nschloe/swig-backports -y
   sudo apt-get -qq update
   sudo apt-get install -y swig3.0
+
 elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   echo "Installing deps for OSX"
   if [ $PYTHON_VERSION == "2.7" ]; then
