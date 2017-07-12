@@ -34,7 +34,11 @@ else
 
   pip install -r requirements.txt
   
-  pip install $PYPI HTSeq
+  if [ -z "$PYPI" ]; then
+    pip install HTSeq
+  else
+    pip install -i "$PYPI" HTSeq
+  fi
   if [ $? != 0 ]; then
       exit 1
   fi

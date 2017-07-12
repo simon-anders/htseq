@@ -9,82 +9,82 @@ env:
 
 matrix:
   include:
-    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="https://test.pypi.org/legacy/"
       python: 2.7
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="https://test.pypi.org/legacy/"
       python: 3.4
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="https://test.pypi.org/legacy/"
       python: 3.5
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam' PYPI="https://test.pypi.org/legacy/"
       python: 3.6
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='2.7' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='2.7' PYPI="https://test.pypi.org/legacy/"
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='3.6' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='3.6' PYPI="https://test.pypi.org/legacy/"
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="https://test.pypi.org/legacy/"
       python: 2.7
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="https://test.pypi.org/legacy/"
       python: 3.4
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="https://test.pypi.org/legacy/"
       python: 3.5
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="https://test.pypi.org/legacy/"
       python: 3.6
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='2.7' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='2.7' PYPI="https://test.pypi.org/legacy/"
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='3.6' PYPI="-i https://test.pypi.org/legacy/"
+    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='3.6' PYPI="https://test.pypi.org/legacy/"
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
       python: 2.7
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
       python: 3.4
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
       python: 3.5
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
       python: 3.6
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='2.7' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='2.7' PYPI="https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='3.6' PYPI="-i https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
+    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='3.6' PYPI="https://test.pypi.org/legacy/" CYTHON_INSTALL='Cython'
       language: generic
       os: osx
     - env: CC=gcc PYSAM_VERSION='pysam' PYPI=""
