@@ -43,15 +43,14 @@ else
   if [ -n "${PYPI}" ]; then
     echo "Installing HTSeq from testpypi"
     pip install -i "${PYPI}" HTSeq
-    echo "HTSeq installed"
   else
     echo "Installing HTSeq from production pypi"
     pip install HTSeq
-    echo "HTSeq installed"
   fi
   if [ $? != 0 ]; then
       exit 1
   fi
+  echo "HTSeq installed"
 fi
 
 ## OSX makes wheels as well
