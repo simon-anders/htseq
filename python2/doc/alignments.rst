@@ -188,9 +188,9 @@ object you typically never call the constructor yourself.
       A list of :class:`CigarOperation` objects, as parsed from the extended CIGAR string. See
       :class:`CigarOperation` for details.
    
-   .. attribute:: SAM_Alignment.nor_primary_alignment
+   .. attribute:: SAM_Alignment.not_primary_alignment
    
-      A boolean. Whether the alignment is not primary. (See SAM format reference, flag 0x0100.)
+      A boolean. Whether the alignment is secondary. (See SAM format reference, flag 0x0100. See also supplementary alignments, flag 0x0800.)
 
    .. attribute:: SAM_Alignment.failed_platform_qc
    
@@ -199,6 +199,10 @@ object you typically never call the constructor yourself.
    .. attribute:: SAM_Alignment.pcr_or_optical_duplicate
    
       A boolean. Whether the read is a PCR or optical duplicate. (See SAM format reference, flag 0x0400.)
+
+   .. attribute:: SAM_Alignment.supplementary
+   
+      A boolean. Whether the alignment is supplementary. (See SAM format reference, flag 0x0800.)
 
    These methods access the optional fields:
 
@@ -356,7 +360,9 @@ objects in the list.
            'M': 'matched',
            'N': 'skipped',
            'P': 'padded',
-           'S': 'soft-clipped'}
+           'S': 'soft-clipped',
+           'X': 'sequence-mismatched',
+           '=': 'sequence-matched'}
            
    .. attribute:: CigarOperation.size
    
