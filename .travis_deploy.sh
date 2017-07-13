@@ -7,8 +7,8 @@ fi
 TAG1=$(echo $TRAVIS_TAG | cut -f1 -d_)
 TAG2=$(echo $TRAVIS_TAG | cut -f2 -d_)
 TAG3=$(echo $TRAVIS_TAG | cut -f3 -d_)
-if [ -z $TAG2 ] || [ -z $TAG3 ]; then
-  echo 'No TAG2 or TAG3, exit'
+if [ -z $TAG2 ]; then
+  echo 'No TAG2, exit'
   exit 0;
 fi
 if [ $TAG1 != 'release' ] || [ $TAG2 != $(cat VERSION) ]; then
@@ -29,14 +29,17 @@ if [ $TRAVIS_OS_NAME == 'osx' ] && [ $PYSAM_VERSION != 'pysam' ]; then
 fi
 
 # deploy onto pypitest unless you have no RC
-if [ ${TAG3:0:2} == 'RC' ]; then
+if [ -z $TAG3 ]; then
+  TWINE_PASSWORD=${TWINE_PASSWORD_PYPI}
+  TWINE_REPOSITORY='https://upload.pypi.org/legacy/'
+  echo 'Deploying to production pypi'
+elif [ ${TAG3:0:2} == 'RC' ]; then
   TWINE_PASSWORD=${TWINE_PASSWORD_TESTPYPI}
   TWINE_REPOSITORY='https://test.pypi.org/legacy/'
   echo 'Deploying to testpypi'
 else
-  TWINE_PASSWORD=${TWINE_PASSWORD_PYPI}
-  TWINE_REPOSITORY='https://upload.pypi.org/legacy/'
-  echo 'Deploying to production pypi'
+  echo "Tag not recognized: $TRAVIS_TAG"
+  exit 1
 fi
    
 if [ $DOCKER_IMAGE ]; then

@@ -154,6 +154,13 @@ setup(name='HTSeq',
       url='https://github.com/simon-anders/htseq',
       description="A framework to process and analyze data from " +
                   "high-throughput sequencing (HTS) assays",
+      long_description="""
+      A framework to process and analyze data from high-throughput sequencing
+      (HTS) assays.
+
+      Development: https://github.com/simon-anders/htseq
+
+      Documentation: http://htseq.readthedocs.io""",
       license='GPL3',
       classifiers=[
          'Development Status :: 5 - Production/Stable',
