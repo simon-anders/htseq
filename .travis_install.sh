@@ -18,7 +18,9 @@ else
   fi
 
   # setuptools < 18.0 has issues with Cython as a dependency
-  pip install "$CYTHON_INSTALL"
+  if [ -n "${CYTHON_INSTALL}" ]; then
+    pip install "$CYTHON_INSTALL"
+  fi
   
   if [ $TRAVIS_OS_NAME == 'linux' ]; then
     sed -i "s|pysam>=0.9.0|$PYSAM_VERSION|" requirements.txt
