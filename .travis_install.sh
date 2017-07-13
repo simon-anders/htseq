@@ -19,7 +19,9 @@ else
 
   # setuptools < 18.0 has issues with Cython as a dependency
   if [ -n "${CYTHON_INSTALL}" ]; then
+    echo "Installing Cython separately..."
     pip install "$CYTHON_INSTALL"
+    echo "Cython installed"
   fi
   
   if [ $TRAVIS_OS_NAME == 'linux' ]; then
@@ -34,12 +36,18 @@ else
       exit 1
   fi
 
+  echo "Installing requirements"
   pip install -r requirements.txt
+  echo "Requirements installed"
   
-  if [ -z "$PYPI" ]; then
-    pip install HTSeq
+  if [ -n "${PYPI}" ]; then
+    echo "Installing HTSeq from testpypi"
+    pip install -i "${PYPI}" HTSeq
+    echo "HTSeq installed"
   else
-    pip install -i "$PYPI" HTSeq
+    echo "Installing HTSeq from production pypi"
+    pip install HTSeq
+    echo "HTSeq installed"
   fi
   if [ $? != 0 ]; then
       exit 1
