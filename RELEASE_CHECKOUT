@@ -3,20 +3,25 @@
   (this makes _version.py and SWIGs _HTSeq.c)
 - git add ...
 - git commit ...
-- git tag release_<semantic-version>_RC1
-- git push htseq
+- git push fabio
 
 (wait for CI to complete)
 
 If all well:
-- python setup.py register -r testpypi
-  (or whatever the test repo is called in .pypirc)
-- python setup.py sdist; mv dist/HTSeq...tar.gz dist/HTSeq...dev1.tar.gz
-- upload the file manually to testpypi
-- restart the CI build on the CI_pypi branch
+- git tag release_<semantic-version>_RC1
+- git push fabio release_<semantic-version>_RC1 (this repo has testpypi deploy triggers)
+else:
+- make changes on the branch and repeat (no additional version bump is needed)
+
+(wait for CI to complete)
 
 If all well:
-- python setup.py register -r pypi
-  (or whatever the production repo is called in .pypirc)
-- upload the file manually to pypi
+- restart and, if necessary, update the pypi_CI branch
+else:
+- a minor version bump might be needed (pypi hates files with existing names)
+
+If all well:
+- git tag release_<semantic-version>
+- git push fabio release_<semantic-version>
 - restart the CI build on the CI_pypi branch
+- activate, triggen, and change default documentation page on readthedocs to the new release

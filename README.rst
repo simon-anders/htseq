@@ -29,6 +29,14 @@ and are transferring the binaries onto another machine with a compatible
 environment (architechture, shared libraries). If you are not sure,
 chances are you need them.
 
+Both ``Linux`` and ``OSX`` are supported and binaries are provided for virtually
+all ``Linux`` versions and for some ``OSX`` versions (the latter only for ``Python 2.7``
+and ``Python 3.6``). A source package which should not require ``Cython`` nor ``SWIG``
+is provided for all other cases. ``Windows`` is not officially supported as we don't
+have access to a Continuous Integration ``Windows`` machine that supports ``pysam``.
+However, if you have built ``HTSeq`` for ``Windows``, please open an issue and we'll
+try and include it in the release.
+
 Installation
 ~~~~~~~~~~~~
 
