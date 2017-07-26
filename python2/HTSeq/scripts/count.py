@@ -214,12 +214,16 @@ def count_reads_in_features(sam_filenames, gff_filename,
                             write_to_samout(r, "__not_aligned", samoutfile)
                             notaligned += 1
                             continue
-                    if ((secondary_alignment_mode == 'ignore') and
-                       r[0].not_primary_alignment):
-                        continue
-                    if ((supplementary_alignment_mode == 'ignore') and
-                       r[0].supplementary):
-                        continue
+                    if secondary_alignment_mode == 'ignore':
+                        if (r[0] is not None) and r[0].not_primary_alignment:
+                            continue
+                        elif (r[1] is not None) and r[1].not_primary_alignment:
+                            continue
+                    if supplementary_alignment_mode == 'ignore':
+                        if (r[0] is not None) and r[0].supplementary:
+                            continue
+                        elif (r[1] is not None) and r[1].supplementary:
+                            continue
                     try:
                         if ((r[0] is not None and r[0].optional_field("NH") > 1) or
                            (r[1] is not None and r[1].optional_field("NH") > 1)):
