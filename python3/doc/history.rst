@@ -4,6 +4,15 @@
 Version history
 ***************
 
+Version 0.9.1
+=============
+2017-07-26
+
+Bugfix release for ``htseq-count``:
+
+- ``--secondary-alignments`` and ``supplementary-alignments`` should now work for some corner cases of unmapped reads
+
+
 Version 0.9.0
 =============
 2017-07-11
