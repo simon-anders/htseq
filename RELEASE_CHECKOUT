@@ -1,0 +1,28 @@
+- change version in VERSION
+- change python3/doc/history.rst
+- python2 setup.py build; python setup.py build
+  (this makes _version.py and SWIGs _HTSeq.c)
+- git add ...
+- git commit ...
+- git push fabio
+
+(wait for CI to complete)
+
+If all well:
+- git tag release_<semantic-version>_RC1
+- git push fabio release_<semantic-version>_RC1 (this repo has testpypi deploy triggers)
+else:
+- make changes on the branch and repeat (no additional version bump is needed)
+
+(wait for CI to complete)
+
+If all well:
+- restart and, if necessary, update the pypi_CI branch
+else:
+- a minor version bump might be needed (pypi hates files with existing names)
+
+If all well:
+- git tag release_<semantic-version>
+- git push fabio release_<semantic-version>
+- restart the CI build on the CI_pypi branch
+- activate, triggen, and change default documentation page on readthedocs to the new release
