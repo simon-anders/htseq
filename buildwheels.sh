@@ -23,10 +23,10 @@ if ! grep -q docker /proc/1/cgroup; then
 fi
 
 # Python 2.6 is not supported
-rm -r /opt/python/cp26*
+rm -rf /opt/python/cp26*
 
 # Python 3.3 is not supported:
-rm -r /opt/python/cp33*
+rm -rf /opt/python/cp33*
 
 # Build wheels
 PYBINS="/opt/python/*/bin"
