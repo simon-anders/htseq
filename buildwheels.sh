@@ -24,6 +24,7 @@ fi
 
 # Python 2.6 is not supported
 rm -rf /opt/python/cp26*
+rm -rf /opt/python/cpython-2.6*
 
 # Python 3.3 is not supported:
 rm -rf /opt/python/cp33*
