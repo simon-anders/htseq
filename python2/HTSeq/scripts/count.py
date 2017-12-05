@@ -87,6 +87,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
             i += 1
             if i % 100000 == 0 and not quiet:
                 sys.stderr.write("%d GFF lines processed.\n" % i)
+                sys.stderr.flush()
     except:
         sys.stderr.write(
             "Error occured when processing GFF file (%s):\n" %
@@ -95,6 +96,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
 
     if not quiet:
         sys.stderr.write("%d GFF lines processed.\n" % i)
+        sys.stderr.flush()
 
     if len(counts) == 0:
         sys.stderr.write(
@@ -156,6 +158,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
                     sys.stderr.write(
                         "%d SAM alignment record%s processed.\n" %
                         (i, "s" if not pe_mode else " pairs"))
+                    sys.stderr.flush()
 
                 i += 1
                 if not pe_mode:
@@ -298,6 +301,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
             sys.stderr.write(
                 "%d SAM %s processed.\n" %
                 (i, "alignments " if not pe_mode else "alignment pairs"))
+            sys.stderr.flush()
 
         if samoutfile is not None:
             samoutfile.close()
