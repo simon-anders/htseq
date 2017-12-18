@@ -576,7 +576,9 @@ cdef class GenomicArray(object):
                                    self.storage, self.memmap_dir)
         else:
             self.chrom_vectors[chrom] = {
-                strand_nostrand:  ChromVector.create(iv, self.typecode, self.storage)}
+                strand_nostrand:  ChromVector.create(iv, self.typecode,
+                                                     self.storage,
+                                                     self.memmap_dir)}
 
     def __reduce__(self):
         return (_GenomicArray_unpickle, (self.stranded, self.typecode, self.chrom_vectors))
