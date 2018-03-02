@@ -17,6 +17,7 @@ else
     source $HOME/miniconda/bin/activate
     # Somehow we need this to execute the setup.py at all...
     pip install numpy
+    pip install pysam
   fi
 
   # setuptools < 18.0 has issues with Cython as a dependency
