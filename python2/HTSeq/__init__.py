@@ -44,7 +44,7 @@ class FileOrSequence( object ):
       
    def __iter__( self ):
       self.line_no = 1
-      if isinstance( self.fos, str ):
+      if isinstance( self.fos, basestring ):
          if self.fos.lower().endswith( ( ".gz" , ".gzip" ) ):
             lines = gzip.open( self.fos, 'rt' )
          else:
