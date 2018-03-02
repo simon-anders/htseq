@@ -121,7 +121,7 @@ counting the reads::
 
 The average qualities are hence::
 
-   >>> qualsum / float(nreads)
+   >>> qualsum / float(nreads)  #doctest: +NORMALIZE_WHITESPACE
    array([ 31.56838274,  30.08288332,  29.4375375 ,  29.00432017,
            28.55290212,  28.26825073,  28.46681867,  27.59082363,
            27.34097364,  27.57330293,  27.11784471,  27.19432777,
