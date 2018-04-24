@@ -1515,12 +1515,19 @@ cdef class SAM_Alignment(AlignmentWithSequenceReversal):
         else:
             cigar = "*"
 
-        return '\t'.join((self.read.name, str(self.flag), query_start.chrom,
-                          str(query_start.start +
-                              1), str(self.aQual), cigar, mate_start.chrom,
-                          str(mate_start.pos + 1), str(self.inferred_insert_size),
-                          self.read_as_aligned.seq, self.read_as_aligned.qualstr,
-                          '\t'.join(self.raw_optional_fields())))
+        return '\t'.join(
+                (self.read.name,
+                 str(self.flag),
+                 query_start.chrom,
+                 str(query_start.start + 1),
+                 str(self.aQual),
+                 cigar,
+                 mate_start.chrom,
+                 str(mate_start.pos + 1),
+                 str(self.inferred_insert_size),
+                 self.read_as_aligned.seq.decode(),
+                 self.read_as_aligned.qualstr.decode(),
+                 '\t'.join(self.raw_optional_fields())))
 
     def optional_field(SAM_Alignment self, str tag):
         res = [p for p in self.optional_fields if p[0] == tag]
