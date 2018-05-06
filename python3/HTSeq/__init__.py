@@ -993,11 +993,12 @@ class WiggleReader(FileOrSequence):
 
 class BAM_Reader(object):
 
-    def __init__(self, filename):
+    def __init__(self, filename, check_sq=True):
         global pysam
         self.filename = filename
         self.sf = None  # This one is only used by __getitem__
         self.record_no = -1
+        self.check_sq = check_sq
         try:
             import pysam
         except ImportError:
@@ -1006,7 +1007,7 @@ class BAM_Reader(object):
             raise
 
     def __iter__(self):
-        sf = pysam.Samfile(self.filename, "rb")
+        sf = pysam.Samfile(self.filename, "rb", check_sq=self.check_sq)
         self.record_no = 0
         for pa in sf:
             # yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
@@ -1014,7 +1015,7 @@ class BAM_Reader(object):
             self.record_no += 1
 
     def fetch(self, reference=None, start=None, end=None, region=None):
-        sf = pysam.Samfile(self.filename, "rb")
+        sf = pysam.Samfile(self.filename, "rb", check_sq=self.check_sq)
         self.record_no = 0
         try:
             for pa in sf.fetch(reference, start, end, region):
@@ -1041,7 +1042,7 @@ class BAM_Reader(object):
             raise TypeError(
                 "Use a HTSeq.GenomicInterval to access regions within .bam-file!")
         if self.sf is None:
-            self.sf = pysam.Samfile(self.filename, "rb")
+            self.sf = pysam.Samfile(self.filename, "rb", check_seq=self.check_sq)
             # NOTE: pysam 0.9 has renames _hasIndex into has_index
             if (hasattr(self.sf, '_hasIndex') and (not self.sf._hasIndex())) or (not self.sf.has_index()):
                 raise ValueError(
@@ -1050,7 +1051,7 @@ class BAM_Reader(object):
             yield SAM_Alignment.from_pysam_AlignedRead(pa, self.sf)
 
     def get_header_dict(self):
-        sf = pysam.Samfile(self.filename, "rb")
+        sf = pysam.Samfile(self.filename, "rb", check_sq=self.check_sq)
         return sf.header
 
 
