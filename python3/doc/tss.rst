@@ -35,12 +35,12 @@ We start with the straight-forward way of calculating the full coverage first
 and then summing up the profile. This can be done as described in the :ref:`Tour <tour>`::
 
    >>> import HTSeq
-   >>> bamfile = HTSeq.BAM_Reader( "SRR001432_head.bam" )
-   >>> gtffile = HTSeq.GFF_Reader( "Homo_sapiens.GRCh37.56_chrom1.gtf" )
-   >>> coverage = HTSeq.GenomicArray( "auto", stranded=False, typecode="i" )
+   >>> bamfile = HTSeq.BAM_Reader("SRR001432_head.bam")
+   >>> gtffile = HTSeq.GFF_Reader("Homo_sapiens.GRCh37.56_chrom1.gtf")
+   >>> coverage = HTSeq.GenomicArray("auto", stranded=False, typecode="i")
    >>> for almnt in bamfile:
    ...    if almnt.aligned:
-   ...       coverage[ almnt.iv ] += 1
+   ...       coverage[almnt.iv] += 1
 
 To find the location of all transcription start sites, we can look in the GTF
 file for exons with exon number 1 (as indicated by the ``exon_number``
@@ -49,7 +49,7 @@ The following loop extracts and prints this information (using ``itertools.islic
 to go through only the first 100 features in the GTF file)::
 
    >>> import itertools
-   >>> for feature in itertools.islice( gtffile, 100):
+   >>> for feature in itertools.islice(gtffile, 100):
    ...    if feature.type == "exon" and feature.attr["exon_number"] == "1":
    ...       print(feature.attr["gene_id"], feature.attr["transcript_id"], feature.iv.start_d_as_pos)
    ENSG00000223972 ENST00000456328 1:11873/+
@@ -80,7 +80,7 @@ as this data type enforces uniqueness.
 Let's take one of these starting positions. To get a nice one, we manually chose
 this one here, just for demonstration purposes::
 
-   >>> p = HTSeq.GenomicPosition( "1", 145439814, "+" )
+   >>> p = HTSeq.GenomicPosition("1", 145439814, "+")
 
 This is really one of the TSSs in the set:
 
@@ -91,7 +91,7 @@ We can get a window centered on this TSS by just subtracting and adding a fixed
 value (half of the desired window size, let's use 3 kb)::
    
    >>> halfwinwidth = 3000
-   >>> window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
+   >>> window = HTSeq.GenomicInterval(p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, ".")
    >>> window
    <GenomicInterval object '1', [145436814,145442814), strand '.'>
 
@@ -99,7 +99,7 @@ We can check the coverage in this window by subsetting and transforming to a lis
 
 .. doctest::
 
-   >>> list( coverage[window] )  #doctest: +ELLIPSIS
+   >>> list(coverage[window])  #doctest: +ELLIPSIS
    [0, 0, 0, ..., 0, 0]
 
 As we will work with numpy_ from now on, it may be better to get this as 
@@ -110,7 +110,7 @@ numpy array:
 .. doctest::
 
    >>> import numpy
-   >>> wincvg = numpy.fromiter( coverage[window], dtype='i', count=2*halfwinwidth )
+   >>> wincvg = numpy.fromiter(coverage[window], dtype='i', count=2*halfwinwidth)
    >>> wincvg
    array([0, 0, 0, ..., 0, 0, 0], dtype=int32)
 
@@ -119,21 +119,21 @@ With matplotlib, we can see that this vector is, in effect, not all zero:
 .. doctest::
 
    >>> from matplotlib import pyplot #doctest: +SKIP
-   >>> pyplot.plot( wincvg )    #doctest: +SKIP
-   >>> pyplot.show()            #doctest: +SKIP
+   >>> pyplot.plot(wincvg)    #doctest: +SKIP
+   >>> pyplot.show()          #doctest: +SKIP
 
 .. image:: tss_fig1.png
 
 To sum up the profile, we initialize a numpy vector of the size of our window with zeroes::
 
-   >>> profile = numpy.zeros( 2*halfwinwidth, dtype='i' )
+   >>> profile = numpy.zeros(2*halfwinwidth, dtype='i')
 
 Now, we can go through the TSS positions and add the coverage in their windows 
 to get the profile::
 
    >>> for p in tsspos:
-   ...    window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
-   ...    wincvg = numpy.fromiter( coverage[window], dtype='i', count=2*halfwinwidth )
+   ...    window = HTSeq.GenomicInterval(p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, ".")
+   ...    wincvg = numpy.fromiter(coverage[window], dtype='i', count=2*halfwinwidth)
    ...    if p.strand == "+":
    ...       profile += wincvg
    ...    else:
@@ -146,7 +146,7 @@ Using matplotlib, we can plot this:
 
 .. doctest::
 
-   >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )  #doctest: +SKIP
+   >>> pyplot.plot( numpy.arange(-halfwinwidth, halfwinwidth), profile)  #doctest: +SKIP
    >>> pyplot.show()  #doctest: +SKIP
 
 .. image:: tss_fig2.png
@@ -171,7 +171,7 @@ to it:
 
 .. doctest::
 
-   pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )  #doctest: +SKIP
+   pyplot.plot( numpy.arange(-halfwinwidth, halfwinwidth), profile)  #doctest: +SKIP
    pyplot.show()  #doctest: +SKIP
 
 .. image:: tss_fig3.png
@@ -198,8 +198,8 @@ and then use random access, as HTSeq exposes this functionality of SAMtools.
 
 Let's say we use the same window as above as example::
 
-   >>> p = HTSeq.GenomicPosition( "1", 145439814, "+" )
-   >>> window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
+   >>> p = HTSeq.GenomicPosition("1", 145439814, "+")
+   >>> window = HTSeq.GenomicInterval(p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, ".")
    >>> window
    <GenomicInterval object '1', [145436814,145442814), strand '.'>
    
@@ -207,8 +207,8 @@ Then, we can simply get a list of all reads within this interval as follows:
 
 .. doctest::
 
-   >>> sortedbamfile = HTSeq.BAM_Reader( "SRR001432_head_sorted.bam" )
-   >>> for almnt in sortedbamfile[ window ]:
+   >>> sortedbamfile = HTSeq.BAM_Reader("SRR001432_head_sorted.bam")
+   >>> for almnt in sortedbamfile[window]:
    ...     print(almnt)   #doctest:+ELLIPSIS +NORMALIZE_WHITESPACE
    <SAM_Alignment object: Read 'SRR001432.90270 USI-EAS21_0008_3445:8:3:245:279 length=25' aligned to 1:[145437532,145437557)/->
     ...
@@ -238,10 +238,10 @@ Using this, we can go through the set of all TSS positions (in the ``tsspos``
 set variable that we created above) and for each TSS position, loop through
 all aligned reads close to it. Here is this double loop::
 
-   >>> profileB = numpy.zeros( 2*halfwinwidth, dtype='i' )   
+   >>> profileB = numpy.zeros(2*halfwinwidth, dtype='i')   
    >>> for p in tsspos:
-   ...     window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
-   ...     for almnt in sortedbamfile[ window ]:
+   ...     window = HTSeq.GenomicInterval(p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, ".")
+   ...     for almnt in sortedbamfile[window]:
    ...         almnt.iv.length = fragmentsize
    ...         if p.strand == "+":
    ...             start_in_window = almnt.iv.start - p.pos + halfwinwidth
@@ -258,8 +258,8 @@ We can plot the profiles obtained from our two methods on top of each other:
 
 .. doctest::
 
-   >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile, ls="-", color="blue" )   #doctest: +SKIP
-   >>> pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profileB, ls="--", color="red" )   #doctest: +SKIP
+   >>> pyplot.plot( numpy.arange(-halfwinwidth, halfwinwidth), profile, ls="-", color="blue")   #doctest: +SKIP
+   >>> pyplot.plot( numpy.arange(-halfwinwidth, halfwinwidth), profileB, ls="--", color="red")   #doctest: +SKIP
    >>> pyplot.show()   #doctest: +SKIP
 
 .. image:: tss_fig4.png
@@ -283,7 +283,7 @@ As before, to get a plot, add:
 
 .. doctest::
 
-   pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )   #doctest: +SKIP
+   pyplot.plot( numpy.arange(-halfwinwidth, halfwinwidth), profile)   #doctest: +SKIP
    pyplot.show()   #doctest: +SKIP
 
 You will now get the same plot as we got with the first method.
@@ -303,14 +303,14 @@ can use a :class:`GenomicArrayOfSets`, in which we mark off all windows. For
 easy access, we denote each winow with an :class:`GenomicPosition` object
 giving its midpoint, i.e., the actual TSS position, as follows::
 
-   >>> tssarray = HTSeq.GenomicArrayOfSets( "auto", stranded=False )
+   >>> tssarray = HTSeq.GenomicArrayOfSets("auto", stranded=False)
    >>> for feature in gtffile:
    ...    if feature.type == "exon" and feature.attr["exon_number"] == "1":
    ...       p = feature.iv.start_d_as_pos
-   ...       window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
-   ...       tssarray[ window ] += p
+   ...       window = HTSeq.GenomicInterval(p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, ".")
+   ...       tssarray[window] += p
 
-   >>> len( list( tssarray.chrom_vectors["1"]["."].steps() ) )
+   >>> len(list(tssarray.chrom_vectors["1"]["."].steps()))
    30085
 
 
@@ -321,7 +321,7 @@ To demonstrate how this data structure can be used, we take a specific read that
 we selected as a good example::
 
    >>> for almnt in bamfile:
-   ...     if almnt.read.name.startswith( "SRR001432.700 " ):
+   ...     if almnt.read.name.startswith("SRR001432.700 "):
    ...         break
    >>> almnt
    <SAM_Alignment object: Read 'SRR001432.700 USI-EAS21_0008_3445:8:1:35:294 length=25' aligned to 1:[169677855,169677880)/->
@@ -333,7 +333,7 @@ Again, we extent the read to fragment size::
    <SAM_Alignment object: Read 'SRR001432.700 USI-EAS21_0008_3445:8:1:35:294 length=25' aligned to 1:[169677680,169677880)/->
    
 To see which windows the read covers, we subset the ``tssarray`` and ask for steps
-that the fragment in ``almnt`` covers:
+that the fragment in ``almnt`` covers::
 
    >>> for step_iv, step_set in tssarray[ almnt.iv ].steps():
    ...    print("Step", step_iv, ", contained by these windows:")
@@ -356,7 +356,7 @@ the operator ``|=``, which means in-place union when used for Python sets):
 .. doctest::  
   
    >>> s = set()
-   >>> for step_iv, step_set in tssarray[ almnt.iv ].steps():
+   >>> for step_iv, step_set in tssarray[almnt.iv].steps():
    ...    s |= {x.__repr__() for x in step_set}
    >>> sorted(s)  ##doctest:+NORMALIZE_WHITESPACE
    ["<GenomicPosition object '1':169677780, strand '-'>", 
@@ -375,6 +375,6 @@ Again, to get a plot (which will look the same as before), add:
 
 .. doctest::
 
-   pyplot.plot( numpy.arange( -halfwinwidth, halfwinwidth ), profile )  #doctest: +SKIP
+   pyplot.plot(numpy.arange(-halfwinwidth, halfwinwidth), profile)  #doctest: +SKIP
    pyplot.show()  #doctest: +SKIP
    
