@@ -76,11 +76,20 @@ def test_pickle():
     print("Test passed")
 
 
+def test_bamfile_nosq():
+    print('Test parsing BAM file with no SQ field (e.g. PacBio)')
+    bamfile = HTSeq.BAM_Reader("example_data/short_test_ccs.bam", check_sq=False)
+    for read in bamfile:
+        pass
+    print("Test passed")
+
+
 if len(sys.argv) == 1:
     test_fasta_parser()
     test_fastq_parser()
     test_bam_inconsistent_mate()
     test_pickle()
+    test_bamfile_nosq()
 else:
     print("Wrong usage")
     print("Call without arguments to run all tests")
