@@ -78,7 +78,9 @@ def test_pickle():
 
 def test_bamfile_nosq():
     print('Test parsing BAM file with no SQ field (e.g. PacBio)')
-    bamfile = HTSeq.BAM_Reader("example_data/short_test_ccs.bam", check_sq=False)
+    bamfile = HTSeq.BAM_Reader(
+            "example_data/short_test_ccs.bam",
+            check_sq=False)
     for read in bamfile:
         pass
     print("Test passed")
