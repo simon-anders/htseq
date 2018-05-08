@@ -4,6 +4,15 @@
 Version history
 ***************
 
+Version 0.10.0
+=============
+2018-05-08
+
+- flush output of ``htseq-count`` (thanks dcroote)
+- pass memmap_dir to ChromVector.create (thanks wkopp)
+- ``BAM_Reader`` supports ``check_sq`` for PacBio reads (thanks jbloom)
+- a number of Bugfixes
+
 Version 0.9.1
 =============
 2017-07-26
