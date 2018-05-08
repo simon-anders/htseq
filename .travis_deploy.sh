@@ -23,7 +23,7 @@ if [ -z $DOCKER_IMAGE ] && [ $TRAVIS_OS_NAME != 'osx' ]; then
 fi
 
 # OSX only deploys on latest pysam
-if [ $TRAVIS_OS_NAME == 'osx' ] && [ $PYSAM_VERSION != 'pysam' ]; then
+if [ $TRAVIS_OS_NAME == 'osx' ] && [ $PYSAM_VERSION != 'pysam==0.13.0' ]; then
   echo "OSX on older pysam, exit"
   exit 0
 fi
