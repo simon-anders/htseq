@@ -17,7 +17,9 @@ else:
 (wait for CI to complete)
 
 If all well:
-- restart and, if necessary, update the pypi_CI branch
+- update the pypi_CI branch with the new highest pysam for OSX (this is a workaround)
+- push to htseq/pypi_CI
+ (if no need to push, just restart the run on Travis)
 else:
 - a minor version bump might be needed (pypi hates files with existing names)
 

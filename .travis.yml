@@ -29,10 +29,10 @@ matrix:
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='2.7' PYPI="https://test.pypi.org/pypi/"
+    - env: CC=gcc PYSAM_VERSION='pysam==0.13.0' PYTHON_VERSION='2.7' PYPI="https://test.pypi.org/pypi/"
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='3.6' PYPI="https://test.pypi.org/pypi/"
+    - env: CC=gcc PYSAM_VERSION='pysam==0.13.0' PYTHON_VERSION='3.6' PYPI="https://test.pypi.org/pypi/"
       language: generic
       os: osx
     - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="https://test.pypi.org/pypi/"
