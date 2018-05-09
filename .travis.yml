@@ -35,58 +35,6 @@ matrix:
     - env: CC=gcc PYSAM_VERSION='pysam==0.13.0' PYTHON_VERSION='3.6' PYPI="https://test.pypi.org/pypi/"
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="https://test.pypi.org/pypi/"
-      python: 2.7
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="https://test.pypi.org/pypi/"
-      python: 3.4
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="https://test.pypi.org/pypi/"
-      python: 3.5
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI="https://test.pypi.org/pypi/"
-      python: 3.6
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='2.7' PYPI="https://test.pypi.org/pypi/"
-      language: generic
-      os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='3.6' PYPI="https://test.pypi.org/pypi/"
-      language: generic
-      os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="https://test.pypi.org/pypi/" CYTHON_INSTALL='Cython'
-      python: 2.7
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="https://test.pypi.org/pypi/" CYTHON_INSTALL='Cython'
-      python: 3.4
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="https://test.pypi.org/pypi/" CYTHON_INSTALL='Cython'
-      python: 3.5
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="https://test.pypi.org/pypi/" CYTHON_INSTALL='Cython'
-      python: 3.6
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='2.7' PYPI="https://test.pypi.org/pypi/" CYTHON_INSTALL='Cython'
-      language: generic
-      os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='3.6' PYPI="https://test.pypi.org/pypi/" CYTHON_INSTALL='Cython'
-      language: generic
-      os: osx
     - env: CC=gcc PYSAM_VERSION='pysam' PYPI=""
       python: 2.7
       os: linux
@@ -107,62 +55,10 @@ matrix:
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='2.7' PYPI=""
+    - env: CC=gcc PYSAM_VERSION='pysam==0.13.0' PYTHON_VERSION='2.7' PYPI=""
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam' PYTHON_VERSION='3.6' PYPI=""
-      language: generic
-      os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI=""
-      python: 2.7
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI=""
-      python: 3.4
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI=""
-      python: 3.5
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYPI=""
-      python: 3.6
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='2.7' PYPI=""
-      language: generic
-      os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.10.0' PYTHON_VERSION='3.6' PYPI=""
-      language: generic
-      os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
-      python: 2.7
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
-      python: 3.4
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
-      python: 3.5
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYPI="" CYTHON_INSTALL='Cython'
-      python: 3.6
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='2.7' PYPI="" CYTHON_INSTALL='Cython'
-      language: generic
-      os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='3.6' PYPI="" CYTHON_INSTALL='Cython'
+    - env: CC=gcc PYSAM_VERSION='pysam==0.13.0' PYTHON_VERSION='3.6' PYPI=""
       language: generic
       os: osx
 

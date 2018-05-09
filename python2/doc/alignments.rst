@@ -353,16 +353,16 @@ objects in the list.
       
       .. doctest::
       
-          >>> HTSeq.cigar_operation_names    #doctest:+NORMALIZE_WHITESPACE
-          {'D': 'deleted',
-           'I': 'inserted',
-           'H': 'hard-clipped',
-           'M': 'matched',
-           'N': 'skipped',
-           'P': 'padded',
-           'S': 'soft-clipped',
-           'X': 'sequence-mismatched',
-           '=': 'sequence-matched'}
+          >>> sorted(HTSeq.cigar_operation_names.items())    #doctest:+NORMALIZE_WHITESPACE
+          [('=', 'sequence-matched'),
+           ('D', 'deleted'),
+           ('H', 'hard-clipped'),
+           ('I', 'inserted'),
+           ('M', 'matched'),
+           ('N', 'skipped'),
+           ('P', 'padded'),
+           ('S', 'soft-clipped'),
+           ('X', 'sequence-mismatched')]
            
    .. attribute:: CigarOperation.size
    
