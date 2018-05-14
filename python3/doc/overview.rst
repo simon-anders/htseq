@@ -148,10 +148,11 @@ Documentation overview
 Author
 ======
 
-HTSeq is developed by `Simon Anders`_ at `EMBL Heidelberg`_ (`Genome Biology
-Unit`_). Please do not hesitate to contact me (anders *at* embl *dot* de) if you
-have any comments or questions.
+HTSeq is currently developed by `Fabio Zanini`_ at Stanford University
+(fabio *dot* zanini *at* stanford *dot* edu) and `Simon Anders`_
+(anders *at* embl *dot* de) at `EMBL Heidelberg`_ (`Genome Biology Unit`_).
 
+.. _`Fabio Zanini`: https://scholar.google.de/citations?user=XMDw5-4AAAAJ
 .. _`Simon Anders`: http://www.embl.de/research/units/genome_biology/huber/members/index.php?s_personId=6001
 .. _`EMBL Heidelberg`: http://www.embl.de/
 .. _`Genome Biology Unit`: http://www.embl.de/research/units/genome_biology/index.html
