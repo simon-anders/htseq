@@ -8,20 +8,12 @@ import warnings
 import os
 import shlex
 
-try:
-    from _HTSeq import *
-except ImportError:
-    if os.path.isfile("setup.py"):
-        raise ImportError("Cannot import 'HTSeq' when working directory is HTSeq's own build directory.")
-    else:
-        raise
+from _HTSeq import *
 
 from _version import __version__
 
-#from vcf_reader import *
-
 #########################
-## Utils
+# Utils
 #########################
 
 
@@ -82,7 +74,7 @@ class FileOrSequence(object):
 
 
 #########################
-## Features
+# Features
 #########################
 
 class GenomicFeature(object):
@@ -137,7 +129,8 @@ class GenomicFeature(object):
             sep = "="
         else:
             sep = " "
-        attr_str = '; '.join(['%s%s\"%s\"' % (ak, sep, attr[ak]) for ak in attr])
+        attr_str = '; '.join(
+                ['%s%s\"%s\"' % (ak, sep, attr[ak]) for ak in attr])
         return "\t".join(str(a) for a in (self.iv.chrom, source,
                          self.type, self.iv.start+1, self.iv.end, score,
                          self.iv.strand, frame, attr_str)) + "\n"
@@ -151,24 +144,27 @@ def parse_GFF_attribute_string(attrStr, extra_return_first_value=False):
     """Parses a GFF attribute string and returns it as a dictionary.
 
     If 'extra_return_first_value' is set, a pair is returned: the dictionary
-    and the value of the first attribute. This might be useful if this is the ID.
+    and the value of the first attribute. This might be useful if this is the
+    ID.
     """
     if attrStr.endswith("\n"):
         attrStr = attrStr[:-1]
     d = {}
     first_val = "_unnamed_"
-    for (i, attr) in itertools.izip(itertools.count(), _HTSeq.quotesafe_split(attrStr)):
+    for (i, attr) in itertools.izip(
+            itertools.count(),
+            _HTSeq.quotesafe_split(attrStr)):
         if _re_attr_empty.match(attr):
             continue
         if attr.count('"') not in (0, 2):
-            raise ValueError("The attribute string seems to contain mismatched quotes.")
+            raise ValueError(
+                    "The attribute string seems to contain mismatched quotes.")
         mo = _re_attr_main.match(attr)
         if not mo:
             raise ValueError("Failure parsing GFF attribute line")
         val = mo.group(2)
         if val.startswith('"') and val.endswith('"'):
             val = val[1:-1]
-        # val = urllib.unquote(val)
         d[intern(mo.group(1))] = intern(val)
         if extra_return_first_value and i == 0:
             first_val = val
@@ -224,6 +220,7 @@ class GFF_Reader(FileOrSequence):
             f.attr = attr
             yield f
 
+
 def make_feature_dict(feature_sequence):
     """A feature dict is a convenient way to organize a sequence of Feature
     object (which you have got, e.g., from parse_GFF).
@@ -260,16 +257,17 @@ def make_feature_dict(feature_sequence):
 
 
 #########################
-## GenomicArray
+# GenomicArray
 #########################
 
 def read_chrom_lens(filename, delimiter="\t"):
-    return dict(((chrom, int(len))
-        for chrom, len in csv.reader(open(filename), delimiter=delimiter)))
+    return dict(
+        ((chrom, int(len))
+         for chrom, len in csv.reader(open(filename), delimiter=delimiter)))
 
 
 #########################
-## Sequence readers
+# Sequence readers
 #########################
 
 _re_fasta_header_line = re.compile(r'>\s*(\S+)\s*(.*)')
@@ -286,87 +284,95 @@ class FastaReader(FileOrSequence):
         self.raw_iterator = raw_iterator
 
     def __iter__(self):
-       seq = None
-       for line in FileOrSequence.__iter__(self):
-          if line.startswith(">"):
-             if seq:
-                if self.raw_iterator:
-                   s = (seq, name, descr)
-                else:
-                   s = Sequence(seq, name)
-                   s.descr = descr
-                yield s
-             mo = _re_fasta_header_line.match(line)
-             name = mo.group(1)
-             descr = mo.group(2)
-             seq = ""
-          else:
-             assert seq is not None, "FASTA file does not start with '>'."
-             seq += line[:-1]
-       if seq is not None:
-          if self.raw_iterator:
-             s = (seq, name, descr)
-          else:
-             s = Sequence(seq, name)
-             s.descr = descr
-          yield s
+        seq = None
+        name = None
+        descr = None
+        for line in FileOrSequence.__iter__(self):
+            if line.startswith(">"):
+                if seq:
+                    if self.raw_iterator:
+                        s = (seq, name, descr)
+                    else:
+                        s = Sequence(seq, name)
+                        s.descr = descr
+                    yield s
+                mo = _re_fasta_header_line.match(line)
+                name = mo.group(1)
+                descr = mo.group(2)
+                seq = ""
+            else:
+                assert seq is not None, "FASTA file does not start with '>'."
+                seq += line[:-1]
+        if seq is not None:
+            if self.raw_iterator:
+                s = (seq, name, descr)
+            else:
+                s = Sequence(seq, name)
+                s.descr = descr
+            yield s
 
     def get_sequence_lengths(self):
-       seqname = None
-       seqlengths = {}
-       for line in FileOrSequence.__iter__(self):
-          if line.startswith(">"):
-             if seqname is not None:
-                seqlengths[ seqname ] = length
-             mo = _re_fasta_header_line.match(line)
-             seqname = mo.group(1)
-             length = 0
-          else:
-             assert seqname is not None, "FASTA file does not start with '>'."
-             length += len(line.rstrip())
-       if seqname is not None:
-          seqlengths[ seqname ] = length
-       return seqlengths
+        seqname = None
+        length = 0
+        seqlengths = {}
+        for line in FileOrSequence.__iter__(self):
+            if line.startswith(">"):
+                if seqname is not None:
+                    seqlengths[seqname] = length
+                mo = _re_fasta_header_line.match(line)
+                seqname = mo.group(1)
+                length = 0
+            else:
+                assert seqname is not None, "FASTA file does not start with '>'."
+                length += len(line.rstrip())
+        if seqname is not None:
+            seqlengths[seqname] = length
+        return seqlengths
 
     @staticmethod
     def _import_pysam():
-       global pysam
-       try:
-          import pysam
-       except ImportError:
-          sys.stderr.write("Please install the 'pysam' package to be able to use the Fasta indexing functionality.")
-          raise
+        global pysam
+        try:
+            import pysam
+        except ImportError:
+            sys.stderr.write(
+                "Please install the 'pysam' package to be able to use the Fasta indexing functionality.")
+            raise
 
-    def build_index(self, force = False):
-       self._import_pysam()
-       if not isinstance(self.fos, str):
-          raise TypeError, "This function only works with FastaReader objects " + \
-             "connected to a fasta file via file name"
-       index_filename = self.fos + ".fai"
-       if os.access(index_filename, os.R_OK):
-          if (not force) and os.stat(self.filename_or_sequence).st_mtime <= \
-                os.stat(index_filename).st_mtime:
-             # index is up to date
-             return
-       pysam.faidx(self.fos)
-       if not os.access(index_filename, os.R_OK):
-          raise SystemError, "Building of Fasta index failed due to unknown error."
+    def build_index(self, force=False):
+        self._import_pysam()
+        if not isinstance(self.fos, str):
+            raise TypeError, "This function only works with FastaReader objects " + \
+              "connected to a fasta file via file name"
+        index_filename = self.fos + ".fai"
+        if os.access(index_filename, os.R_OK):
+            if (not force) and os.stat(self.filename_or_sequence).st_mtime <= \
+                 os.stat(index_filename).st_mtime:
+                # index is up to date
+                return
+        pysam.faidx(self.fos)
+        if not os.access(index_filename, os.R_OK):
+            raise SystemError(
+                "Building of Fasta index failed due to unknown error.")
 
     def __getitem__(self, iv):
-       if not isinstance(iv, GenomicInterval):
-          raise TypeError, "GenomicInterval expected as key."
-       if not isinstance(self.fos, str):
-          raise TypeError, "This function only works with FastaReader objects " + \
-             "connected to a fasta file via file name"
-       self._import_pysam()
-       fasta = pysam.faidx(self.fos, "%s:%d-%d" % (iv.chrom, iv.start, iv.end-1))
-       ans = list(FastaReader(fasta))
-       assert len(ans) == 1
-       ans[0].name = str(iv)
-       if iv.strand != "-":
-          return ans[0]
-       else:
-          return ans[0].get_reverse_complement()
+        if not isinstance(iv, GenomicInterval):
+            raise TypeError("GenomicInterval expected as key.")
+        if not isinstance(self.fos, str):
+            raise TypeError(
+                "This function only works with FastaReader objects " +
+                "connected to a fasta file via file name")
+        self._import_pysam()
+        fasta = pysam.faidx(
+                self.fos,
+                "%s:%d-%d" % (iv.chrom, iv.start, iv.end-1))
+        ans = list(FastaReader(fasta))
+        assert len(ans) == 1
+        ans[0].name = str(iv)
+        if iv.strand != "-":
+            return ans[0]
+        else:
+            return ans[0].get_reverse_complement()
 
 
 class FastqReader(FileOrSequence):
@@ -401,14 +407,18 @@ class FastqReader(FileOrSequence):
             if not qual.endswith("\n"):
                 qual += "\n"
             if not id1.startswith("@"):
-                raise ValueError("Primary ID line in FASTQ file does"
-                   "not start with '@'. Either this is not FASTQ data or the parser got out of sync.")
+                raise ValueError(
+                    "Primary ID line in FASTQ file does "
+                    "not start with '@'. Either this is not FASTQ data or the "
+                    "parser got out of sync.")
             if not id2.startswith("+"):
-                raise ValueError("Secondary ID line in FASTQ file does"
-                   "not start with '+'. Maybe got out of sync.")
+                raise ValueError(
+                    "Secondary ID line in FASTQ file does"
+                    "not start with '+'. Maybe got out of sync.")
             if len(id2) > 2 and id1[1:] != id2[1:]:
-                raise ValueError("Primary and secondary ID line in FASTQ"
-                   "disagree.")
+                raise ValueError(
+                    "Primary and secondary ID line in FASTQ"
+                    "disagree.")
 
             if self.raw_iterator:
                 s = (seq[:-1], id1[1:-1], qual[:-1], self.qual_scale)
@@ -430,119 +440,140 @@ class BowtieReader(FileOrSequence):
             except ValueError:
                 if line.startswith("Reported "):
                     continue
-                warnings.warn("BowtieReader: Ignoring the following line, which could not be parsed:\n%s\n" % line,
-                  RuntimeWarning)
+                warnings.warn(
+                    "BowtieReader: Ignoring the following line, which could "
+                    "not be parsed:\n%s\n" % line,
+                    RuntimeWarning)
             yield algnt
 
 
 def bundle_multiple_alignments(sequence_of_alignments):
-   """Some alignment programs, e.g., Bowtie, can output multiple alignments,
-   i.e., the same read is reported consecutively with different alignments.
-   This function takes an iterator over alignments and bundles consecutive
-   alignments regarding the same read to a list of Alignment objects and
-   returns an iterator over these.
-   """
-   alignment_iter = iter(sequence_of_alignments)
-   algnt = alignment_iter.next()
-   ma = [ algnt ]
-   for algnt in alignment_iter:
-      if algnt.read.name != ma[0].read.name:
-         yield ma
-         ma = [ algnt ]
-      else:
-         ma.append(algnt)
-   yield ma
+    """Some alignment programs, e.g., Bowtie, can output multiple alignments,
+    i.e., the same read is reported consecutively with different alignments.
+    This function takes an iterator over alignments and bundles consecutive
+    alignments regarding the same read to a list of Alignment objects and
+    returns an iterator over these.
+    """
+    alignment_iter = iter(sequence_of_alignments)
+    algnt = alignment_iter.next()
+    ma = [algnt]
+    for algnt in alignment_iter:
+        if algnt.read.name != ma[0].read.name:
+            yield ma
+            ma = [algnt]
+        else:
+            ma.append(algnt)
+    yield ma
 
 
 class SolexaExportAlignment(Alignment):
-   """Iterating over SolexaExportReader objects will yield SoelxaExportRecord
-   objects. These have four fields:
-      read          - a SequenceWithQualities object
-      aligned       - a boolean, indicating whether the object was aligned
-      iv            - a GenomicInterval giving the alignment (or None, if not aligned)
-      passed_filter - a boolean, indicating whether the object passed the filter
-      nomatch_code  - a code indicating why no match was found (or None, if the
-        read was aligned)
+    """Iterating over SolexaExportReader objects will yield SoelxaExportRecord
+    objects. These have four fields:
+       read          - a SequenceWithQualities object
+       aligned       - a boolean, indicating whether the object was aligned
+       iv            - a GenomicInterval giving the alignment (or None, if not aligned)
+       passed_filter - a boolean, indicating whether the object passed the filter
+       nomatch_code  - a code indicating why no match was found (or None, if the
+         read was aligned)
 
-   As long as 'aligned' is True, a SolexaExportRecord can be treated as an
-   Alignment object.
-   """
+    As long as 'aligned' is True, a SolexaExportRecord can be treated as an
+    Alignment object.
+    """
 
-   def __init__(self):
-      # Data is filled in by SolexaExportRecord
-      pass
+    def __init__(self):
+        # Data is filled in by SolexaExportRecord
+        pass
 
-   def __repr__(self):
-      if self.aligned:
-         return "< %s object: Read '%s', aligned to %s >" % (
-            self.__class__.__name__, self.read.name, self.iv)
-      else:
-         return "< %s object: Non-aligned read '%s' >" % (
-            self.__class__.__name__, self.read.name)
+    def __repr__(self):
+        if self.aligned:
+            return "< %s object: Read '%s', aligned to %s >" % (
+              self.__class__.__name__, self.read.name, self.iv)
+        else:
+            return "< %s object: Non-aligned read '%s' >" % (
+              self.__class__.__name__, self.read.name)
+
 
 class SolexaExportReader(FileOrSequence):
-   """Parser for *_export.txt files from the SolexaPipeline software.
+    """Parser for *_export.txt files from the SolexaPipeline software.
 
-   Iterating over a SolexaExportReader yields SolexaExportRecord objects.
-   """
+    Iterating over a SolexaExportReader yields SolexaExportRecord objects.
+    """
 
-   def __init__(self, filename_or_sequence, solexa_old = False):
-      FileOrSequence.__init__(self, filename_or_sequence)
-      if solexa_old:
-         self.qualscale = "solexa-old"
-      else:
-         self.qualscale = "solexa"
+    def __init__(self, filename_or_sequence, solexa_old=False):
+        FileOrSequence.__init__(self, filename_or_sequence)
+        if solexa_old:
+            self.qualscale = "solexa-old"
+        else:
+            self.qualscale = "solexa"
 
-   @classmethod
-   def parse_line_bare(dummy, line):
-      if line[-1] == "\n":
-         line = line[:-1]
-      res = {}
-      (res['machine'], res['run_number'], res['lane'], res['tile'], res['x_coord'],
-         res['y_coord'], res['index_string'], res['read_nbr'], res['read_seq'],
-         res['qual_str'], res['chrom'], res['contig'], res['pos'], res['strand'],
-         res['match_descr'], res['single_read_algnt_score'],
-         res['paired_read_algnt_score'], res['partner_chrom'], res['partner_contig'],
-         res['partner_offset'], res['partner_strand'], res['passed_filtering']) \
-         = line.split("\t")
-      return res
+    @classmethod
+    def parse_line_bare(dummy, line):
+        if line[-1] == "\n":
+            line = line[:-1]
+        res = {}
+        (res['machine'],
+         res['run_number'],
+         res['lane'],
+         res['tile'],
+         res['x_coord'],
+         res['y_coord'],
+         res['index_string'],
+         res['read_nbr'],
+         res['read_seq'],
+         res['qual_str'],
+         res['chrom'],
+         res['contig'],
+         res['pos'],
+         res['strand'],
+         res['match_descr'],
+         res['single_read_algnt_score'],
+         res['paired_read_algnt_score'],
+         res['partner_chrom'],
+         res['partner_contig'],
+         res['partner_offset'],
+         res['partner_strand'],
+         res['passed_filtering']) = line.split("\t")
+        return res
 
-   def __iter__(self):
-      for line in FileOrSequence.__iter__(self):
-         record = SolexaExportAlignment()
-         fields = SolexaExportReader.parse_line_bare(line)
-         if fields['read_nbr'] != "1":
-            warnings.warn("Paired-end read encountered. PE is so far supported only for " +
-               "SAM files, not yet for SolexaExport. All PE-related fields are ignored. ")
-         record.read = SequenceWithQualities(
-            fields['read_seq'],
-            "%s:%s:%s:%s:%s#0" % (fields['machine'], fields['lane'], fields['tile'],
-               fields['x_coord'], fields['y_coord']),
-            fields['qual_str'], self.qualscale)
-         if fields['passed_filtering'] == 'Y':
-            record.passed_filter = True
-         elif fields['passed_filtering'] == 'N':
-            record.passed_filter = False
-         else:
-            raise ValueError, "Illegal 'passed filter' value in Solexa export data: '%s'." % fields['passed_filtering']
-         record.index_string = fields['index_string']
-         if fields['pos'] == '':
-            record.iv = None
-            record.nomatch_code = fields['chrom']
-         else:
-            if fields['strand'] == 'F':
-               strand = '+'
-            elif fields['strand'] == 'R':
-               strand = '-'
+    def __iter__(self):
+        for line in FileOrSequence.__iter__(self):
+            record = SolexaExportAlignment()
+            fields = SolexaExportReader.parse_line_bare(line)
+            if fields['read_nbr'] != "1":
+                warnings.warn("Paired-end read encountered. PE is so far supported only for " +
+                  "SAM files, not yet for SolexaExport. All PE-related fields are ignored. ")
+            record.read = SequenceWithQualities(
+                fields['read_seq'],
+               "%s:%s:%s:%s:%s#0" % (fields['machine'], fields['lane'], fields['tile'],
+                  fields['x_coord'], fields['y_coord']),
+                fields['qual_str'], self.qualscale)
+            if fields['passed_filtering'] == 'Y':
+                record.passed_filter = True
+            elif fields['passed_filtering'] == 'N':
+                record.passed_filter = False
             else:
-               raise ValueError, "Illegal strand value in Solexa export data."
-            start = int(fields['pos'])
-            chrom = fields['chrom']
-            if fields['chrom'] == "":
-               chrom = fields['contig']
-            record.iv = GenomicInterval(chrom, start,
-               start + len(fields['read_seq']), strand)
-         yield record
+                raise ValueError(
+                    "Illegal 'passed filter' value in Solexa export data: '%s'." % fields['passed_filtering'])
+            record.index_string = fields['index_string']
+            if fields['pos'] == '':
+                record.iv = None
+                record.nomatch_code = fields['chrom']
+            else:
+                if fields['strand'] == 'F':
+                    strand = '+'
+                elif fields['strand'] == 'R':
+                    strand = '-'
+                else:
+                    raise ValueError(
+                        "Illegal strand value in Solexa export data.")
+                start = int(fields['pos'])
+                chrom = fields['chrom']
+                if fields['chrom'] == "":
+                    chrom = fields['contig']
+                record.iv = GenomicInterval(
+                    chrom, start,
+                    start + len(fields['read_seq']), strand)
+            yield record
 
 
 class SAM_Reader(FileOrSequence):
@@ -582,7 +613,7 @@ class GenomicArrayOfSets(GenomicArray):
 
 
 ###########################
-##   paired-end handling
+#   paired-end handling
 ###########################
 
 
@@ -704,56 +735,59 @@ def pair_SAM_alignments_with_buffer(alignments, max_buffer_size=30000000):
                yield (None, almnt)
 
    if ambiguous_pairing_counter > 0:
-      warnings.warn("Mate pairing was ambiguous for %d records; mate key for first such record: %s." %
+      warnings.warn(
+            "Mate pairing was ambiguous for %d records; mate key for first such record: %s." %
          (ambiguous_pairing_counter, str(ambiguous_pairing_first_occurance)))
 
 
 ###########################
-##   variant calls
+#   variant calls
 ###########################
 
 
 _re_vcf_meta_comment = re.compile("^##([a-zA-Z]+)\=(.*)$")
 
-_re_vcf_meta_descr = re.compile('ID=[^,]+,?|Number=[^,]+,?|Type=[^,]+,?|Description="[^"]+",?')
+_re_vcf_meta_descr = re.compile(
+        'ID=[^,]+,?|Number=[^,]+,?|Type=[^,]+,?|Description="[^"]+",?')
 
 _re_vcf_meta_types = re.compile("[INFO|FILTER|FORMAT]")
 
 _vcf_typemap = {
-    "Integer":int,
-    "Float":float,
-    "String":str,
-    "Flag":bool
+    "Integer": int,
+    "Float": float,
+    "String": str,
+    "Flag": bool
 }
 
 class VariantCall(object):
 
-    def __init__(self, chrom = None, pos = None, identifier = None, ref = None, alt = None, qual = None, filtr = None, info = None):
-        self.chrom  = chrom
-        self.pos    = pos
-        self.id     = identifier
-        self.ref    = ref
-        self.alt    = alt
-        self.qual   = qual
+    def __init__(self, chrom=None, pos=None, identifier=None, ref=None,
+                 alt=None, qual=None, filtr=None, info=None):
+        self.chrom = chrom
+        self.pos = pos
+        self.id = identifier
+        self.ref = ref
+        self.alt = alt
+        self.qual = qual
         self.filter = filtr
-        self.info   = info
+        self.info = info
         self._original_line = None
 
     @classmethod
     def fromdict(cls, dictionary):
         ret = cls()
-        ret.chrom   = dictionary["chrom"]
-        ret.pos     = dictionary["pos"]
-        ret.id      = dictionary["id"]
-        ret.ref     = dictionary["ref"]
-        ret.alt     = dictionary["alt"]
-        ret.qual    = dictionary["qual"]
-        ret.filter  = dictionary["filter"]
-        ret.info    = dictionary["info"]
+        ret.chrom = dictionary["chrom"]
+        ret.pos = dictionary["pos"]
+        ret.id = dictionary["id"]
+        ret.ref = dictionary["ref"]
+        ret.alt = dictionary["alt"]
+        ret.qual = dictionary["qual"]
+        ret.filter = dictionary["filter"]
+        ret.info = dictionary["info"]
         ret._original_line = None
 
     @classmethod
-    def fromline(cls, line, nsamples = 0, sampleids = []):
+    def fromline(cls, line, nsamples=0, sampleids=[]):
         ret = cls()
         if nsamples == 0:
             ret.format = None
@@ -779,28 +813,28 @@ class VariantCall(object):
             return self.info
 
     def get_original_line(self):
-       warnings.warn("Original line is empty, probably this object was created from scratch and not from a line in a .vcf file!")
-       return self._original_line
+        warnings.warn("Original line is empty, probably this object was created from scratch and not from a line in a .vcf file!")
+        return self._original_line
 
     def sampleline(self):
-       if self.format == None:
-          print >> sys.stderr, "No samples in this variant call!"
-          return ""
-       keys = self.format
-       ret = [ ":".join(keys) ]
-       for sid in self.samples:
-          tmp = []
-          for k in keys:
-             if k in self.samples[sid]:
-                tmp.append(self.samples[sid][k])
-          ret.append(":".join(tmp))
-       return "\t".join(ret)
+        if self.format == None:
+           print >> sys.stderr, "No samples in this variant call!"
+           return ""
+        keys = self.format
+        ret = [ ":".join(keys) ]
+        for sid in self.samples:
+           tmp = []
+           for k in keys:
+              if k in self.samples[sid]:
+                 tmp.append(self.samples[sid][k])
+           ret.append(":".join(tmp))
+        return "\t".join(ret)
 
     def to_line(self):
-       if self.format == None:
-          return "\t".join(map(str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join(self.alt), self.qual, self.filter, self.infoline() ])) + "\n"
-       else:
-          return "\t".join(map(str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join(self.alt), self.qual, self.filter, self.infoline(), self.sampleline() ])) + "\n"
+        if self.format == None:
+           return "\t".join(map(str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join(self.alt), self.qual, self.filter, self.infoline() ])) + "\n"
+        else:
+           return "\t".join(map(str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join(self.alt), self.qual, self.filter, self.infoline(), self.sampleline() ])) + "\n"
 
     def __descr__(self):
         return "<VariantCall at %s, ref '%s', alt %s >" % (str(self.pos).rstrip("/."), self.ref, str(self.alt).strip("[]"))
@@ -819,13 +853,14 @@ class VariantCall(object):
                     tmp[token[0]] = token[1].split(",")
                 if len(tmp[ token[0] ]) == 1:
                     tmp[token[0]] = tmp[token[0]][0]
-            else: #Flag attribute found
+            else:  # Flag attribute found
                 tmp[token] = True
         diff = set(infodict.keys()).difference(set(tmp.keys()))
         for key in diff:
             if infodict[key] == bool:
                 tmp[key] = False
         self.info = tmp
+
 
 class VCF_Reader(FileOrSequence):
 
@@ -839,10 +874,12 @@ class VCF_Reader(FileOrSequence):
         self.sampleids = []
 
     def make_info_dict(self):
-        self.infodict = dict((key, _vcf_typemap[self.info[key]["Type"]]) for key in self.info.keys())
+        self.infodict = dict(
+                (key,
+                 _vcf_typemap[self.info[key]["Type"]]) for key in self.info.keys())
 
-    def parse_meta(self, header_filename = None):
-        if header_filename == None:
+    def parse_meta(self, header_filename=None):
+        if header_filename is None:
             the_iter = FileOrSequence.__iter__(self)
         else:
             the_iter = open(header_filename, "r")
@@ -854,22 +891,22 @@ class VCF_Reader(FileOrSequence):
                     if mo:
                         value = mo.group(2)
                         if mo.group(1) == "INFO":
-                            value = dict(e.rstrip(",").split("=",1) for e in _re_vcf_meta_descr.findall(value))
+                            value = dict(e.rstrip(",").split("=", 1) for e in _re_vcf_meta_descr.findall(value))
                             key = value["ID"]
                             del value["ID"]
-                            self.info[ key ] = value
+                            self.info[key] = value
                         elif mo.group(1) == "FILTER":
-                            value = dict(e.rstrip(",").split("=",1) for e in _re_vcf_meta_descr.findall(value))
+                            value = dict(e.rstrip(",").split("=", 1) for e in _re_vcf_meta_descr.findall(value))
                             key = value["ID"]
                             del value["ID"]
                             self.filters[ key ] = value
                         elif mo.group(1) == "FORMAT":
-                            value = dict(e.rstrip(",").split("=",1) for e in _re_vcf_meta_descr.findall(value))
+                            value = dict(e.rstrip(",").split("=", 1) for e in _re_vcf_meta_descr.findall(value))
                             key = value["ID"]
                             del value["ID"]
-                            self.formats[ key ] = value
+                            self.formats[key] = value
                         else:
-                            self.metadata[ mo.group(1) ] = mo.group(2)
+                            self.metadata[mo.group(1)] = mo.group(2)
                 else:
                     self.sampleids = line.rstrip("\t\n").split("\t")[9:]
                     self.nsamples = len(self.sampleids)
@@ -961,14 +998,14 @@ class BAM_Reader(object):
         try:
             import pysam
         except ImportError:
-            sys.stderr.write("Please Install PySam to use the BAM_Reader Class (http://code.google.com/p/pysam/)")
+            sys.stderr.write(
+                "Please Install PySam to use the BAM_Reader Class (http://code.google.com/p/pysam/)")
             raise
 
     def __iter__(self):
         sf = pysam.Samfile(self.filename, "rb", check_sq=self.check_sq)
         self.record_no = 0
         for pa in sf:
-            #yield SAM_Alignment.from_pysam_AlignedRead(pa, sf)
             yield SAM_Alignment.from_pysam_AlignedSegment(pa, sf)
             self.record_no += 1
 
@@ -1011,11 +1048,13 @@ class BAM_Reader(object):
 
 
 class BAM_Writer(object):
-    def __init__(self, filename, template=None, referencenames=None, referencelengths=None, text=None, header=None):
+    def __init__(self, filename, template=None, referencenames=None,
+                 referencelengths=None, text=None, header=None):
         try:
             import pysam
         except ImportError:
-            sys.stderr.write("Please Install PySam to use the BAM_Writer Class (http://code.google.com/p/pysam/)")
+            sys.stderr.write(
+                "Please Install PySam to use the BAM_Writer Class (http://code.google.com/p/pysam/)")
             raise
 
         self.filename = filename
@@ -1038,7 +1077,6 @@ class BAM_Writer(object):
         return BAM_Writer(filename=fn, header=br.get_header_dict())
 
     def write(self, alnmt):
-        #self.sf.write(alnmt.to_pysam_AlignedRead(self.sf))
         self.sf.write(alnmt.to_pysam_AlignedSegment(self.sf))
 
     def close(self):

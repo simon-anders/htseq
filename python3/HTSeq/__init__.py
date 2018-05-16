@@ -9,20 +9,9 @@ import os
 import shlex
 import sys
 
-try:
-    import HTSeq
-    from HTSeq._HTSeq import *
-    #from _HTSeq import *
-except ImportError:
-    if os.path.isfile("setup.py"):
-        raise ImportError(
-            "Cannot import 'HTSeq' when working directory is HTSeq's own build directory.")
-    else:
-        raise
-
+import HTSeq
+from HTSeq._HTSeq import *
 from HTSeq._version import __version__
-
-#from vcf_reader import *
 
 #########################
 # Utils
@@ -32,14 +21,14 @@ from HTSeq._version import __version__
 class FileOrSequence(object):
     """ The construcutor takes one argument, which may either be a string,
     which is interpreted as a file name (possibly with path), or a
-    connection, by which we mean a text file opened for reading, or 
-    any other object that can provide an iterator over strings 
+    connection, by which we mean a text file opened for reading, or
+    any other object that can provide an iterator over strings
     (lines of the file).
 
     The advantage of passing a file name instead of an already opened file
     is that if an iterator is requested several times, the file will be
     re-opened each time. If the file is already open, its lines can be read
-    only once, and then, the iterator stays exhausted.      
+    only once, and then, the iterator stays exhausted.
 
     Furthermore, if a file name is passed that end in ".gz" or ".gzip"
     (case insensitive), it is transparently gunzipped.
@@ -97,7 +86,7 @@ class GenomicFeature(object):
 
       name: a string identifying the feature (e.g., a gene symbol)
       type: a string giving the feature type (e.g., "gene", "exon")
-      iv: a GenomicInterval object specifying the feature locus     
+      iv: a GenomicInterval object specifying the feature locus
     """
 
     def __init__(self, name, type_, interval):
@@ -145,8 +134,8 @@ class GenomicFeature(object):
         attr_str = '; '.join(
             ['%s%s\"%s\"' % (ak, sep, attr[ak]) for ak in attr])
         return "\t".join(str(a) for a in (self.iv.chrom, source,
-                                          self.type, self.iv.start + 1, self.iv.end, score,
-                                          self.iv.strand, frame, attr_str)) + "\n"
+                         self.type, self.iv.start + 1, self.iv.end, score,
+                         self.iv.strand, frame, attr_str)) + "\n"
 
 
 _re_attr_main = re.compile("\s*([^\s\=]+)[\s=]+(.*)")
@@ -157,13 +146,16 @@ def parse_GFF_attribute_string(attrStr, extra_return_first_value=False):
     """Parses a GFF attribute string and returns it as a dictionary.
 
     If 'extra_return_first_value' is set, a pair is returned: the dictionary
-    and the value of the first attribute. This might be useful if this is the ID.
+    and the value of the first attribute. This might be useful if this is the
+    ID.
     """
     if attrStr.endswith("\n"):
         attrStr = attrStr[:-1]
     d = {}
     first_val = "_unnamed_"
-    for (i, attr) in zip(itertools.count(), _HTSeq.quotesafe_split(attrStr.encode())):
+    for (i, attr) in zip(
+            itertools.count(),
+            _HTSeq.quotesafe_split(attrStr.encode())):
         attr = attr.decode()
         if _re_attr_empty.match(attr):
             continue
@@ -176,7 +168,6 @@ def parse_GFF_attribute_string(attrStr, extra_return_first_value=False):
         val = mo.group(2)
         if val.startswith('"') and val.endswith('"'):
             val = val[1:-1]
-        #val = urllib.unquote( val )
         d[sys.intern(mo.group(1))] = sys.intern(val)
         if extra_return_first_value and i == 0:
             first_val = val
@@ -185,6 +176,7 @@ def parse_GFF_attribute_string(attrStr, extra_return_first_value=False):
     else:
         return d
 
+
 _re_gff_meta_comment = re.compile("##\s*(\S+)\s+(\S*)")
 
 
@@ -192,7 +184,7 @@ class GFF_Reader(FileOrSequence):
 
     """Parse a GFF file
 
-    Pass the constructor either a file name or an iterator of lines of a 
+    Pass the constructor either a file name or an iterator of lines of a
     GFF files. If a file name is specified, it may refer to a gzip compressed
     file.
 
@@ -238,7 +230,7 @@ class GFF_Reader(FileOrSequence):
 
 
 def make_feature_dict(feature_sequence):
-    """A feature dict is a convenient way to organize a sequence of Feature 
+    """A feature dict is a convenient way to organize a sequence of Feature
     object (which you have got, e.g., from parse_GFF).
 
     The function returns a dict with all the feature types as keys. Each value
@@ -248,7 +240,7 @@ def make_feature_dict(feature_sequence):
     An example makes this clear. Let's say you load the C. elegans GTF file
     from Ensemble and make a feature dict:
 
-    >>> worm_features_dict = HTSeq.make_feature_dict( HTSeq.parse_GFF( 
+    >>> worm_features_dict = HTSeq.make_feature_dict( HTSeq.parse_GFF(
     ...     "test_data/Caenorhabditis_elegans.WS200.55.gtf.gz" ) )
 
     (This command may take a few minutes to deal with the 430,000 features
@@ -277,8 +269,9 @@ def make_feature_dict(feature_sequence):
 #########################
 
 def read_chrom_lens(filename, delimiter="\t"):
-    return dict(((chrom, int(len))
-                 for chrom, len in csv.reader(open(filename), delimiter=delimiter)))
+    return dict(
+        ((chrom, int(len))
+         for chrom, len in csv.reader(open(filename), delimiter=delimiter)))
 
 
 #########################
@@ -300,6 +293,8 @@ class FastaReader(FileOrSequence):
 
     def __iter__(self):
         seq = None
+        name = None
+        descr = None
         for line in FileOrSequence.__iter__(self):
             if line.startswith(">"):
                 if seq:
@@ -326,6 +321,7 @@ class FastaReader(FileOrSequence):
 
     def get_sequence_lengths(self):
         seqname = None
+        length = 0
         seqlengths = {}
         for line in FileOrSequence.__iter__(self):
             if line.startswith(">"):
@@ -358,7 +354,7 @@ class FastaReader(FileOrSequence):
                             "connected to a fasta file via file name")
         index_filename = self.fos + ".fai"
         if os.access(index_filename, os.R_OK):
-            if (not force) and os.stat( self.filename_or_sequence ).st_mtime <= \
+            if (not force) and os.stat(self.filename_or_sequence).st_mtime <= \
                     os.stat(index_filename).st_mtime:
                 # index is up to date
                 return
@@ -371,8 +367,9 @@ class FastaReader(FileOrSequence):
         if not isinstance(iv, GenomicInterval):
             raise TypeError("GenomicInterval expected as key.")
         if not isinstance(self.fos, str):
-            raise TypeError("This function only works with FastaReader objects " +
-                            "connected to a fasta file via file name")
+            raise TypeError(
+                    "This function only works with FastaReader objects " +
+                    "connected to a fasta file via file name")
         self._import_pysam()
         fasta = pysam.faidx(self.fos, "%s:%d-%d" %
                             (iv.chrom, iv.start, iv.end - 1))
@@ -416,14 +413,18 @@ class FastqReader(FileOrSequence):
             if not qual.endswith("\n"):
                 qual += "\n"
             if not id1.startswith("@"):
-                raise ValueError("Primary ID line in FASTQ file does"
-                                 "not start with '@'. Either this is not FASTQ data or the parser got out of sync.")
+                raise ValueError(
+                    "Primary ID line in FASTQ file does "
+                    "not start with '@'. Either this is not FASTQ data or the "
+                    "parser got out of sync.")
             if not id2.startswith("+"):
-                raise ValueError("Secondary ID line in FASTQ file does"
-                                 "not start with '+'. Maybe got out of sync.")
+                raise ValueError(
+                    "Secondary ID line in FASTQ file does"
+                    "not start with '+'. Maybe got out of sync.")
             if len(id2) > 2 and id1[1:] != id2[1:]:
-                raise ValueError("Primary and secondary ID line in FASTQ"
-                                 "disagree.")
+                raise ValueError(
+                    "Primary and secondary ID line in FASTQ"
+                    "disagree.")
 
             if self.raw_iterator:
                 s = (seq[:-1], id1[1:-1], qual[:-1], self.qual_scale)
@@ -445,8 +446,10 @@ class BowtieReader(FileOrSequence):
             except ValueError:
                 if line.startswith("Reported "):
                     continue
-                warnings.warn("BowtieReader: Ignoring the following line, which could not be parsed:\n%s\n" % line,
-                              RuntimeWarning)
+                warnings.warn(
+                    "BowtieReader: Ignoring the following line, which could "
+                    "not be parsed:\n%s\n" % line,
+                    RuntimeWarning)
             yield algnt
 
 
@@ -472,14 +475,14 @@ def bundle_multiple_alignments(sequence_of_alignments):
 class SolexaExportAlignment(Alignment):
     """Iterating over SolexaExportReader objects will yield SoelxaExportRecord
     objects. These have four fields:
-       read          - a SequenceWithQualities object 
+       read          - a SequenceWithQualities object
        aligned       - a boolean, indicating whether the object was aligned
        iv            - a GenomicInterval giving the alignment (or None, if not aligned)
        passed_filter - a boolean, indicating whether the object passed the filter
        nomatch_code  - a code indicating why no match was found (or None, if the
          read was aligned)
 
-    As long as 'aligned' is True, a SolexaExportRecord can be treated as an 
+    As long as 'aligned' is True, a SolexaExportRecord can be treated as an
     Alignment object.
     """
 
@@ -514,15 +517,28 @@ class SolexaExportReader(FileOrSequence):
         if line[-1] == "\n":
             line = line[:-1]
         res = {}
-        (res['machine'], res['run_number'], res['lane'], res['tile'], res['x_coord'],
-         res['y_coord'], res['index_string'], res['read_nbr'], res['read_seq'],
-         res['qual_str'], res['chrom'], res[
-             'contig'], res['pos'], res['strand'],
-         res['match_descr'], res['single_read_algnt_score'],
-         res['paired_read_algnt_score'], res[
-             'partner_chrom'], res['partner_contig'],
-         res['partner_offset'], res['partner_strand'], res['passed_filtering'] ) \
-            = line.split("\t")
+        (res['machine'],
+         res['run_number'],
+         res['lane'],
+         res['tile'],
+         res['x_coord'],
+         res['y_coord'],
+         res['index_string'],
+         res['read_nbr'],
+         res['read_seq'],
+         res['qual_str'],
+         res['chrom'],
+         res['contig'],
+         res['pos'],
+         res['strand'],
+         res['match_descr'],
+         res['single_read_algnt_score'],
+         res['paired_read_algnt_score'],
+         res['partner_chrom'],
+         res['partner_contig'],
+         res['partner_offset'],
+         res['partner_strand'],
+         res['passed_filtering']) = line.split("\t")
         return res
 
     def __iter__(self):
@@ -530,12 +546,17 @@ class SolexaExportReader(FileOrSequence):
             record = SolexaExportAlignment()
             fields = SolexaExportReader.parse_line_bare(line)
             if fields['read_nbr'] != "1":
-                warnings.warn("Paired-end read encountered. PE is so far supported only for " +
-                              "SAM files, not yet for SolexaExport. All PE-related fields are ignored. ")
+                warnings.warn(
+                    "Paired-end read encountered. PE is so far supported only "
+                    "for SAM files, not yet for SolexaExport. All PE-related "
+                    "fields are ignored.")
             record.read = SequenceWithQualities(
                 fields['read_seq'],
-                "%s:%s:%s:%s:%s#0" % (fields['machine'], fields['lane'], fields['tile'],
-                                      fields['x_coord'], fields['y_coord']),
+                "%s:%s:%s:%s:%s#0" % (fields['machine'],
+                                      fields['lane'],
+                                      fields['tile'],
+                                      fields['x_coord'],
+                                      fields['y_coord']),
                 fields['qual_str'], self.qualscale)
             if fields['passed_filtering'] == 'Y':
                 record.passed_filter = True
@@ -560,13 +581,14 @@ class SolexaExportReader(FileOrSequence):
                 chrom = fields['chrom']
                 if fields['chrom'] == "":
                     chrom = fields['contig']
-                record.iv = GenomicInterval(chrom, start,
-                                            start + len(fields['read_seq']), strand)
+                record.iv = GenomicInterval(
+                        chrom, start,
+                        start + len(fields['read_seq']), strand)
             yield record
 
 
 class SAM_Reader(FileOrSequence):
-    """A SAM_Reader object is associated with a SAM file that 
+    """A SAM_Reader object is associated with a SAM file that
     contains short read alignments. It can generate an iterator of Alignment
     objects."""
 
@@ -584,7 +606,6 @@ class SAM_Reader(FileOrSequence):
 
 
 class GenomicArrayOfSets(GenomicArray):
-
     """A GenomicArrayOfSets is a specialization of GenomicArray that allows to store
     sets of objects. On construction, the step vectors are initialized with empty sets.
     By using the 'add_value' method, objects can be added to intervals. If an object
@@ -730,7 +751,8 @@ def pair_SAM_alignments_with_buffer(alignments, max_buffer_size=30000000):
                     yield (None, almnt)
 
     if ambiguous_pairing_counter > 0:
-        warnings.warn("Mate pairing was ambiguous for %d records; mate key for first such record: %s." %
+        warnings.warn(
+            "Mate pairing was ambiguous for %d records; mate key for first such record: %s." %
                       (ambiguous_pairing_counter, str(ambiguous_pairing_first_occurance)))
 
 
@@ -756,7 +778,8 @@ _vcf_typemap = {
 
 class VariantCall(object):
 
-    def __init__(self, chrom=None, pos=None, identifier=None, ref=None, alt=None, qual=None, filtr=None, info=None):
+    def __init__(self, chrom=None, pos=None, identifier=None, ref=None,
+                 alt=None, qual=None, filtr=None, info=None):
         self.chrom = chrom
         self.pos = pos
         self.id = identifier
@@ -1010,7 +1033,6 @@ class BAM_Reader(object):
         sf = pysam.Samfile(self.filename, "rb", check_sq=self.check_sq)
         self.record_no = 0
         for pa in sf:
-            # yield SAM_Alignment.from_pysam_AlignedRead( pa, sf )
             yield SAM_Alignment.from_pysam_AlignedSegment(pa, sf)
             self.record_no += 1
 
@@ -1079,7 +1101,6 @@ class BAM_Writer(object):
         return BAM_Writer(filename=fn, header=br.get_header_dict())
 
     def write(self, alnmt):
-        #self.sf.write( alnmt.to_pysam_AlignedRead( self.sf ) )
         self.sf.write(alnmt.to_pysam_AlignedSegment(self.sf))
 
     def close(self):

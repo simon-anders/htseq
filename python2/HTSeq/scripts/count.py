@@ -46,7 +46,8 @@ def count_reads_in_features(sam_filenames, gff_filename,
 
     if samouts != "":
         if len(samouts) != len(sam_filenames):
-            raise ValueError('Select the same number of SAM input and output files')
+            raise ValueError(
+                    'Select the same number of SAM input and output files')
         # Try to open samout files early in case any of them has issues
         for samout in samouts:
             with open(samout, 'w'):
@@ -73,12 +74,14 @@ def count_reads_in_features(sam_filenames, gff_filename,
                 try:
                     feature_id = f.attr[id_attribute]
                 except KeyError:
-                    raise ValueError("Feature %s does not contain a '%s' attribute" %
-                                     (f.name, id_attribute))
+                    raise ValueError(
+                            "Feature %s does not contain a '%s' attribute" %
+                            (f.name, id_attribute))
                 if stranded != "no" and f.iv.strand == ".":
-                    raise ValueError("Feature %s at %s does not have strand information but you are "
-                                     "running htseq-count in stranded mode. Use '--stranded=no'." %
-                                     (f.name, f.iv))
+                    raise ValueError(
+                            "Feature %s at %s does not have strand information but you are "
+                            "running htseq-count in stranded mode. Use '--stranded=no'." %
+                            (f.name, f.iv))
                 features[f.iv] += feature_id
                 counts[f.attr[id_attribute]] = 0
                 attributes[f.attr[id_attribute]] = [
@@ -175,7 +178,10 @@ def count_reads_in_features(sam_filenames, gff_filename,
                     try:
                         if r.optional_field("NH") > 1:
                             nonunique += 1
-                            write_to_samout(r, "__alignment_not_unique", samoutfile)
+                            write_to_samout(
+                                    r,
+                                    "__alignment_not_unique",
+                                    samoutfile)
                             if multimapped_mode == 'none':
                                 continue
                     except KeyError:
@@ -325,7 +331,8 @@ def count_reads_in_features(sam_filenames, gff_filename,
     print('\t'.join(["__alignment_not_unique"] + pad + [str(c) for c in nonunique_all]))
 
 
-def my_showwarning(message, category, filename, lineno=None, file=None, line=None):
+def my_showwarning(message, category, filename, lineno=None, file=None,
+                   line=None):
     sys.stderr.write("Warning: %s\n" % message)
 
 
