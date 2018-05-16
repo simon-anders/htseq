@@ -138,17 +138,17 @@ def main():
         for a in readfile:
             if isAlnmntFile:
                 r = a.read
-        else:
-            r = a
-        if twoColumns and (isAlnmntFile and a.aligned):
-            r.add_bases_to_count_array(base_arr_A)
-            r.add_qual_to_count_array(qual_arr_A)
-        else:
-            r.add_bases_to_count_array(base_arr_U)
-            r.add_qual_to_count_array(qual_arr_U)
-        i += 1
-        if (i % 200000) == 0:
-            print i, "reads processed"
+            else:
+                r = a
+            if twoColumns and (isAlnmntFile and a.aligned):
+                r.add_bases_to_count_array(base_arr_A)
+                r.add_qual_to_count_array(qual_arr_A)
+            else:
+                r.add_bases_to_count_array(base_arr_U)
+                r.add_qual_to_count_array(qual_arr_U)
+            i += 1
+            if (i % 200000) == 0:
+                print i, "reads processed"
     except:
         sys.stderr.write("Error occured in: %s\n" %
                          readfile.get_line_number_string())
@@ -202,12 +202,12 @@ def main():
         pyplot.subplot(221)
         plot_bases(base_arr_U_n)
         pyplot.ylabel("proportion of base")
-        pyplot.title("non-aligned reads\n%.0f%% (%.3f million)" %
+        pyplot.title("non-aligned reads\n%.0f%% (%.4f million)" %
                      (100. * nreads_U / (nreads_U+nreads_A), nreads_U / 1e6))
 
         pyplot.subplot(222)
         plot_bases(base_arr_A_n)
-        pyplot.title("aligned reads\n%.0f%% (%.3f million)" %
+        pyplot.title("aligned reads\n%.0f%% (%.4f million)" %
                      (100. * nreads_A / (nreads_U+nreads_A), nreads_A / 1e6))
 
         pyplot.subplot(223)
