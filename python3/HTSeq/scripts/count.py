@@ -139,12 +139,20 @@ def count_reads_in_features(sam_filenames, gff_filename,
 
         try:
             if pe_mode:
+                if ((supplementary_alignment_mode == 'ignore') and
+                   (secondary_alignment_mode == 'ignore')):
+                    primary_only = True
+                else:
+                    primary_only = False
                 if order == "name":
-                    read_seq = HTSeq.pair_SAM_alignments(read_seq)
+                    read_seq = HTSeq.pair_SAM_alignments(
+                            read_seq,
+                            primary_only=primary_only)
                 elif order == "pos":
                     read_seq = HTSeq.pair_SAM_alignments_with_buffer(
                             read_seq,
-                            max_buffer_size=max_buffer_size)
+                            max_buffer_size=max_buffer_size,
+                            primary_only=primary_only)
                 else:
                     raise ValueError("Illegal order specified.")
             empty = 0

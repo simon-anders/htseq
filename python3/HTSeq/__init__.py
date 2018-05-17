@@ -627,13 +627,53 @@ class GenomicArrayOfSets(GenomicArray):
 # paired-end handling
 ###########################
 
-def pair_SAM_alignments(alignments, bundle=False):
+def pair_SAM_alignments(
+        alignments,
+        bundle=False,
+        primary_only=False):
+    '''Iterate over SAM aligments, name-sorted paired-end
+
+    Args:
+        alignments (iterator of SAM/BAM alignments): the alignments to wrap
+        bundle (bool): if True, bundle all alignments from one read pair into a
+            single yield. If False (default), each pair of alignments is
+            yielded separately.
+        primary_only (bool): for each read, consider only the primary line
+            (SAM flag 0x900 = 0). The SAM specification requires one and only
+            one of those for each read.
+
+    Yields:
+        2-tuples with each pair of alignments or, if bundle==True, each bundled
+        list of alignments.
+    '''
 
     mate_missing_count = [0]
 
     def process_list(almnt_list):
+        '''Transform a list of alignment with the same read name into pairs
+
+        Args:
+            almnt_list (list): alignments to process
+
+        Yields:
+            each pair of alignments.
+
+        This function is needed because each line of a BAM file is not a read
+        but an alignment. For uniquely mapped and unmapped reads, those two are
+        the same. For multimapped reads, however, there can be more than one
+        alignment for each read. Also, it is normal for a mapper to uniquely
+        map one read and multimap its mate.
+
+        This function goes down the list of alignments for a given read name
+        and tries to find the first mate. So if read 1 is uniquely mapped but
+        read 2 is mapped 4 times, only (read 1, read 2 - first occurrence) will
+        yield; the other 3 alignments of read 2 are ignored.
+        '''
+
+
         while len(almnt_list) > 0:
             a1 = almnt_list.pop(0)
+
             # Find its mate
             for a2 in almnt_list:
                 if a1.pe_which == a2.pe_which:
@@ -649,8 +689,9 @@ def pair_SAM_alignments(alignments, bundle=False):
                 if a1.mate_aligned:
                     mate_missing_count[0] += 1
                     if mate_missing_count[0] == 1:
-                        warnings.warn("Read " + a1.read.name + " claims to have an aligned mate " +
-                                      "which could not be found in an adjacent line.")
+                        warnings.warn(
+                            "Read "+a1.read.name+" claims to have an aligned mate "+
+                            "which could not be found in an adjacent line.")
                 a2 = None
             if a2 is not None:
                 almnt_list.remove(a2)
@@ -669,6 +710,9 @@ def pair_SAM_alignments(alignments, bundle=False):
         if almnt.pe_which == "unknown":
             raise ValueError(
                 "Paired-end read found with 'unknown' 'pe_which' status.")
+        # FIXME: almnt.not_primary_alignment currently means secondary
+        if primary_only and (almnt.not_primary_alignment or almnt.supplementary):
+            continue
         if almnt.read.name == current_name:
             almnt_list.append(almnt)
         else:
@@ -689,18 +733,35 @@ def pair_SAM_alignments(alignments, bundle=False):
                       mate_missing_count[0])
 
 
-def pair_SAM_alignments_with_buffer(alignments, max_buffer_size=30000000):
+def pair_SAM_alignments_with_buffer(
+        alignments,
+        max_buffer_size=30000000,
+        primary_only=False):
+    '''Iterate over SAM aligments with buffer, position-sorted paired-end
+
+    Args:
+        alignments (iterator of SAM/BAM alignments): the alignments to wrap
+        max_buffer_size (int): maxmal numer of alignments to keep in memory.
+        primary_only (bool): for each read, consider only the primary line
+            (SAM flag 0x900 = 0). The SAM specification requires one and only
+            one of those for each read.
+
+    Yields:
+        2-tuples with each pair of alignments.
+    '''
 
     almnt_buffer = {}
     ambiguous_pairing_counter = 0
     for almnt in alignments:
-
         if not almnt.paired_end:
             raise ValueError(
                 "Sequence of paired-end alignments expected, but got single-end alignment.")
         if almnt.pe_which == "unknown":
             raise ValueError(
                 "Cannot process paired-end alignment found with 'unknown' 'pe_which' status.")
+        # FIXME: almnt.not_primary_alignment currently means secondary
+        if primary_only and (almnt.not_primary_alignment or almnt.supplementary):
+            continue
 
         matekey = (
             almnt.read.name,
