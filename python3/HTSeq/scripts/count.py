@@ -422,12 +422,12 @@ def main():
 
     pa.add_argument(
             "--secondary-alignments", dest="secondary_alignments", type=str,
-            choices=("score", "ignore"), default="score",
+            choices=("score", "ignore"), default="ignore",
             help="Whether to score secondary alignments (0x100 flag)")
 
     pa.add_argument(
             "--supplementary-alignments", dest="supplementary_alignments", type=str,
-            choices=("score", "ignore"), default="score",
+            choices=("score", "ignore"), default="ignore",
             help="Whether to score supplementary alignments (0x800 flag)")
 
     pa.add_argument(
