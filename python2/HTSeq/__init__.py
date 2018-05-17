@@ -7,6 +7,7 @@ import itertools
 import warnings
 import os
 import shlex
+import sys
 
 from _HTSeq import *
 
@@ -130,9 +131,9 @@ class GenomicFeature(object):
         else:
             sep = " "
         attr_str = '; '.join(
-                ['%s%s\"%s\"' % (ak, sep, attr[ak]) for ak in attr])
+            ['%s%s\"%s\"' % (ak, sep, attr[ak]) for ak in attr])
         return "\t".join(str(a) for a in (self.iv.chrom, source,
-                         self.type, self.iv.start+1, self.iv.end, score,
+                         self.type, self.iv.start + 1, self.iv.end, score,
                          self.iv.strand, frame, attr_str)) + "\n"
 
 
@@ -158,7 +159,7 @@ def parse_GFF_attribute_string(attrStr, extra_return_first_value=False):
             continue
         if attr.count('"') not in (0, 2):
             raise ValueError(
-                    "The attribute string seems to contain mismatched quotes.")
+                "The attribute string seems to contain mismatched quotes.")
         mo = _re_attr_main.match(attr)
         if not mo:
             raise ValueError("Failure parsing GFF attribute line")
@@ -206,9 +207,15 @@ class GFF_Reader(FileOrSequence):
              strand, frame, attributeStr) = line.split("\t", 8)
             (attr, name) = parse_GFF_attribute_string(attributeStr, True)
             if self.end_included:
-                iv = GenomicInterval(seqname, int(start)-1, int(end), strand)
+                iv = GenomicInterval(
+                        seqname,
+                        int(start) - 1, int(end),
+                        strand)
             else:
-                iv = GenomicInterval(seqname, int(start)-1, int(end)-1, strand)
+                iv = GenomicInterval(
+                        seqname,
+                        int(start) - 1, int(end) - 1,
+                        strand)
             f = GenomicFeature(name, feature, iv)
             if score != ".":
                 score = float(score)
@@ -342,8 +349,9 @@ class FastaReader(FileOrSequence):
     def build_index(self, force=False):
         self._import_pysam()
         if not isinstance(self.fos, str):
-            raise TypeError, "This function only works with FastaReader objects " + \
-              "connected to a fasta file via file name"
+            raise TypeError(
+                "This function only works with FastaReader objects " +
+                "connected to a fasta file via file name")
         index_filename = self.fos + ".fai"
         if os.access(index_filename, os.R_OK):
             if (not force) and os.stat(self.filename_or_sequence).st_mtime <= \
@@ -365,7 +373,7 @@ class FastaReader(FileOrSequence):
         self._import_pysam()
         fasta = pysam.faidx(
                 self.fos,
-                "%s:%d-%d" % (iv.chrom, iv.start, iv.end-1))
+                "%s:%d-%d" % (iv.chrom, iv.start, iv.end - 1))
         ans = list(FastaReader(fasta))
         assert len(ans) == 1
         ans[0].name = str(iv)
@@ -423,8 +431,10 @@ class FastqReader(FileOrSequence):
             if self.raw_iterator:
                 s = (seq[:-1], id1[1:-1], qual[:-1], self.qual_scale)
             else:
-                s = SequenceWithQualities(seq[:-1], id1[1:-1], qual[:-1],
-                                          self.qual_scale)
+                s = SequenceWithQualities(
+                        seq[:-1], id1[1:-1],
+                        qual[:-1],
+                        self.qual_scale)
             yield s
 
 
@@ -540,12 +550,17 @@ class SolexaExportReader(FileOrSequence):
             record = SolexaExportAlignment()
             fields = SolexaExportReader.parse_line_bare(line)
             if fields['read_nbr'] != "1":
-                warnings.warn("Paired-end read encountered. PE is so far supported only for " +
-                  "SAM files, not yet for SolexaExport. All PE-related fields are ignored. ")
+                warnings.warn(
+                    "Paired-end read encountered. PE is so far supported only "
+                    "for SAM files, not yet for SolexaExport. All PE-related "
+                    "fields are ignored.")
             record.read = SequenceWithQualities(
                 fields['read_seq'],
-               "%s:%s:%s:%s:%s#0" % (fields['machine'], fields['lane'], fields['tile'],
-                  fields['x_coord'], fields['y_coord']),
+                "%s:%s:%s:%s:%s#0" % (fields['machine'],
+                                      fields['lane'],
+                                      fields['tile'],
+                                      fields['x_coord'],
+                                      fields['y_coord']),
                 fields['qual_str'], self.qualscale)
             if fields['passed_filtering'] == 'Y':
                 record.passed_filter = True
@@ -613,15 +628,53 @@ class GenomicArrayOfSets(GenomicArray):
 
 
 ###########################
-#   paired-end handling
+# paired-end handling
 ###########################
 
+def pair_SAM_alignments(
+        alignments,
+        bundle=False,
+        primary_only=False):
+    '''Iterate over SAM aligments, name-sorted paired-end
 
-def pair_SAM_alignments(alignments, bundle=False):
+    Args:
+        alignments (iterator of SAM/BAM alignments): the alignments to wrap
+        bundle (bool): if True, bundle all alignments from one read pair into a
+            single yield. If False (default), each pair of alignments is
+            yielded separately.
+        primary_only (bool): for each read, consider only the primary line
+            (SAM flag 0x900 = 0). The SAM specification requires one and only
+            one of those for each read.
+
+    Yields:
+        2-tuples with each pair of alignments or, if bundle==True, each bundled
+        list of alignments.
+    '''
 
     mate_missing_count = [0]
 
     def process_list(almnt_list):
+        '''Transform a list of alignment with the same read name into pairs
+
+        Args:
+            almnt_list (list): alignments to process
+
+        Yields:
+            each pair of alignments.
+
+        This function is needed because each line of a BAM file is not a read
+        but an alignment. For uniquely mapped and unmapped reads, those two are
+        the same. For multimapped reads, however, there can be more than one
+        alignment for each read. Also, it is normal for a mapper to uniquely
+        map one read and multimap its mate.
+
+        This function goes down the list of alignments for a given read name
+        and tries to find the first mate. So if read 1 is uniquely mapped but
+        read 2 is mapped 4 times, only (read 1, read 2 - first occurrence) will
+        yield; the other 3 alignments of read 2 are ignored.
+        '''
+
+
         while len(almnt_list) > 0:
             a1 = almnt_list.pop(0)
             # Find its mate
@@ -639,7 +692,8 @@ def pair_SAM_alignments(alignments, bundle=False):
                 if a1.mate_aligned:
                     mate_missing_count[0] += 1
                     if mate_missing_count[0] == 1:
-                        warnings.warn("Read " + a1.read.name + " claims to have an aligned mate " +
+                        warnings.warn(
+                            "Read " + a1.read.name + " claims to have an aligned mate " +
                             "which could not be found in an adjacent line.")
                 a2 = None
             if a2 is not None:
@@ -654,9 +708,14 @@ def pair_SAM_alignments(alignments, bundle=False):
     current_name = None
     for almnt in alignments:
         if not almnt.paired_end:
-            raise ValueError, "'pair_alignments' needs a sequence of paired-end alignments"
+            raise ValueError(
+                "'pair_alignments' needs a sequence of paired-end alignments")
         if almnt.pe_which == "unknown":
-            raise ValueError, "Paired-end read found with 'unknown' 'pe_which' status."
+            raise ValueError(
+                "Paired-end read found with 'unknown' 'pe_which' status.")
+        # FIXME: almnt.not_primary_alignment currently means secondary
+        if primary_only and (almnt.not_primary_alignment or almnt.supplementary):
+            continue
         if almnt.read.name == current_name:
             almnt_list.append(almnt)
         else:
@@ -673,82 +732,104 @@ def pair_SAM_alignments(alignments, bundle=False):
         for p in process_list(almnt_list):
             yield p
     if mate_missing_count[0] > 1:
-        warnings.warn("%d reads with missing mate encountered." % mate_missing_count[0])
+        warnings.warn("%d reads with missing mate encountered." %
+                      mate_missing_count[0])
 
 
-def pair_SAM_alignments_with_buffer(alignments, max_buffer_size=30000000):
+def pair_SAM_alignments_with_buffer(
+        alignments,
+        max_buffer_size=30000000,
+        primary_only=False):
+    '''Iterate over SAM aligments with buffer, position-sorted paired-end
 
-   almnt_buffer = {}
-   ambiguous_pairing_counter = 0
-   for almnt in alignments:
+    Args:
+        alignments (iterator of SAM/BAM alignments): the alignments to wrap
+        max_buffer_size (int): maxmal numer of alignments to keep in memory.
+        primary_only (bool): for each read, consider only the primary line
+            (SAM flag 0x900 = 0). The SAM specification requires one and only
+            one of those for each read.
 
-      if not almnt.paired_end:
-         raise ValueError, "Sequence of paired-end alignments expected, but got single-end alignment."
-      if almnt.pe_which == "unknown":
-         raise ValueError, "Cannot process paired-end alignment found with 'unknown' 'pe_which' status."
+    Yields:
+        2-tuples with each pair of alignments.
+    '''
 
-      matekey = (
-         almnt.read.name,
-         "second" if almnt.pe_which == "first" else "first",
-         almnt.mate_start.chrom if almnt.mate_aligned else None,
-         almnt.mate_start.pos if almnt.mate_aligned else None,
-         almnt.iv.chrom if almnt.aligned else None,
-         almnt.iv.start if almnt.aligned else None,
-         -almnt.inferred_insert_size if almnt.aligned and almnt.mate_aligned else None)
+    almnt_buffer = {}
+    ambiguous_pairing_counter = 0
+    for almnt in alignments:
+        if not almnt.paired_end:
+            raise ValueError(
+                "Sequence of paired-end alignments expected, but got single-end alignment.")
+        if almnt.pe_which == "unknown":
+            raise ValueError(
+                "Cannot process paired-end alignment found with 'unknown' 'pe_which' status.")
+        # FIXME: almnt.not_primary_alignment currently means secondary
+        if primary_only and (almnt.not_primary_alignment or almnt.supplementary):
+            continue
 
-      if matekey in almnt_buffer:
-         if len(almnt_buffer[ matekey ]) == 1:
-            mate = almnt_buffer[ matekey ][ 0 ]
-            del almnt_buffer[ matekey ]
-         else:
-            mate = almnt_buffer[ matekey ].pop(0)
-            if ambiguous_pairing_counter == 0:
-               ambiguous_pairing_first_occurance = matekey
-            ambiguous_pairing_counter += 1
-         if almnt.pe_which == "first":
-            yield (almnt, mate)
-         else:
-            yield (mate, almnt)
-      else:
-         almntkey = (
-            almnt.read.name, almnt.pe_which,
-            almnt.iv.chrom if almnt.aligned else None,
-            almnt.iv.start if almnt.aligned else None,
+        matekey = (
+            almnt.read.name,
+            "second" if almnt.pe_which == "first" else "first",
             almnt.mate_start.chrom if almnt.mate_aligned else None,
             almnt.mate_start.pos if almnt.mate_aligned else None,
-            almnt.inferred_insert_size if almnt.aligned and almnt.mate_aligned else None)
-         if almntkey not in almnt_buffer:
-            almnt_buffer[ almntkey ] = [ almnt ]
-         else:
-            almnt_buffer[ almntkey ].append(almnt)
-         if len(almnt_buffer) > max_buffer_size:
-            raise ValueError, "Maximum alignment buffer size exceeded while pairing SAM alignments."
+            almnt.iv.chrom if almnt.aligned else None,
+            almnt.iv.start if almnt.aligned else None,
+            -almnt.inferred_insert_size if almnt.aligned and almnt.mate_aligned else None)
 
-   if len(almnt_buffer) > 0:
-      warnings.warn("Mate records missing for %d records; first such record: %s." %
-         (len(almnt_buffer), str(almnt_buffer.values()[0][0])))
-      for almnt_list in almnt_buffer.values():
-         for almnt in almnt_list:
-            if almnt.pe_which == "first":
-               yield (almnt, None)
+        if matekey in almnt_buffer:
+            if len(almnt_buffer[matekey]) == 1:
+                mate = almnt_buffer[matekey][0]
+                del almnt_buffer[matekey]
             else:
-               yield (None, almnt)
+                mate = almnt_buffer[matekey].pop(0)
+                if ambiguous_pairing_counter == 0:
+                    ambiguous_pairing_first_occurance = matekey
+                ambiguous_pairing_counter += 1
+            if almnt.pe_which == "first":
+                yield (almnt, mate)
+            else:
+                yield (mate, almnt)
+        else:
+            almntkey = (
+                almnt.read.name, almnt.pe_which,
+                almnt.iv.chrom if almnt.aligned else None,
+                almnt.iv.start if almnt.aligned else None,
+                almnt.mate_start.chrom if almnt.mate_aligned else None,
+                almnt.mate_start.pos if almnt.mate_aligned else None,
+                almnt.inferred_insert_size if almnt.aligned and almnt.mate_aligned else None)
+            if almntkey not in almnt_buffer:
+                almnt_buffer[almntkey] = [almnt]
+            else:
+                almnt_buffer[almntkey].append(almnt)
+            if len(almnt_buffer) > max_buffer_size:
+                raise ValueError(
+                    "Maximum alignment buffer size exceeded while pairing SAM alignments.")
 
-   if ambiguous_pairing_counter > 0:
-      warnings.warn(
+    if len(almnt_buffer) > 0:
+        warnings.warn(
+            "Mate records missing for %d records; first such record: %s." %
+            (len(almnt_buffer), str(almnt_buffer.values()[0][0])))
+        for almnt_list in almnt_buffer.values():
+            for almnt in almnt_list:
+                if almnt.pe_which == "first":
+                    yield (almnt, None)
+                else:
+                    yield (None, almnt)
+
+    if ambiguous_pairing_counter > 0:
+        warnings.warn(
             "Mate pairing was ambiguous for %d records; mate key for first such record: %s." %
-         (ambiguous_pairing_counter, str(ambiguous_pairing_first_occurance)))
+            (ambiguous_pairing_counter, str(ambiguous_pairing_first_occurance)))
 
 
 ###########################
-#   variant calls
+# variant calls
 ###########################
 
 
 _re_vcf_meta_comment = re.compile("^##([a-zA-Z]+)\=(.*)$")
 
 _re_vcf_meta_descr = re.compile(
-        'ID=[^,]+,?|Number=[^,]+,?|Type=[^,]+,?|Description="[^"]+",?')
+    'ID=[^,]+,?|Number=[^,]+,?|Type=[^,]+,?|Description="[^"]+",?')
 
 _re_vcf_meta_types = re.compile("[INFO|FILTER|FORMAT]")
 
@@ -758,6 +839,7 @@ _vcf_typemap = {
     "String": str,
     "Flag": bool
 }
+
 
 class VariantCall(object):
 
@@ -797,9 +879,10 @@ class VariantCall(object):
             ret.chrom, ret.pos, ret.id, ret.ref, ret.alt, ret.qual, ret.filter, ret.info = lsplit[:8]
             ret.format = lsplit[8].split(":")
             ret.samples = {}
-            spos=9
+            spos = 9
             for sid in sampleids:
-                ret.samples[ sid ] = dict((name, value) for (name, value) in itertools.izip(ret.format, lsplit[spos].split(":")))
+                ret.samples[sid] = dict((name, value) for (
+                    name, value) in itertools.izip(ret.format, lsplit[spos].split(":")))
                 spos += 1
         ret.pos = GenomicPosition(ret.chrom, int(ret.pos))
         ret.alt = ret.alt.split(",")
@@ -813,28 +896,29 @@ class VariantCall(object):
             return self.info
 
     def get_original_line(self):
-        warnings.warn("Original line is empty, probably this object was created from scratch and not from a line in a .vcf file!")
+        warnings.warn(
+            "Original line is empty, probably this object was created from scratch and not from a line in a .vcf file!")
         return self._original_line
 
     def sampleline(self):
         if self.format == None:
-           print >> sys.stderr, "No samples in this variant call!"
-           return ""
+            sys.stderr.write("No samples in this variant call!\n")
+            return ""
         keys = self.format
-        ret = [ ":".join(keys) ]
+        ret = [":".join(keys)]
         for sid in self.samples:
-           tmp = []
-           for k in keys:
-              if k in self.samples[sid]:
-                 tmp.append(self.samples[sid][k])
-           ret.append(":".join(tmp))
+            tmp = []
+            for k in keys:
+                if k in self.samples[sid]:
+                    tmp.append(self.samples[sid][k])
+            ret.append(":".join(tmp))
         return "\t".join(ret)
 
     def to_line(self):
         if self.format == None:
-           return "\t".join(map(str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join(self.alt), self.qual, self.filter, self.infoline() ])) + "\n"
+            return "\t".join(map(str, [self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join(self.alt), self.qual, self.filter, self.infoline()])) + "\n"
         else:
-           return "\t".join(map(str, [ self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join(self.alt), self.qual, self.filter, self.infoline(), self.sampleline() ])) + "\n"
+            return "\t".join(map(str, [self.pos.chrom, self.pos.pos, self.id, self.ref, ",".join(self.alt), self.qual, self.filter, self.infoline(), self.sampleline()])) + "\n"
 
     def __descr__(self):
         return "<VariantCall at %s, ref '%s', alt %s >" % (str(self.pos).rstrip("/."), self.ref, str(self.alt).strip("[]"))
@@ -851,7 +935,7 @@ class VariantCall(object):
                     tmp[token[0]] = map(infodict[token[0]], token[1].split(","))
                 else:
                     tmp[token[0]] = token[1].split(",")
-                if len(tmp[ token[0] ]) == 1:
+                if len(tmp[token[0]]) == 1:
                     tmp[token[0]] = tmp[token[0]][0]
             else:  # Flag attribute found
                 tmp[token] = True
@@ -875,8 +959,8 @@ class VCF_Reader(FileOrSequence):
 
     def make_info_dict(self):
         self.infodict = dict(
-                (key,
-                 _vcf_typemap[self.info[key]["Type"]]) for key in self.info.keys())
+            (key,
+             _vcf_typemap[self.info[key]["Type"]]) for key in self.info.keys())
 
     def parse_meta(self, header_filename=None):
         if header_filename is None:
@@ -891,17 +975,20 @@ class VCF_Reader(FileOrSequence):
                     if mo:
                         value = mo.group(2)
                         if mo.group(1) == "INFO":
-                            value = dict(e.rstrip(",").split("=", 1) for e in _re_vcf_meta_descr.findall(value))
+                            value = dict(e.rstrip(",").split("=", 1)
+                                         for e in _re_vcf_meta_descr.findall(value))
                             key = value["ID"]
                             del value["ID"]
                             self.info[key] = value
                         elif mo.group(1) == "FILTER":
-                            value = dict(e.rstrip(",").split("=", 1) for e in _re_vcf_meta_descr.findall(value))
+                            value = dict(e.rstrip(",").split("=", 1)
+                                         for e in _re_vcf_meta_descr.findall(value))
                             key = value["ID"]
                             del value["ID"]
-                            self.filters[ key ] = value
+                            self.filters[key] = value
                         elif mo.group(1) == "FORMAT":
-                            value = dict(e.rstrip(",").split("=", 1) for e in _re_vcf_meta_descr.findall(value))
+                            value = dict(e.rstrip(",").split("=", 1)
+                                         for e in _re_vcf_meta_descr.findall(value))
                             key = value["ID"]
                             del value["ID"]
                             self.formats[key] = value
@@ -1033,13 +1120,15 @@ class BAM_Reader(object):
 
     def __getitem__(self, iv):
         if not isinstance(iv, GenomicInterval):
-            raise TypeError("Use a HTSeq.GenomicInterval to access regions within .bam-file!")
+            raise TypeError(
+                "Use a HTSeq.GenomicInterval to access regions within .bam-file!")
         if self.sf is None:
             self.sf = pysam.Samfile(self.filename, "rb", check_sq=self.check_sq)
             # NOTE: pysam 0.9 has renames _hasIndex into has_index
             if (hasattr(self.sf, '_hasIndex') and (not self.sf._hasIndex())) or (not self.sf.has_index()):
-                raise ValueError("The .bam-file has no index, random-access is disabled!")
-        for pa in self.sf.fetch(iv.chrom, iv.start+1, iv.end):
+                raise ValueError(
+                    "The .bam-file has no index, random-access is disabled!")
+        for pa in self.sf.fetch(iv.chrom, iv.start + 1, iv.end):
             yield SAM_Alignment.from_pysam_AlignedRead(pa, self.sf)
 
     def get_header_dict(self):
@@ -1097,9 +1186,21 @@ class BED_Reader(FileOrSequence):
                 raise ValueError("BED file line contains less than 3 fields")
             if len(fields) > 9:
                 raise ValueError("BED file line contains more than 9 fields")
-            iv = GenomicInterval(fields[0], int(fields[1]), int(fields[2]), fields[5] if len(fields) > 5 else ".")
-            f = GenomicFeature(fields[3] if len(fields) > 3 else "unnamed", "BED line", iv)
+            iv = GenomicInterval(
+                fields[0],
+                int(fields[1]),
+                int(fields[2]),
+                fields[5] if len(fields) > 5 else ".")
+            f = GenomicFeature(
+                fields[3] if len(fields) > 3 else "unnamed",
+                "BED line",
+                iv)
             f.score = float(fields[4]) if len(fields) > 4 else None
-            f.thick = GenomicInterval(iv.chrom, int(fields[6]), int(fields[7]), iv.strand) if len(fields) > 7 else None
-            f.itemRgb = [int(a) for a in fields[8].split(",")] if len(fields) > 8 else None
+            f.thick = GenomicInterval(
+                iv.chrom,
+                int(fields[6]),
+                int(fields[7]),
+                iv.strand) if len(fields) > 7 else None
+            f.itemRgb = [int(a) for a in fields[8].split(",")
+                         ] if len(fields) > 8 else None
             yield(f)

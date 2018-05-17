@@ -79,7 +79,6 @@ class FileOrSequence(object):
 #########################
 
 class GenomicFeature(object):
-
     """A genomic feature, i.e., an interval on a genome with metadata.
 
     At minimum, the following information should be provided by slots:
@@ -181,7 +180,6 @@ _re_gff_meta_comment = re.compile("##\s*(\S+)\s+(\S*)")
 
 
 class GFF_Reader(FileOrSequence):
-
     """Parse a GFF file
 
     Pass the constructor either a file name or an iterator of lines of a
@@ -200,7 +198,6 @@ class GFF_Reader(FileOrSequence):
         for line in FileOrSequence.__iter__(self):
             if isinstance(line, bytes):
                 line = line.decode()
-
             if line == "\n":
                 continue
             if line.startswith('#'):
@@ -213,10 +210,15 @@ class GFF_Reader(FileOrSequence):
              strand, frame, attributeStr) = line.split("\t", 8)
             (attr, name) = parse_GFF_attribute_string(attributeStr, True)
             if self.end_included:
-                iv = GenomicInterval(seqname, int(start) - 1, int(end), strand)
+                iv = GenomicInterval(
+                        seqname,
+                        int(start) - 1, int(end),
+                        strand)
             else:
-                iv = GenomicInterval(seqname, int(
-                    start) - 1, int(end) - 1, strand)
+                iv = GenomicInterval(
+                        seqname,
+                        int(start) - 1, int(end) - 1,
+                        strand)
             f = GenomicFeature(name, feature, iv)
             if score != ".":
                 score = float(score)
@@ -240,8 +242,8 @@ def make_feature_dict(feature_sequence):
     An example makes this clear. Let's say you load the C. elegans GTF file
     from Ensemble and make a feature dict:
 
-    >>> worm_features_dict = HTSeq.make_feature_dict( HTSeq.parse_GFF(
-    ...     "test_data/Caenorhabditis_elegans.WS200.55.gtf.gz" ) )
+    >>> worm_features_dict = HTSeq.make_feature_dict(HTSeq.parse_GFF(
+    ...     "test_data/Caenorhabditis_elegans.WS200.55.gtf.gz"))
 
     (This command may take a few minutes to deal with the 430,000 features
     in the GTF file. Note that you may need a lot of RAM if you have millions
@@ -350,12 +352,13 @@ class FastaReader(FileOrSequence):
     def build_index(self, force=False):
         self._import_pysam()
         if not isinstance(self.fos, str):
-            raise TypeError("This function only works with FastaReader objects " +
-                            "connected to a fasta file via file name")
+            raise TypeError(
+                "This function only works with FastaReader objects " +
+                "connected to a fasta file via file name")
         index_filename = self.fos + ".fai"
         if os.access(index_filename, os.R_OK):
             if (not force) and os.stat(self.filename_or_sequence).st_mtime <= \
-                    os.stat(index_filename).st_mtime:
+                 os.stat(index_filename).st_mtime:
                 # index is up to date
                 return
         pysam.faidx(self.fos)
@@ -368,11 +371,12 @@ class FastaReader(FileOrSequence):
             raise TypeError("GenomicInterval expected as key.")
         if not isinstance(self.fos, str):
             raise TypeError(
-                    "This function only works with FastaReader objects " +
-                    "connected to a fasta file via file name")
+                "This function only works with FastaReader objects " +
+                "connected to a fasta file via file name")
         self._import_pysam()
-        fasta = pysam.faidx(self.fos, "%s:%d-%d" %
-                            (iv.chrom, iv.start, iv.end - 1))
+        fasta = pysam.faidx(
+                self.fos,
+                "%s:%d-%d" % (iv.chrom, iv.start, iv.end - 1))
         ans = list(FastaReader(fasta))
         assert len(ans) == 1
         ans[0].name = str(iv)
@@ -405,9 +409,10 @@ class FastqReader(FileOrSequence):
             qual = next(fin)
             if qual == "":
                 if id1 != "":
-                    warnings.warn("Number of lines in FASTQ file is not "
-                                  "a multiple of 4. Discarding the last, "
-                                  "incomplete record")
+                    warnings.warn(
+                        "Number of lines in FASTQ file is not "
+                        "a multiple of 4. Discarding the last, "
+                        "incomplete record")
                 break
 
             if not qual.endswith("\n"):
@@ -429,8 +434,10 @@ class FastqReader(FileOrSequence):
             if self.raw_iterator:
                 s = (seq[:-1], id1[1:-1], qual[:-1], self.qual_scale)
             else:
-                s = SequenceWithQualities(seq[:-1].encode(), id1[1:-1],
-                                          qual[:-1].encode(), self.qual_scale)
+                s = SequenceWithQualities(
+                        seq[:-1].encode(), id1[1:-1],
+                        qual[:-1].encode(),
+                        self.qual_scale)
             yield s
 
 
@@ -493,10 +500,10 @@ class SolexaExportAlignment(Alignment):
     def __repr__(self):
         if self.aligned:
             return "< %s object: Read '%s', aligned to %s >" % (
-                self.__class__.__name__, self.read.name, self.iv)
+              self.__class__.__name__, self.read.name, self.iv)
         else:
             return "< %s object: Non-aligned read '%s' >" % (
-                self.__class__.__name__, self.read.name)
+              self.__class__.__name__, self.read.name)
 
 
 class SolexaExportReader(FileOrSequence):
@@ -563,8 +570,8 @@ class SolexaExportReader(FileOrSequence):
             elif fields['passed_filtering'] == 'N':
                 record.passed_filter = False
             else:
-                raise ValueError("Illegal 'passed filter' value in Solexa export data: '%s'." % fields[
-                                 'passed_filtering'])
+                raise ValueError(
+                    "Illegal 'passed filter' value in Solexa export data: '%s'." % fields['passed_filtering'])
             record.index_string = fields['index_string']
             if fields['pos'] == '':
                 record.iv = None
@@ -582,8 +589,8 @@ class SolexaExportReader(FileOrSequence):
                 if fields['chrom'] == "":
                     chrom = fields['contig']
                 record.iv = GenomicInterval(
-                        chrom, start,
-                        start + len(fields['read_seq']), strand)
+                    chrom, start,
+                    start + len(fields['read_seq']), strand)
             yield record
 
 
@@ -673,7 +680,6 @@ def pair_SAM_alignments(
 
         while len(almnt_list) > 0:
             a1 = almnt_list.pop(0)
-
             # Find its mate
             for a2 in almnt_list:
                 if a1.pe_which == a2.pe_which:
@@ -683,14 +689,14 @@ def pair_SAM_alignments(
                 if not (a1.aligned and a2.aligned):
                     break
                 if a1.iv.chrom == a2.mate_start.chrom and a1.iv.start == a2.mate_start.pos and \
-                        a2.iv.chrom == a1.mate_start.chrom and a2.iv.start == a1.mate_start.pos:
+                   a2.iv.chrom == a1.mate_start.chrom and a2.iv.start == a1.mate_start.pos:
                     break
             else:
                 if a1.mate_aligned:
                     mate_missing_count[0] += 1
                     if mate_missing_count[0] == 1:
                         warnings.warn(
-                            "Read "+a1.read.name+" claims to have an aligned mate "+
+                            "Read " + a1.read.name + " claims to have an aligned mate " +
                             "which could not be found in an adjacent line.")
                 a2 = None
             if a2 is not None:
@@ -802,8 +808,9 @@ def pair_SAM_alignments_with_buffer(
                     "Maximum alignment buffer size exceeded while pairing SAM alignments.")
 
     if len(almnt_buffer) > 0:
-        warnings.warn("Mate records missing for %d records; first such record: %s." %
-                      (len(almnt_buffer), str(list(almnt_buffer.values())[0][0])))
+        warnings.warn(
+            "Mate records missing for %d records; first such record: %s." %
+            (len(almnt_buffer), str(list(almnt_buffer.values())[0][0])))
         for almnt_list in list(almnt_buffer.values()):
             for almnt in almnt_list:
                 if almnt.pe_which == "first":
@@ -814,7 +821,7 @@ def pair_SAM_alignments_with_buffer(
     if ambiguous_pairing_counter > 0:
         warnings.warn(
             "Mate pairing was ambiguous for %d records; mate key for first such record: %s." %
-                      (ambiguous_pairing_counter, str(ambiguous_pairing_first_occurance)))
+            (ambiguous_pairing_counter, str(ambiguous_pairing_first_occurance)))
 
 
 ###########################
@@ -869,12 +876,10 @@ class VariantCall(object):
         ret = cls()
         if nsamples == 0:
             ret.format = None
-            ret.chrom, ret.pos, ret.id, ret.ref, ret.alt, ret.qual, ret.filter, ret.info = line.rstrip(
-                "\n").split("\t", 7)
+            ret.chrom, ret.pos, ret.id, ret.ref, ret.alt, ret.qual, ret.filter, ret.info = line.rstrip("\n").split("\t", 7)
         else:
             lsplit = line.rstrip("\n").split("\t")
-            ret.chrom, ret.pos, ret.id, ret.ref, ret.alt, ret.qual, ret.filter, ret.info = lsplit[
-                :8]
+            ret.chrom, ret.pos, ret.id, ret.ref, ret.alt, ret.qual, ret.filter, ret.info = lsplit[:8]
             ret.format = lsplit[8].split(":")
             ret.samples = {}
             spos = 9
@@ -958,10 +963,11 @@ class VCF_Reader(FileOrSequence):
 
     def make_info_dict(self):
         self.infodict = dict(
-            (key, _vcf_typemap[self.info[key]["Type"]]) for key in list(self.info.keys()))
+            (key,
+             _vcf_typemap[self.info[key]["Type"]]) for key in list(self.info.keys()))
 
     def parse_meta(self, header_filename=None):
-        if header_filename == None:
+        if header_filename is None:
             the_iter = FileOrSequence.__iter__(self)
         else:
             the_iter = open(header_filename, "r")
@@ -1001,7 +1007,7 @@ class VCF_Reader(FileOrSequence):
 
     def meta_info(self, header_filename=None):
         ret = []
-        if header_filename == None:
+        if header_filename is None:
             the_iter = FileOrSequence.__iter__(self)
         else:
             the_iter = open(header_filename, "r")
@@ -1139,8 +1145,8 @@ class BAM_Reader(object):
 
 
 class BAM_Writer(object):
-
-    def __init__(self, filename, template=None, referencenames=None, referencelengths=None, text=None, header=None):
+    def __init__(self, filename, template=None, referencenames=None,
+                 referencelengths=None, text=None, header=None):
         try:
             import pysam
         except ImportError:
@@ -1154,8 +1160,14 @@ class BAM_Writer(object):
         self.referencelengths = referencelengths
         self.text = text
         self.header = header
-        self.sf = pysam.Samfile(self.filename, mode="wb", template=self.template, referencenames=self.referencenames,
-                                referencelengths=self.referencelengths, text=self.text, header=self.header)
+        self.sf = pysam.Samfile(
+                self.filename,
+                mode="wb",
+                template=self.template,
+                referencenames=self.referencenames,
+                referencelengths=self.referencelengths,
+                text=self.text,
+                header=self.header)
 
     @classmethod
     def from_BAM_Reader(cls, fn, br):
@@ -1182,13 +1194,21 @@ class BED_Reader(FileOrSequence):
                 raise ValueError("BED file line contains less than 3 fields")
             if len(fields) > 9:
                 raise ValueError("BED file line contains more than 9 fields")
-            iv = GenomicInterval(fields[0], int(fields[1]), int(
-                fields[2]), fields[5] if len(fields) > 5 else ".")
-            f = GenomicFeature(fields[3] if len(
-                fields) > 3 else "unnamed", "BED line", iv)
+            iv = GenomicInterval(
+                fields[0],
+                int(fields[1]),
+                int(fields[2]),
+                fields[5] if len(fields) > 5 else ".")
+            f = GenomicFeature(
+                fields[3] if len(fields) > 3 else "unnamed",
+                "BED line",
+                iv)
             f.score = float(fields[4]) if len(fields) > 4 else None
-            f.thick = GenomicInterval(iv.chrom, int(fields[6]), int(
-                fields[7]), iv.strand) if len(fields) > 7 else None
+            f.thick = GenomicInterval(
+                iv.chrom,
+                int(fields[6]),
+                int(fields[7]),
+                iv.strand) if len(fields) > 7 else None
             f.itemRgb = [int(a) for a in fields[8].split(",")
                          ] if len(fields) > 8 else None
             yield(f)
