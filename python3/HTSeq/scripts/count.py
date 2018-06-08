@@ -41,8 +41,8 @@ def count_reads_in_features(sam_filenames, gff_filename,
             r = (r,)
         for read in r:
             if read is not None:
-                samoutfile.write(read.original_sam_line.rstrip() +
-                                 "\tXF:Z:" + assignment + "\n")
+                read.optional_fields.append(('XF', assignment))
+                samoutfile.write(read.get_sam_line() + "\n")
 
     if samouts != "":
         if len(samouts) != len(sam_filenames):
