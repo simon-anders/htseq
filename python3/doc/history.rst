@@ -4,6 +4,12 @@
 Version history
 ***************
 
+Version 0.10.1
+=============
+2018-06-08
+
+- bugfix in the SAM output of ``htseq-count``
+
 Version 0.10.0
 =============
 2018-05-08
