@@ -29,6 +29,9 @@ rm -rf /opt/python/cpython-2.6*
 # Python 3.3 is not supported:
 rm -rf /opt/python/cp33*
 
+# Python 3.7 is not supported YET:
+rm -rf /opt/python/cp37*
+
 # Build wheels
 PYBINS="/opt/python/*/bin"
 for PYBIN in ${PYBINS}; do

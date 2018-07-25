@@ -28,6 +28,9 @@ rm -rf /opt/python/cp26*
 # Python 3.3 is not supported:
 rm -rf /opt/python/cp33*
 
+# Python 3.7 is not supported YET:
+rm -rf /opt/python/cp37*
+
 # Deploy binary packages
 HTSEQ_VERSION=$(cat /io/VERSION)
 PYBINS="/opt/python/*/bin"
