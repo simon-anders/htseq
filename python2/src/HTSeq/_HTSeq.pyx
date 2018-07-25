@@ -651,10 +651,15 @@ cdef class Sequence(object):
         self.name = name
         self.descr = None
 
-    cpdef Sequence get_reverse_complement(self):
-        return Sequence(
-            reverse_complement(self.seq),
-            "revcomp_of_" + self.name)
+    cpdef Sequence get_reverse_complement(self, bint rename=True):
+        if rename:
+            return Sequence(
+                reverse_complement(self.seq),
+                "revcomp_of_" + self.name)
+        else:
+            return Sequence(
+                reverse_complement(self.seq),
+                self.name)
 
     def __str__(self):
         return self.seq
@@ -903,13 +908,20 @@ cdef class SequenceWithQualities(Sequence):
         self.write_to_fastq_file(sio, convert_to_phred)
         return sio.getvalue()
 
-    cpdef SequenceWithQualities get_reverse_complement(self):
+    cpdef SequenceWithQualities get_reverse_complement(self, bint rename=True):
         cdef SequenceWithQualities res
-        res = SequenceWithQualities(
-            reverse_complement(self.seq),
-            "revcomp_of_" + self.name,
-            self._qualstr[::-1],
-            self._qualscale)
+        if rename:
+            res = SequenceWithQualities(
+                reverse_complement(self.seq),
+                "revcomp_of_" + self.name,
+                self._qualstr[::-1],
+                self._qualscale)
+        else:
+            res = SequenceWithQualities(
+                reverse_complement(self.seq),
+                self.name,
+                self._qualstr[::-1],
+                self._qualscale)
         if self._qualarr is not None:
             res._qualarr = self._qualarr[::-1]
         return res

@@ -20,10 +20,10 @@ cdef class Sequence(object):
    cdef public bytes seq
    cdef public str name
    cdef public str descr
-   cpdef Sequence get_reverse_complement(self)      
+   cpdef Sequence get_reverse_complement(self, bint rename=?)
    cpdef object add_bases_to_count_array(Sequence self, numpy.ndarray count_array_)
-   cpdef Sequence trim_left_end(Sequence self, Sequence pattern, float mismatch_prop = ?)   
-   cpdef Sequence trim_right_end(Sequence self, Sequence pattern, float mismatch_prop = ?)   
+   cpdef Sequence trim_left_end(Sequence self, Sequence pattern, float mismatch_prop=?)   
+   cpdef Sequence trim_right_end(Sequence self, Sequence pattern, float mismatch_prop=?)   
    
 
 cdef class SequenceWithQualities(Sequence):
@@ -34,9 +34,9 @@ cdef class SequenceWithQualities(Sequence):
    cdef _fill_qual_arr(SequenceWithQualities self)
    cpdef object add_qual_to_count_array(SequenceWithQualities self, numpy.ndarray count_array_)
    cpdef SequenceWithQualities trim_left_end_with_quals(SequenceWithQualities self, 
-         Sequence pattern, int max_mm_qual = ?)
+         Sequence pattern, int max_mm_qual=?)
    cpdef SequenceWithQualities trim_right_end_with_quals(SequenceWithQualities self, 
-         Sequence pattern, int max_mm_qual = ?)
+         Sequence pattern, int max_mm_qual=?)
 
       
 cdef class Alignment(object):
