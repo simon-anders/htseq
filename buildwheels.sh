@@ -39,7 +39,7 @@ for PYBIN in ${PYBINS}; do
     ${PYBIN}/pip wheel /io/ -w wheelhouse/
 done
 
-for whl in wheelhouse/*.whl; do
+for whl in wheelhouse/HTSeq*.whl; do
     auditwheel repair -L . $whl -w /io/wheelhouse/
 done
 
