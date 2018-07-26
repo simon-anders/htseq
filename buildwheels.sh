@@ -39,8 +39,13 @@ for PYBIN in ${PYBINS}; do
     ${PYBIN}/pip wheel /io/ -w wheelhouse/
 done
 
-for whl in wheelhouse/HTSeq*.whl; do
-    auditwheel repair -L . $whl -w /io/wheelhouse/
+# Repair HTSeq wheels, copy libraries
+for whl in wheelhouse/*.whl; do
+    if [[ $whl == wheelhouse/HTSeq* ]]; then
+      auditwheel repair -L . $whl -w /io/wheelhouse/
+    else
+      cp $whl /io/wheelhouse/
+    fi
 done
 
 # Created files are owned by root, so fix permissions.
