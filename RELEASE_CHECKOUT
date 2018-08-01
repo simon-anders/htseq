@@ -1,5 +1,5 @@
 - change version in VERSION
-- change pysam version for OSX in .travis_deploy.sh (this is a workaround for pysam)
+- if needed, change pysam version for OSX in .travis_deploy.sh (this is a workaround for pysam)
 - change python3/doc/history.rst
 - python2 setup.py build && python setup.py build
   (this makes _version.py and SWIGs _HTSeq.c)

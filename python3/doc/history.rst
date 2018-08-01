@@ -4,14 +4,17 @@
 Version history
 ***************
 
-Version 0.10.1
-=============
-2018-06-08
+Version 0.11.0
+==============
+2018-08-01
 
+- ``htseq-count`` ignores secondary and supplementary alignments by default
 - bugfix in the SAM output of ``htseq-count``
+- optional argument name in reverse complement function
+- better linting of Cython files
 
 Version 0.10.0
-=============
+==============
 2018-05-08
 
 - flush output of ``htseq-count`` (thanks dcroote)
