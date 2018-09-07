@@ -24,6 +24,8 @@ else:
 
 If all well:
 - git tag release_<semantic-version>
-- git push fabio release_<semantic-version>
+- git push fabio release_<semantic-version> (pypi deploy trigger)
+- git push htseq release_<semantic-version> (github release deploy trigger)
 - restart the CI build on the CI_pypi branch
 - activate, triggen, and change default documentation page on readthedocs to the new release
+- document release notes on github releases

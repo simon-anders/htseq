@@ -59,6 +59,20 @@ To install directly from PyPI:
 
    </div>
 
+To install a specific version (e.g. version 0.11.0):
+
+.. raw:: html
+
+   <div class="highlight highlight-source-shell">
+
+::
+
+    pip install 'HTSeq==0.11.0'
+
+.. raw:: html
+
+   </div>
+
 If this fails, please install all dependencies first:
 
 .. raw:: html
