@@ -23,6 +23,9 @@ def invert_strand(iv):
     return iv2
 
 
+def check_paired_end()
+
+
 def count_reads_in_features(sam_filenames, gff_filename,
                             samtype,
                             order, max_buffer_size,
@@ -122,16 +125,22 @@ def count_reads_in_features(sam_filenames, gff_filename,
             samoutfile = None
 
         try:
-            if sam_filename != "-":
-                read_seq_file = SAM_or_BAM_Reader(sam_filename)
-                read_seq = read_seq_file
-                first_read = next(iter(read_seq))
-            else:
+            if sam_filename == "-":
                 read_seq_file = SAM_or_BAM_Reader(sys.stdin)
-                read_seq_iter = iter(read_seq_file)
+            else:
+                read_seq_file = SAM_or_BAM_Reader(sam_filename)
+            read_seq_iter = iter(read_seq_file)
+            # Catch empty BAM files
+            try:
                 first_read = next(read_seq_iter)
+                pe_mode = first_read.paired_end
+            except:
+                first_read = None
+                pe_mode = False
+            if first_read is not None:
                 read_seq = itertools.chain([first_read], read_seq_iter)
-            pe_mode = first_read.paired_end
+            else:
+                read_seq = []
         except:
             sys.stderr.write(
                 "Error occured when reading beginning of SAM/BAM file.\n")
