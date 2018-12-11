@@ -23,9 +23,6 @@ def invert_strand(iv):
     return iv2
 
 
-def check_paired_end()
-
-
 def count_reads_in_features(sam_filenames, gff_filename,
                             samtype,
                             order, max_buffer_size,
