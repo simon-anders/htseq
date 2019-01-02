@@ -14,6 +14,18 @@ tests = [
     {'call': [
         'htseq-count',
         '-m', 'intersection-nonempty',
+        '--nonunique', 'none',
+        '--secondary-alignments', 'score',
+        '--supplementary-alignments', 'score',
+        '--additional-attr', 'gene_name',
+        '--additional-attr', 'exon_number',
+        'example_data/yeast_RNASeq_excerpt_withNH.sam',
+        'example_data/Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz',
+        ],
+    'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_additional_attributes.tsv'},
+    {'call': [
+        'htseq-count',
+        '-m', 'intersection-nonempty',
         '--nonunique', 'all',
         '--secondary-alignments', 'score',
         '--supplementary-alignments', 'score',

@@ -410,9 +410,11 @@ def main():
             "suitable for Ensembl GTF files: gene_id)")
 
     pa.add_argument(
-            "--additional-attr", type=str, nargs='+',
-            default=(), help="Additional feature attributes (default: none, " +
-            "suitable for Ensembl GTF files: gene_name)")
+            "--additional-attr", type=str,
+            action='append',
+            default=[], help="Additional feature attributes (default: none, " +
+            "suitable for Ensembl GTF files: gene_name). Use multiple times " +
+            "for each different attribute")
 
     pa.add_argument(
             "-m", "--mode", dest="mode",

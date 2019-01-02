@@ -194,7 +194,9 @@ Options
    Additional feature attributes, which will be printed as an additional column
    after the primary attribute column but before the counts column(s). The
    default is none, a suitable value to get gene names using an Ensembl GTF
-   file is ``gene_name``.
+   file is ``gene_name``. To use more than one additional attribute, repeat
+   the option in the command line more than once, with a single attribute each
+   time, e.g. ``--additional-attr=gene_name --additional_attr=exon_number``.
 
 .. cmdoption::  -m <mode>, --mode=<mode>  
 
