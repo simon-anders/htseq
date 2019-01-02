@@ -4,6 +4,14 @@
 Version history
 ***************
 
+Version 0.11.1
+==============
+2019-01-03
+
+Bugfix release for ``htseq-count``:
+
+- fixed bug and changed how to use of additional attributes via ``--additional-attr``
+
 Version 0.11.0
 ==============
 2018-08-01
