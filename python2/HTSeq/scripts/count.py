@@ -44,7 +44,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
                 read.optional_fields.append(('XF', assignment))
                 samoutfile.write(read.get_sam_line() + "\n")
 
-    if samouts != "":
+    if samouts != []:
         if len(samouts) != len(sam_filenames):
             raise ValueError(
                     'Select the same number of SAM input and output files')
@@ -119,7 +119,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
     lowqual_all = []
     nonunique_all = []
     for isam, (sam_filename) in enumerate(sam_filenames):
-        if samouts != '':
+        if samouts != []:
             samoutfile = open(samouts[isam], 'w')
         else:
             samoutfile = None
@@ -438,10 +438,11 @@ def main():
             help="Whether to score supplementary alignments (0x800 flag)")
 
     pa.add_argument(
-            "-o", "--samout", type=str, dest="samouts", nargs='+',
-            default="", help="write out all SAM alignment records into an output " +
-            "SAM file called SAMOUT, annotating each line with its feature assignment " +
-            "(as an optional field with tag 'XF')")
+            "-o", "--samout", type=str, dest="samouts",
+            action='append',
+            default=[], help="write out all SAM alignment records into " +
+            "SAM files (one per input file needed), annotating each line " +
+            "with its feature assignment (as an optional field with tag 'XF')")
 
     pa.add_argument(
             "-q", "--quiet", action="store_true", dest="quiet",

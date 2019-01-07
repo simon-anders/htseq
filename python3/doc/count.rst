@@ -222,10 +222,9 @@ Options
 
 .. cmdoption:: -o <samout>, --samout=<samout>
 
-   write out all SAM alignment records into an output SAM
-   file called <samout>, annotating each line with its
-   assignment to a feature or a special counter
-   (as an optional field with tag 'XF')
+   write out all SAM alignment records into SAM files (one per input file
+   needed), annotating each line with its feature assignment (as an optional
+   field with tag 'XF')
    
 .. cmdoption:: -q, --quiet           
    
