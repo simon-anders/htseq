@@ -4,6 +4,15 @@
 Version history
 ***************
 
+Version 0.11.2
+==============
+2019-01-07
+
+Bugfix release for ``htseq-count``:
+
+- fixed bug and changed how to use output SAM files via ``-o``: you now have
+  to specify the option once per input/output file
+
 Version 0.11.1
 ==============
 2019-01-03
