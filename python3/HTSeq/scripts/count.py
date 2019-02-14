@@ -44,9 +44,19 @@ def count_reads_in_features(sam_filenames, gff_filename,
                 read.optional_fields.append(('XF', assignment))
                 samoutfile.write(read.get_sam_line() + "\n")
 
+    if samtype == "sam":
+        SAM_or_BAM_Reader = HTSeq.SAM_Reader
+        samname = 'SAM'
+    elif samtype == "bam":
+        SAM_or_BAM_Reader = HTSeq.BAM_Reader
+        samname = 'BAM'
+    else:
+        raise ValueError("Unknown input format %s specified." % samtype)
+
     if samouts != []:
         if len(samouts) != len(sam_filenames):
-            raise ValueError('Select the same number of SAM input and output files')
+            raise ValueError(
+                    'Select the same number of {:} input and output files'.format(samname))
         # Try to open samout files early in case any of them has issues
         for samout in samouts:
             with open(samout, 'w'):
@@ -73,12 +83,14 @@ def count_reads_in_features(sam_filenames, gff_filename,
                 try:
                     feature_id = f.attr[id_attribute]
                 except KeyError:
-                    raise ValueError("Feature %s does not contain a '%s' attribute" %
-                                     (f.name, id_attribute))
+                    raise ValueError(
+                            "Feature %s does not contain a '%s' attribute" %
+                            (f.name, id_attribute))
                 if stranded != "no" and f.iv.strand == ".":
-                    raise ValueError("Feature %s at %s does not have strand information but you are "
-                                     "running htseq-count in stranded mode. Use '--stranded=no'." %
-                                     (f.name, f.iv))
+                    raise ValueError(
+                            "Feature %s at %s does not have strand information but you are "
+                            "running htseq-count in stranded mode. Use '--stranded=no'." %
+                            (f.name, f.iv))
                 features[f.iv] += feature_id
                 counts[f.attr[id_attribute]] = 0
                 attributes[f.attr[id_attribute]] = [
@@ -101,13 +113,6 @@ def count_reads_in_features(sam_filenames, gff_filename,
     if len(counts) == 0:
         sys.stderr.write(
             "Warning: No features of type '%s' found.\n" % feature_type)
-
-    if samtype == "sam":
-        SAM_or_BAM_Reader = HTSeq.SAM_Reader
-    elif samtype == "bam":
-        SAM_or_BAM_Reader = HTSeq.BAM_Reader
-    else:
-        raise ValueError("Unknown input format %s specified." % samtype)
 
     counts_all = []
     empty_all = []
@@ -140,7 +145,8 @@ def count_reads_in_features(sam_filenames, gff_filename,
                 read_seq = []
         except:
             sys.stderr.write(
-                "Error occured when reading beginning of SAM/BAM file.\n")
+                "Error occured when reading beginning of {:} file.\n".format(
+                    samname))
             raise
 
         try:
@@ -170,8 +176,8 @@ def count_reads_in_features(sam_filenames, gff_filename,
             for r in read_seq:
                 if i > 0 and i % 100000 == 0 and not quiet:
                     sys.stderr.write(
-                        "%d SAM alignment record%s processed.\n" %
-                        (i, "s" if not pe_mode else " pairs"))
+                        "%d %s alignment record%s processed.\n" %
+                        (i, samname, "s" if not pe_mode else " pairs"))
                     sys.stderr.flush()
 
                 i += 1
@@ -189,7 +195,10 @@ def count_reads_in_features(sam_filenames, gff_filename,
                     try:
                         if r.optional_field("NH") > 1:
                             nonunique += 1
-                            write_to_samout(r, "__alignment_not_unique", samoutfile)
+                            write_to_samout(
+                                    r,
+                                    "__alignment_not_unique",
+                                    samoutfile)
                             if multimapped_mode == 'none':
                                 continue
                     except KeyError:
@@ -307,14 +316,14 @@ def count_reads_in_features(sam_filenames, gff_filename,
 
         except:
             sys.stderr.write(
-                "Error occured when processing SAM input (%s):\n" %
-                read_seq_file.get_line_number_string())
+                "Error occured when processing %s input (%s):\n" %
+                (samname, read_seq_file.get_line_number_string()))
             raise
 
         if not quiet:
             sys.stderr.write(
-                "%d SAM %s processed.\n" %
-                (i, "alignments " if not pe_mode else "alignment pairs"))
+                "%d %s %s processed.\n" %
+                (i, samname, "alignments " if not pe_mode else "alignment pairs"))
             sys.stderr.flush()
 
         if samoutfile is not None:
@@ -339,7 +348,8 @@ def count_reads_in_features(sam_filenames, gff_filename,
     print('\t'.join(["__alignment_not_unique"] + pad + [str(c) for c in nonunique_all]))
 
 
-def my_showwarning(message, category, filename, lineno=None, file=None, line=None):
+def my_showwarning(message, category, filename, lineno=None, file=None,
+                   line=None):
     sys.stderr.write("Warning: %s\n" % message)
 
 
@@ -352,7 +362,8 @@ def main():
         "the number of reads mapping to it. See " +
         "http://htseq.readthedocs.io/en/master/count.html for details.",
         epilog="Written by Simon Anders (sanders@fs.tum.de), " +
-        "European Molecular Biology Laboratory (EMBL). (c) 2010. " +
+        "European Molecular Biology Laboratory (EMBL) and Fabio Zanini " +
+        "(fabio.zanini@stanford.edu), Stanford University. (c) 2010-2019. " +
         "Released under the terms of the GNU General Public License v3. " +
         "Part of the 'HTSeq' framework, version %s." % HTSeq.__version__)
 
