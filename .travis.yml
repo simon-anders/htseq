@@ -37,10 +37,10 @@ matrix:
       os: linux
       dist: trusty
       sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.13.0' PYTHON_VERSION='2.7'
+    - env: CC=gcc PYSAM_VERSION='pysam>=0.13.0' PYTHON_VERSION='2.7'
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.13.0' PYTHON_VERSION='3.6'
+    - env: CC=gcc PYSAM_VERSION='pysam>=0.13.0' PYTHON_VERSION='3.6'
       language: generic
       os: osx
     - env: CC=gcc PYSAM_VERSION='pysam==0.9.0'
