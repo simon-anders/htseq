@@ -452,7 +452,15 @@ def main():
             "-q", "--quiet", action="store_true", dest="quiet",
             help="suppress progress report")  # and warnings" )
 
+    pa.add_argument(
+            "--version", action="store_true",
+            help='show software version')
+
     args = pa.parse_args()
+
+    if args.version:
+        print(HTSeq.__version__)
+        sys.exit()
 
     warnings.showwarning = my_showwarning
     try:

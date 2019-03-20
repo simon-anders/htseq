@@ -234,6 +234,10 @@ Options
 
    Show a usage summary and exit  
 
+.. cmdoption:: --version
+
+   Show software version and exit  
+
 
 Frequenctly asked questions
 ...........................
