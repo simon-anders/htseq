@@ -374,12 +374,12 @@ def main():
 
     pa.add_argument(
             "featuresfilename", type=str,
-            help="Path to the file containing the features")
+            help="Path to the GTF file containing the features")
 
     pa.add_argument(
             "-f", "--format", dest="samtype",
             choices=("sam", "bam"), default="sam",
-            help="type of <alignment_file> data, either 'sam' or 'bam' (default: sam)")
+            help="Type of <alignment_file> data, either 'sam' or 'bam' (default: sam)")
 
     pa.add_argument(
             "-r", "--order", dest="order",
@@ -399,38 +399,43 @@ def main():
     pa.add_argument(
             "-s", "--stranded", dest="stranded",
             choices=("yes", "no", "reverse"), default="yes",
-            help="whether the data is from a strand-specific assay. Specify 'yes', " +
+            help="Whether the data is from a strand-specific assay. Specify 'yes', " +
             "'no', or 'reverse' (default: yes). " +
             "'reverse' means 'yes' with reversed strand interpretation")
 
     pa.add_argument(
             "-a", "--minaqual", type=int, dest="minaqual",
             default=10,
-            help="skip all reads with alignment quality lower than the given " +
-            "minimum value (default: 10)")
+            help="Skip all reads with MAPQ alignment quality lower than the given " +
+            "minimum value (default: 10). MAPQ is the 5th column of a SAM/BAM " +
+            "file and its usage depends on the software used to map the reads.")
 
     pa.add_argument(
             "-t", "--type", type=str, dest="featuretype",
-            default="exon", help="feature type (3rd column in GFF file) to be used, " +
+            default="exon",
+            help="Feature type (3rd column in GTF file) to be used, " +
             "all features of other type are ignored (default, suitable for Ensembl " +
             "GTF files: exon)")
 
     pa.add_argument(
             "-i", "--idattr", type=str, dest="idattr",
-            default="gene_id", help="GFF attribute to be used as feature ID (default, " +
+            default="gene_id",
+            help="GTF attribute to be used as feature ID (default, " +
             "suitable for Ensembl GTF files: gene_id)")
 
     pa.add_argument(
             "--additional-attr", type=str,
             action='append',
-            default=[], help="Additional feature attributes (default: none, " +
+            default=[],
+            help="Additional feature attributes (default: none, " +
             "suitable for Ensembl GTF files: gene_name). Use multiple times " +
             "for each different attribute")
 
     pa.add_argument(
             "-m", "--mode", dest="mode",
             choices=("union", "intersection-strict", "intersection-nonempty"),
-            default="union", help="mode to handle reads overlapping more than one feature " +
+            default="union",
+            help="Mode to handle reads overlapping more than one feature " +
             "(choices: union, intersection-strict, intersection-nonempty; default: union)")
 
     pa.add_argument(
@@ -452,17 +457,18 @@ def main():
     pa.add_argument(
             "-o", "--samout", type=str, dest="samouts",
             action='append',
-            default=[], help="write out all SAM alignment records into " +
+            default=[],
+            help="Write out all SAM alignment records into " +
             "SAM files (one per input file needed), annotating each line " +
             "with its feature assignment (as an optional field with tag 'XF')")
 
     pa.add_argument(
             "-q", "--quiet", action="store_true", dest="quiet",
-            help="suppress progress report")  # and warnings" )
+            help="Suppress progress report")  # and warnings" )
 
     pa.add_argument(
             "--version", action="store_true",
-            help='show software version')
+            help='Show software version and exit')
 
     args = pa.parse_args()
 

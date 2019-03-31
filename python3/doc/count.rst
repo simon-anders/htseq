@@ -158,7 +158,7 @@ Options
 
 .. cmdoption:: -s <yes/no/reverse>, --stranded=<yes/no/reverse>
 
-   whether the data is from a strand-specific assay (default: ``yes``)
+   Whether the data is from a strand-specific assay (default: ``yes``)
    
    For ``stranded=no``, a read is considered overlapping with a feature regardless
    of whether it is mapped to the same or the opposite strand as the feature.
@@ -169,14 +169,13 @@ Options
 
 .. cmdoption:: -a <minaqual>, --a=<minaqual>
 
-   skip all reads with alignment quality lower than the given
-   minimum value (default: 10 --- Note: the default used to be 0 until
-   version 0.5.4.)
-
+   Skip all reads with MAPQ alignment quality lower than the given
+   minimum value (default: 10). MAPQ is the 5th column of a SAM/BAM
+   file and its usage depends on the software used to map the reads.
 
 .. cmdoption:: -t <feature type>, --type=<feature type>
 
-   feature type (3rd column in GFF file) to be used, all
+   Feature type (3rd column in GTF file) to be used, all
    features of other type are ignored (default, suitable
    for RNA-Seq analysis using an `Ensembl GTF`_ file: ``exon``)
    
@@ -184,7 +183,7 @@ Options
 
 .. cmdoption:: -i <id attribute>, --idattr=<id attribute>
 
-   GFF attribute to be used as feature ID. Several GFF lines with the same
+   GTF attribute to be used as feature ID. Several GTF lines with the same
    feature ID will be considered as parts of the same feature. The feature ID
    is used to identity the counts in the output table. The default, suitable 
    for RNA-Seq analysis using an Ensembl GTF file, is ``gene_id``. 
@@ -222,13 +221,13 @@ Options
 
 .. cmdoption:: -o <samout>, --samout=<samout>
 
-   write out all SAM alignment records into SAM files (one per input file
+   Write out all SAM alignment records into SAM files (one per input file
    needed), annotating each line with its feature assignment (as an optional
    field with tag 'XF')
    
 .. cmdoption:: -q, --quiet           
    
-   suppress progress report and warnings
+   Suppress progress report and warnings
 
 .. cmdoption:: -h, --help
 
@@ -304,9 +303,8 @@ Frequenctly asked questions
    several years later, I have seen very few cases where the default ``union`` would not be appropriate
    and hence tend to recommend to just stick to ``union``.
 
-*I have a GTF file? How do I convert it to GFF?*
-   No need to do that, because GTF is a tightening of the GFF format. Hence, all GTF files are GFF files, too.
-   By default, htseq-count expects a GTF file.
+*I have a GTF file, how do I convert it to GFF?*
+   htseq-count expects a GTF file so there's no need to do that.
 
 *I have a GFF file, not a GTF file. How can I use it to count RNA-Seq reads?*
    The GTF format specifies, inter alia, that exons are marked by the word ``exon`` in the third column and
@@ -317,7 +315,7 @@ Frequenctly asked questions
    ``Parent``, ``GeneID`` or ``ID``. Make sure it is the gene ID and not the exon ID.
 
 *How can I count overlaps with features other than genes/exons?*
-   If you have GFF file listing your features, use it together with the ``--type`` and ``--idattr`` options.
+   If you have GTF file listing your features, use it together with the ``--type`` and ``--idattr`` options.
    If your feature intervals need to be computed, you are probably better off writing your own
    counting script (provided you have some knowledge of Python). Follow the tutorial in the other pages 
    of this documentation to see how to use HTSeq for this.
