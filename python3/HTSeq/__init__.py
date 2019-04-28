@@ -407,6 +407,8 @@ class FastqReader(FileOrSequence):
             seq = next(fin)
             id2 = next(fin)
             qual = next(fin)
+            except StopIteration as e:
+                return
             if qual == "":
                 if id1 != "":
                     warnings.warn(
