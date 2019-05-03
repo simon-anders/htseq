@@ -361,6 +361,33 @@ one object. The __iadd__ method is overloaded to add elements to the sets:
 
    Instantiation is as in :class:`GenomicArray`, only that ``datatype`` is always ``'O'``.
    
+
+Negative Index
+========
+
+Sometimes a negative index is useful for representing upstream elements. Imagine you would like to pool information about [-500,500) near transcription start site, it would be useful to have a such :class:`GenomicArray`. But unfortunately the current implementation means a such naive approach would raise an error, in
    
+   >>> arr = HTSeq.GenomicArray(chroms='auto')
+   >>> iv = HTSeq.GenomicInterval('chr1',-10,50,'+')
+   >>> arr[iv] += 1
+   IndexErrorTraceback (most recent call last)
+   <ipython-input-257-5253053be354> in <module>()
+         1 arr = HTSeq.GenomicArray(chroms='auto')
+         2 iv = HTSeq.GenomicInterval('chr1',-10,50,'+')
+   ----> 3 arr[iv] += 1
+   
+   python2/src/HTSeq/_HTSeq.pyx in HTSeq._HTSeq.GenomicArray.__getitem__()
+   
+   python2/src/HTSeq/_HTSeq.pyx in HTSeq._HTSeq.ChromVector.__getitem__()
+   
+   IndexError: start too small
+   
+But we can use a :class:`StepVector` instead to bypass this class check, namely by doing
 
+   >>> iv = HTSeq.GenomicInterval('chr1',-5,30,'+')
+   >>> vct = HTSeq.StepVector.StepVector.create(length=60,start_index=-10)
+   >>> vct[iv.start:iv.end] +=1
+   >>> list(vct)   
+   [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
+And the error is gone!
