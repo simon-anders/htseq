@@ -37,38 +37,48 @@ matrix:
       os: linux
       dist: trusty
       sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam'
+      python: 3.7
+      os: linux
+      dist: bionic
+      sudo: required
+    - env: CC=gcc PYSAM_VERSION='pysam'
+      python: 3.8
+      os: linux
+      dist: bionic
+      sudo: required
     - env: CC=gcc PYSAM_VERSION='pysam>=0.13.0' PYTHON_VERSION='2.7'
       language: generic
       os: osx
     - env: CC=gcc PYSAM_VERSION='pysam>=0.13.0' PYTHON_VERSION='3.6'
       language: generic
       os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0'
-      python: 2.7
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0'
-      python: 3.4
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0'
-      python: 3.5
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0'
-      python: 3.6
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='2.7'
-      language: generic
-      os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='3.6'
-      language: generic
-      os: osx
+#    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0'
+#      python: 2.7
+#      os: linux
+#      dist: trusty
+#      sudo: required
+#    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0'
+#      python: 3.4
+#      os: linux
+#      dist: trusty
+#      sudo: required
+#    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0'
+#      python: 3.5
+#      os: linux
+#      dist: trusty
+#      sudo: required
+#    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0'
+#      python: 3.6
+#      os: linux
+#      dist: trusty
+#      sudo: required
+#    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='2.7'
+#      language: generic
+#      os: osx
+#    - env: CC=gcc PYSAM_VERSION='pysam==0.9.0' PYTHON_VERSION='3.6'
+#      language: generic
+#      os: osx
 
 before_install:
   - ./.travis_before_install.sh

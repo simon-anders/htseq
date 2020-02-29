@@ -25,8 +25,8 @@ from high-throughput sequencing assays.
 * For downloads and installation instructions, see :ref:`install`.
 
 
-Paper
-=====
+Citation
+========
 
 HTSeq is described in the following publication:
 
@@ -148,11 +148,11 @@ Documentation overview
 Authors
 =======
 
-HTSeq is currently developed by `Fabio Zanini`_ at Stanford University
-(fabio *dot* zanini *at* stanford *dot* edu) and `Simon Anders`_
+HTSeq is currently developed by `Fabio Zanini`_ at University of New South Wales in Sydney
+(fabio *dot* zanini *at* unsw *dot* edu *dot* au) and `Simon Anders`_
 (anders *at* embl *dot* de) at `EMBL Heidelberg`_ (`Genome Biology Unit`_).
 
-.. _`Fabio Zanini`: https://scholar.google.com/citations?user=XMDw5-4AAAAJ
+.. _`Fabio Zanini`: http://fabilab.org
 .. _`Simon Anders`: http://www.embl.de/research/units/genome_biology/huber/members/index.php?s_personId=6001
 .. _`EMBL Heidelberg`: http://www.embl.de/
 .. _`Genome Biology Unit`: http://www.embl.de/research/units/genome_biology/index.html
