@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'HTSeq'
-copyright = u'2010, Simon Anders'
+copyright = u'2010-2020, Simon Anders and Fabio Zanini'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -170,7 +170,7 @@ htmlhelp_basename = 'HTSeqdoc'
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
   ('index', 'HTSeq.tex', ur'HTSeq Documentation',
-   ur'Simon Anders', 'manual'),
+   ur'Simon Anders and Fabio Zanini', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

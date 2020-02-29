@@ -21,7 +21,7 @@ To run the ``htseq-qa`` script, you will also need:
 
 To **build** the package from source, you will **also** need:
 
--  ``Cython``
+-  ``Cython >=0.29.5``
 -  ``SWIG >=3.0.8``
 
 The latter packages are not required if you have already built ``HTSeq``
@@ -125,3 +125,8 @@ http://htseq.readthedocs.io
    :target: https://travis-ci.org/simon-anders/htseq
 .. |Documentation Status| image:: https://camo.githubusercontent.com/d3d354c898588bb4b62f559a3a30fa6b6364dfc3/68747470733a2f2f72656164746865646f63732e6f72672f70726f6a656374732f68747365712f62616467652f3f76657273696f6e3d6d6173746572
    :target: http://htseq.readthedocs.io
+
+Authors
+~~~~~~~~~~~~~
+
+Simon Anders and Wolfgang Huber are the original authors. Since 2016, ``HTSeq`` is maintained by Fabio Zanini (http://fabilab.org).

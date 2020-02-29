@@ -26,6 +26,13 @@ should install from PyPI like this::
 If this does not work, please open an issue on Github_ and also try the instructions
 below.
 
+..note::
+
+It sometimes happens that the precompiled version on `pip` is a little too old for
+your computer. If that happens, `pip` will try to build HTSeq from source. That should
+work but you'll need a few more dependencies, e.g. Cython. See the Github_ page for
+more info.
+
 .. _`Python Package Index (PyPI)`: http://pypi.python.org/pypi/HTSeq
 .. _Python: http://www.python.org/
 .. _NumPy: http://numpy.scipy.org/
