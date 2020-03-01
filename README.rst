@@ -11,7 +11,7 @@ Requirements
 
 To use ``HTSeq`` you will need:
 
--  ``Python 2.7``\ or ``Python >= 3.4`` (tested up to 3.6)
+-  ``Python 2.7``\ or ``Python >= 3.5`` (tested up to 3.8)
 -  ``numpy``
 -  ``pysam >= 0.9.0``
 

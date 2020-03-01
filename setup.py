@@ -5,9 +5,9 @@ import os
 from distutils.log import INFO as logINFO
 
 if ((sys.version_info[0] == 2 and sys.version_info[1] < 7) or
-   (sys.version_info[0] == 3 and sys.version_info[1] < 4)):
+   (sys.version_info[0] == 3 and sys.version_info[1] < 5)):
     sys.stderr.write("Error in setup script for HTSeq:\n")
-    sys.stderr.write("HTSeq support Python 2.7 or 3.4+.")
+    sys.stderr.write("HTSeq support Python 2.7 or 3.5+.")
     sys.exit(1)
 
 # Manage python2/3 compatibility with symlinks

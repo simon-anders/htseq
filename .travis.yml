@@ -23,11 +23,6 @@ matrix:
       dist: trusty
       sudo: required
     - env: CC=gcc PYSAM_VERSION='pysam'
-      python: 3.4
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam'
       python: 3.5
       os: linux
       dist: trusty
