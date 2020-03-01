@@ -24,12 +24,15 @@ fi
 
 # Python 2.6 is not supported
 rm -rf /opt/python/cp26*
+rm -rf /opt/python/cpython-2.6*
 
-# Python 3.3 is not supported:
+# Python 2.7 is deprecated
+rm -rf /opt/python/cp27*
+rm -rf /opt/python/cpython-2.7*
+
+# Python 3.3-4 is not supported:
 rm -rf /opt/python/cp33*
-
-# Python 3.7 is not supported YET:
-rm -rf /opt/python/cp37*
+rm -rf /opt/python/cp34*
 
 # Deploy binary packages
 HTSEQ_VERSION=$(cat /io/VERSION)
