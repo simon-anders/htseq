@@ -1326,8 +1326,9 @@ cdef class SAM_Alignment(AlignmentWithSequenceReversal):
             seq = SequenceWithQualities(
                 read.query_sequence.encode(), read.qname, read.qual.encode())
         else:
-            seq = SequenceWithQualities(read.query_sequence.encode(
-            ), read.qname, read.qual.encode(), "noquals")
+            seq = SequenceWithQualities(
+                read.query_sequence.encode(), read.qname, read.qual.encode(),
+                "noquals")
         a = SAM_Alignment(seq, iv)
         a.cigar = build_cigar_list([(cigar_operation_codes[code], length) for (
             code, length) in read.cigar], read.pos, chrom, strand) if iv != None else []
@@ -1368,10 +1369,15 @@ cdef class SAM_Alignment(AlignmentWithSequenceReversal):
                                  read.reference_end, strand)
         else:
             iv = None
-        seq = SequenceWithQualities(
-            read.query_sequence.encode(), read.query_name, b'', 'noquals')
-        if read.query_qualities != None:
-            seq.qual = numpy.array(read.query_qualities)
+        if read.qual != b"*":
+            #sys.stderr.write(
+            #        'query_sequence type: '+str(type(read.query_sequence))+', quality type: '+str(type(read.qual)))
+            seq = SequenceWithQualities(
+                read.query_sequence.encode(), read.qname, read.qual.encode())
+        else:
+            seq = SequenceWithQualities(
+                read.query_sequence.encode(), read.query_name, read.qual.encode(),
+                'noquals')
         a = SAM_Alignment(seq, iv)
         a.cigar = build_cigar_list([(cigar_operation_codes[code], length) for (
             code, length) in read.cigartuples], read.reference_start, chrom, strand) if iv != None else []

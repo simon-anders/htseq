@@ -4,6 +4,12 @@
 Version history
 ***************
 
+Version 0.11.3
+==============
+2020-03-01
+
+Updates in the documentation and new wheels to fix installation bugs.
+
 Version 0.11.2
 ==============
 2019-01-07
