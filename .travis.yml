@@ -12,12 +12,12 @@ matrix:
     - env: CC=gcc PYSAM_VERSION='pysam' PYPI="https://test.pypi.org/pypi/"
       python: 3.5
       os: linux
-      dist: trusty
+      dist: bionic
       sudo: required
     - env: CC=gcc PYSAM_VERSION='pysam' PYPI="https://test.pypi.org/pypi/"
       python: 3.6
       os: linux
-      dist: trusty
+      dist: bionic
       sudo: required
     - env: CC=gcc PYSAM_VERSION='pysam' PYPI="https://test.pypi.org/pypi/"
       python: 3.7
@@ -38,12 +38,12 @@ matrix:
     - env: CC=gcc PYSAM_VERSION='pysam' PYPI=""
       python: 3.5
       os: linux
-      dist: trusty
+      dist: bionic
       sudo: required
     - env: CC=gcc PYSAM_VERSION='pysam' PYPI=""
       python: 3.6
       os: linux
-      dist: trusty
+      dist: bionic
       sudo: required
     - env: CC=gcc PYSAM_VERSION='pysam' PYPI=""
       python: 3.7
