@@ -6,18 +6,23 @@ wheelhouse/
 .eggs/
 
 # Symlink for Python2/3 compatibility
-src/
-HTSeq/
-doc/
-scripts/
-test/
+src
+HTSeq
+doc
+scripts
+test
 
 # Data and machine-generated
-python*/HTSeq/StepVector.py
-python*/HTSeq/_version.py
-python*/HTSeq/__pycache__/
-python*/src/_HTSeq.c
-python*/src/StepVector_wrap.cxx
+python2/HTSeq/StepVector.py
+python2/HTSeq/_version.py
+python2/HTSeq/__pycache__/
+python2/src/_HTSeq.c
+python2/src/StepVector_wrap.cxx
+python3/HTSeq/StepVector.py
+python3/HTSeq/_version.py
+python3/HTSeq/__pycache__/
+python3/src/_HTSeq.c
+python3/src/StepVector_wrap.cxx
 example_data/minus.wig
 example_data/plus.wig
 example_data/region.bam
@@ -40,5 +45,3 @@ Session.vim
 *~
 # auto-generated tag files
 tags
-
-
