@@ -1,14 +1,14 @@
 # Build folders
 HTSeq.egg-info
-build
-dist
+build/
+dist/
 
 # Symlink for Python2/3 compatibility
-src
-HTSeq
-doc
-scripts
-test
+src/
+HTSeq/
+doc/
+scripts/
+test/
 
 # Data and machine-generated
 python*/HTSeq/StepVector.py

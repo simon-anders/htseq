@@ -285,7 +285,7 @@ class StepVector( object ):
       If you use a slice, i.e., 'sv[i:j]', you get a view on the StepVector,
       i.e., the same data, but changed boundaries.
       """
-      if isinstance( index, slice ):
+      if isinstance(index, slice):
          if index.step is not None and index.step != 1:
              raise ValueError, "Striding slices (i.e., step != 1) are not supported"
          if index.start is None:
@@ -307,48 +307,48 @@ class StepVector( object ):
          res.stop = stop
          return res
       else:
-         return self._swigobj.get_values_pystyle( index ).next().second
+         return self._swigobj.get_values_pystyle(index).next().second
       
-   def __iter__( self ):
+   def __iter__(self):
       """When asked to provide an iterator, a StepVector will yield all its
       value, repeating each value according to the length of the step.
       Hence, calling, e.g., 'list( sv )' will transform the StepVector 'sv'
       into an ordinary list.
       """
       for start, stop, value in self.get_steps():
-         for i in xrange( start, stop ):
+         for i in range(start, stop):
             yield value
        
-   def __repr__( self ):
+   def __repr__(self):
       if self.start == -sys.maxint - 1:
          start_s = "-inf"
       else:
-         start_s = str( self.start )
+         start_s = str(self.start)
       if self.stop == sys.maxint:
          stop_s = "inf"
       else:
-         stop_s = str( self.stop )
+         stop_s = str(self.stop)
       return "<%s object, type '%s', index range %s:%s, %d step(s)>" % (
          self.__class__.__name__, self.typecode(), start_s,
-         stop_s, self.num_steps() )
+         stop_s, self.num_steps())
        
-   def typecode( self ):
+   def typecode(self):
       "Returns the typecode."
       return self._typecode
       
-   def __len__( self ):
+   def __len__(self):
       """The length of a StepVector is defined by its index range, not by
       the number of steps.
       """
       return self.stop - self.start
       
-   def num_steps( self ):
+   def num_steps(self):
       """Returns the number of steps, i.e., the number of triples that get_steps
       returns.
       """
       return self._swigobj.num_values()
       
-   def __eq__( self, other ):
+   def __eq__(self, other):
       """StepVectors can be compared for equality. This is conceptually done
       element for element, but, for performance, taking steps in one go.
       """
@@ -374,29 +374,29 @@ class StepVector( object ):
             othrstart, othrstop, othrval = othrsteps.next()
       return True
       
-   def __neq__( self, other ):
-      return not ( self == other )
+   def __neq__(self, other):
+      return not (self == other)
       
-   def __reduce__( self ):
+   def __reduce__(self):
       if self.__class__ is not StepVector:
          raise NotImplemented, "Attempting to pickle a subclass of StepVector without redefined __reduce__."
       return ( 
          _StepVector_unpickle, 
-         ( self.stop - self.start, self._typecode, self.start ),
+         (self.stop - self.start, self._typecode, self.start),
          None,
          None,
-         ( ( slice( start, stop ), val ) for start, stop, val in self.get_steps() ) )
+         ((slice(start, stop), val) for start, stop, val in self.get_steps()))
     
-   def __iadd__( self, value ):
-      self._swigobj.add_value( self.start, self.stop-1, value )
+   def __iadd__(self, value):
+      self._swigobj.add_value(self.start, self.stop-1, value)
       return self
     
-   def apply( self, func, start = None, stop = None ):
+   def apply(self, func, start=None, stop=None):
       # TODO: check!
-      for stepstart, stepstop, value in self.get_steps( start, stop ):
-         self[ stepstart : stepstop ] = func( value )
+      for stepstart, stepstop, value in self.get_steps(start, stop):
+         self[stepstart:stepstop] = func(value)
       
-def _StepVector_unpickle( length, typecode, start ):
-   return StepVector.create( length, typecode, start )
+def _StepVector_unpickle(length, typecode, start):
+   return StepVector.create(length, typecode, start)
     
 %}

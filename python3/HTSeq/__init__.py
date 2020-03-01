@@ -402,11 +402,28 @@ class FastqReader(FileOrSequence):
 
     def __iter__(self):
         fin = FileOrSequence.__iter__(self)
-        while True:
-            id1 = next(fin)
-            seq = next(fin)
-            id2 = next(fin)
-            qual = next(fin)
+        il = 0
+        id1 = None
+        id2 = None
+        seq = None
+        qual = None
+        for line in fin:
+            if il == 0:
+                id1 = line
+                il += 1
+                continue
+            elif il == 1:
+                seq = line
+                il += 1
+                continue
+            elif il == 2:
+                id2 = line
+                il += 1
+                continue
+
+            qual = line
+            il = 0
+
             if qual == "":
                 if id1 != "":
                     warnings.warn(
