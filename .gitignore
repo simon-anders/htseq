@@ -2,6 +2,8 @@
 HTSeq.egg-info
 build/
 dist/
+wheelhouse/
+.eggs/
 
 # Symlink for Python2/3 compatibility
 src/

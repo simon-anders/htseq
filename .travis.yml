@@ -12,7 +12,7 @@ env:
 
 matrix:
   include:
-    - env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+    - env: DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
       python: 3.6
       os: linux
       dist: trusty

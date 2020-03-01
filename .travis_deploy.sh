@@ -16,7 +16,7 @@ if [ $TAG1 != 'release' ] || [ $TAG2 != $(cat VERSION) ]; then
   exit 0;
 fi
 
-# do not deploy on linux outside of manylinux1
+# do not deploy on linux outside of manylinux
 if [ -z $DOCKER_IMAGE ] && [ $TRAVIS_OS_NAME != 'osx' ]; then
   echo 'Not inside manylinux docker image and not OSX, exit'
   exit 0
