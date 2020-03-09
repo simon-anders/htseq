@@ -24,7 +24,6 @@ def invert_strand(iv):
 
 
 def count_reads_in_features(sam_filenames, gff_filename,
-                            samtype,
                             order, max_buffer_size,
                             stranded, overlap_mode,
                             multimapped_mode,
@@ -43,15 +42,6 @@ def count_reads_in_features(sam_filenames, gff_filename,
             if read is not None:
                 read.optional_fields.append(('XF', assignment))
                 samoutfile.write(read.get_sam_line() + "\n")
-
-    if samtype == "sam":
-        SAM_or_BAM_Reader = HTSeq.SAM_Reader
-        samname = 'SAM'
-    elif samtype == "bam":
-        SAM_or_BAM_Reader = HTSeq.BAM_Reader
-        samname = 'BAM'
-    else:
-        raise ValueError("Unknown input format %s specified." % samtype)
 
     if samouts != []:
         if len(samouts) != len(sam_filenames):
@@ -128,9 +118,9 @@ def count_reads_in_features(sam_filenames, gff_filename,
 
         try:
             if sam_filename == "-":
-                read_seq_file = SAM_or_BAM_Reader(sys.stdin)
+                read_seq_file = HTSeq.BAM_Reader(sys.stdin)
             else:
-                read_seq_file = SAM_or_BAM_Reader(sam_filename)
+                read_seq_file = HTSeq.BAM_Reader(sam_filename)
             read_seq_iter = iter(read_seq_file)
             # Catch empty BAM files
             try:
@@ -378,8 +368,9 @@ def main():
 
     pa.add_argument(
             "-f", "--format", dest="samtype",
-            choices=("sam", "bam"), default="sam",
-            help="Type of <alignment_file> data, either 'sam' or 'bam' (default: sam)")
+            choices=("sam", "bam", "auto"), default="auto",
+            help="Type of <alignment_file> data. DEPRECATED: " +
+            "file format is detected automatically. This option is ignored.")
 
     pa.add_argument(
             "-r", "--order", dest="order",
@@ -481,7 +472,6 @@ def main():
         count_reads_in_features(
                 args.samfilenames,
                 args.featuresfilename,
-                args.samtype,
                 args.order,
                 args.max_buffer_size,
                 args.stranded,

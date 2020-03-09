@@ -611,24 +611,6 @@ class SolexaExportReader(FileOrSequence):
             yield record
 
 
-class SAM_Reader(FileOrSequence):
-    """A SAM_Reader object is associated with a SAM file that
-    contains short read alignments. It can generate an iterator of Alignment
-    objects."""
-
-    def __iter__(self):
-        for line in FileOrSequence.__iter__(self):
-            if line.startswith("@"):
-                # do something with the header line
-                continue
-            try:
-                algnt = SAM_Alignment.from_SAM_line(line)
-            except ValueError as e:
-                e.args = e.args + (self.get_line_number_string(), )
-                raise
-            yield algnt
-
-
 class GenomicArrayOfSets(GenomicArray):
     """A GenomicArrayOfSets is a specialization of GenomicArray that allows to store
     sets of objects. On construction, the step vectors are initialized with empty sets.
@@ -1114,14 +1096,14 @@ class BAM_Reader(object):
             raise
 
     def __iter__(self):
-        sf = pysam.AlignmentFile(self.filename, "rb", check_sq=self.check_sq)
+        sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
         self.record_no = 0
         for pa in sf:
             yield SAM_Alignment.from_pysam_AlignedSegment(pa, sf)
             self.record_no += 1
 
     def fetch(self, reference=None, start=None, end=None, region=None):
-        sf = pysam.AlignmentFile(self.filename, "rb", check_sq=self.check_sq)
+        sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
         self.record_no = 0
         try:
             for pa in sf.fetch(reference, start, end, region):
@@ -1148,7 +1130,7 @@ class BAM_Reader(object):
             raise TypeError(
                 "Use a HTSeq.GenomicInterval to access regions within .bam-file!")
         if self.sf is None:
-            self.sf = pysam.AlignmentFile(self.filename, "rb", check_sq=self.check_sq)
+            self.sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
             # NOTE: pysam 0.9 has renames _hasIndex into has_index
             if (hasattr(self.sf, '_hasIndex') and (not self.sf._hasIndex())) or (not self.sf.has_index()):
                 raise ValueError(
@@ -1157,8 +1139,12 @@ class BAM_Reader(object):
             yield SAM_Alignment.from_pysam_AlignedRead(pa, self.sf)
 
     def get_header_dict(self):
-        sf = pysam.AlignmentFile(self.filename, "rb", check_sq=self.check_sq)
+        sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
         return sf.header
+
+
+# NOTE: this will be deprecated
+SAM_Reader = BAM_Reader
 
 
 class BAM_Writer(object):

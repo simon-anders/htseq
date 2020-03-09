@@ -133,6 +133,10 @@ Options
    Format of the input data. Possible values are ``sam`` (for text SAM files)
    and ``bam`` (for binary BAM files). Default is ``sam``.
 
+   DEPRECATED: Modern versions of samtools/htslibs, which HTSeq uses to access
+   SAM/BAM/CRAM files, have automatic file type detection. This flag will be
+   removed in future versions of htseq-count.
+
 .. cmdoption::  -r <order>, --order=<order>
 
   For paired-end data, the alignment have to be sorted either by read name or
