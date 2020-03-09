@@ -46,7 +46,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
     if samouts != []:
         if len(samouts) != len(sam_filenames):
             raise ValueError(
-                    'Select the same number of {:} input and output files'.format(samname))
+                    'Select the same number of input and output files')
         # Try to open samout files early in case any of them has issues
         for samout in samouts:
             with open(samout, 'w'):
@@ -165,8 +165,8 @@ def count_reads_in_features(sam_filenames, gff_filename,
             for r in read_seq:
                 if i > 0 and i % 100000 == 0 and not quiet:
                     sys.stderr.write(
-                        "%d %s alignment record%s processed.\n" %
-                        (i, samname, "s" if not pe_mode else " pairs"))
+                        "%d alignment record%s processed.\n" %
+                        (i, "s" if not pe_mode else " pairs"))
                     sys.stderr.flush()
 
                 i += 1
@@ -305,14 +305,14 @@ def count_reads_in_features(sam_filenames, gff_filename,
 
         except:
             sys.stderr.write(
-                "Error occured when processing %s input (%s):\n" %
-                (samname, read_seq_file.get_line_number_string()))
+                "Error occured when processing input (%s):\n" %
+                (read_seq_file.get_line_number_string()))
             raise
 
         if not quiet:
             sys.stderr.write(
-                "%d %s %s processed.\n" %
-                (i, samname, "alignments " if not pe_mode else "alignment pairs"))
+                "%d %s processed.\n" %
+                (i, "alignments " if not pe_mode else "alignment pairs"))
             sys.stderr.flush()
 
         if samoutfile is not None:
