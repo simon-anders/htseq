@@ -135,8 +135,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
                 read_seq = []
         except:
             sys.stderr.write(
-                "Error occured when reading beginning of {:} file.\n".format(
-                    samname))
+                "Error occured when reading beginning of SAM/BAM file.\n")
             raise
 
         try:
