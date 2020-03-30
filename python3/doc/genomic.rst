@@ -115,11 +115,11 @@ Methods
       
       Note that all three methods return ``True`` for identical intervals.
                
-   .. method:: GenomicInterval.xrange( step = 1 )
-               GenomicInterval.xrange_d( step = 1 )
+   .. method:: GenomicInterval.range( step = 1 )
+               GenomicInterval.range_d( step = 1 )
                
       These methods yield iterators of :class:GenomicPosition objects from
-      ``start`` to ``end`` (or, for ``xrange_d`` from ``start_d`` to ``end_d``).
+      ``start`` to ``end`` (or, for ``range_d`` from ``start_d`` to ``end_d``).
 
    .. method:: GenomicInterval.extend_to_include( iv )
    
