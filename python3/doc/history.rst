@@ -4,6 +4,12 @@
 Version history
 ***************
 
+Version 0.11.4
+==============
+2020-03-30
+
+Fix a bug with Python3 and no-quality BAM/SAM files.
+
 Version 0.11.3
 ==============
 2020-03-01
