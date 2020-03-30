@@ -126,6 +126,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
             try:
                 first_read = next(read_seq_iter)
                 pe_mode = first_read.paired_end
+            # FIXME: catchall can hide subtle bugs
             except:
                 first_read = None
                 pe_mode = False
