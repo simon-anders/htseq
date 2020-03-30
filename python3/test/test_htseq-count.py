@@ -3,6 +3,18 @@ import subprocess as sp
 tests = [
     {'call': [
         'htseq-count',
+        'example_data/bamfile_no_qualities.sam',
+        'example_data/bamfile_no_qualities.gtf',
+        ],
+     'expected_fn': 'example_data/bamfile_no_qualities.tsv'},
+    {'call': [
+        'htseq-count',
+        'example_data/bamfile_no_qualities.bam',
+        'example_data/bamfile_no_qualities.gtf',
+        ],
+     'expected_fn': 'example_data/bamfile_no_qualities.tsv'},
+    {'call': [
+        'htseq-count',
         '-m', 'intersection-nonempty',
         '--nonunique', 'none',
         '--secondary-alignments', 'score',
@@ -10,7 +22,7 @@ tests = [
         'example_data/yeast_RNASeq_excerpt_withNH.sam',
         'example_data/Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz',
         ],
-    'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts.tsv'},
+     'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts.tsv'},
     {'call': [
         'htseq-count',
         '-m', 'intersection-nonempty',
@@ -22,7 +34,7 @@ tests = [
         'example_data/yeast_RNASeq_excerpt_withNH.sam',
         'example_data/Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz',
         ],
-    'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_additional_attributes.tsv'},
+     'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_additional_attributes.tsv'},
     {'call': [
         'htseq-count',
         '-m', 'intersection-nonempty',
@@ -32,7 +44,7 @@ tests = [
         'example_data/yeast_RNASeq_excerpt_withNH.sam',
         'example_data/Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz',
         ],
-    'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_nonunique.tsv'},
+     'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_nonunique.tsv'},
     {'call': [
         'htseq-count',
         '-m', 'intersection-nonempty',
@@ -45,7 +57,7 @@ tests = [
         'example_data/yeast_RNASeq_excerpt_withNH.sam',
         'example_data/Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz',
         ],
-    'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_twocolumns.tsv'},
+     'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_twocolumns.tsv'},
     {'call': [
         'htseq-count',
         '-m', 'intersection-nonempty',
@@ -55,7 +67,7 @@ tests = [
         'example_data/yeast_RNASeq_excerpt_withNH.sam',
         'example_data/Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz',
         ],
-    'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_ignore_secondary.tsv'},
+     'expected_fn': 'example_data/yeast_RNASeq_excerpt_withNH_counts_ignore_secondary.tsv'},
     ]
 
 
