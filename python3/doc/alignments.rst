@@ -367,7 +367,13 @@ objects in the list.
 
    check (bool, default True): whether to check the operation for internal consistency.
 
-   Instances of this class have no methods but contain the following attributes:
+   Instances of this class have only one method:
+
+   .. method:: CigarOperation.check()
+
+      Check whether the operation is internally consistent.
+  
+   Instances of this class contain the following attributes:
 
    .. attribute:: CigarOperation.type
    
