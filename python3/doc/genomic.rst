@@ -360,7 +360,16 @@ one object. The __iadd__ method is overloaded to add elements to the sets:
 .. class:: GenomicArrayOfSets( chroms, stranded = True )
 
    Instantiation is as in :class:`GenomicArray`, only that ``datatype`` is always ``'O'``.
-   
-   
 
 
+Negative Index
+==============
+Sometimes a negative index is useful for representing upstream elements. For instance, you might want to pool information about [-500,500) near transcription start site. You can do that using :class:`StepVector`::
+
+   >>> iv = HTSeq.GenomicInterval('chr1',-5,30,'+')
+   >>> vct = HTSeq.StepVector.StepVector.create(length=60,start_index=-10)
+   >>> vct[iv.start:iv.end] +=1
+   >>> list(vct)   
+   [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+Notice that unlike :class:`StepVector`, :class:`GenomicArray` cannot be used with negative indices.
