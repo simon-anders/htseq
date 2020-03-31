@@ -44,7 +44,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
         for read in r:
             if read is not None:
                 read.optional_fields.append(('XF', assignment))
-                if samout_format i ('SAM', 'sam'):
+                if samout_format in ('SAM', 'sam'):
                     samoutfile.write(read.get_sam_line() + "\n")
                 else:
                     samoutfile.write(read.to_pysam_AlignedSegment(template))
