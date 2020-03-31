@@ -179,7 +179,10 @@ the next section.
 Reading and writing BAM files
 =============================
 
-HTSeq exposes the samtools API trough pysam, enabling you to read and write BAM files.
+HTSeq exposes the samtools API through `pysam`_, enabling you to read and write BAM files.
+
+.. _pysam: https://pysam.readthedocs.io/en/latest/
+
 A simple example of the usage is given here:
 
 .. doctest::
