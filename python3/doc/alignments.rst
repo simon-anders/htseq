@@ -345,10 +345,30 @@ to 1030 on the reference (i.e., the chromosome) but only from 0 to 36 on the que
 We can convenient access to the parsed data by looking at the attributes of the three ``CigarOperation``
 objects in the list.
 
-.. class:: CigarOperation( ... )
+.. class:: CigarOperation(type, size, rfrom, rto, qfrom, qto, chrom, strand, check=True)
 
-   The available attributes are:
-   
+   This class represents a CIGAR atomic operation (e.g. 5I - insertion of 5 bases). All constructor parameters except the last one are positional, i.e. the order matters and you cannot assign them by name:
+
+   type (str): the type of operation, must be one of M/I/D/N/S/H/P/=/X.
+
+   size (int): the length of the operation, must be a positive integer.
+
+   rfrom (int): the beginning of the operation in the reference genome.
+
+   rto (int): the end of the operation in the reference genome.
+
+   qfrom (int): the beginning of the operation in the query (sequencing read).
+
+   qto (int): the end of the operation in the query (sequencing read).
+
+   chrom (str): the name of the chromosome.
+
+   strand (str): the strandness of the operation, must be +/-/. .
+
+   check (bool, default True): whether to check the operation for internal consistency.
+
+   Instances of this class have no methods but contain the following attributes:
+
    .. attribute:: CigarOperation.type
    
       The type of the operation. One of the letters M, I, D, N, S, H, or P. Use
