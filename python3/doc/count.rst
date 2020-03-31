@@ -228,6 +228,11 @@ Options
    Write out all SAM alignment records into SAM files (one per input file
    needed), annotating each line with its feature assignment (as an optional
    field with tag 'XF')
+
+.. cmdoption:: -p <samout_format>, --samout-format=<samout_format>
+
+   Format to use with the --samout option, can be ``bam`` or ``sam``
+   (default: ``sam``).
    
 .. cmdoption:: -q, --quiet           
    

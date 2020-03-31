@@ -1085,7 +1085,7 @@ class BAM_Reader(object):
     def __init__(self, filename, check_sq=True):
         global pysam
         self.filename = filename
-        self.sf = None  # This one is only used by __getitem__
+        self.sf = None
         self.record_no = -1
         self.check_sq = check_sq
         try:
@@ -1096,11 +1096,14 @@ class BAM_Reader(object):
             raise
 
     def __iter__(self):
-        sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
+        if self.sf is None:
+            self.sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
         self.record_no = 0
-        for pa in sf:
-            yield SAM_Alignment.from_pysam_AlignedSegment(pa, sf)
+        for pa in self.sf:
+            yield SAM_Alignment.from_pysam_AlignedSegment(pa, self.sf)
             self.record_no += 1
+        self.sf.close()
+        self.sf = None
 
     def fetch(self, reference=None, start=None, end=None, region=None):
         sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
@@ -1131,16 +1134,21 @@ class BAM_Reader(object):
                 "Use a HTSeq.GenomicInterval to access regions within .bam-file!")
         if self.sf is None:
             self.sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
-            # NOTE: pysam 0.9 has renames _hasIndex into has_index
-            if (hasattr(self.sf, '_hasIndex') and (not self.sf._hasIndex())) or (not self.sf.has_index()):
-                raise ValueError(
-                    "The .bam-file has no index, random-access is disabled!")
+        if (hasattr(self.sf, '_hasIndex') and (not self.sf._hasIndex())) or (not self.sf.has_index()):
+            raise ValueError(
+                "The .bam-file has no index, random-access is disabled!")
         for pa in self.sf.fetch(iv.chrom, iv.start + 1, iv.end):
             yield SAM_Alignment.from_pysam_AlignedRead(pa, self.sf)
 
     def get_header_dict(self):
-        sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
+        if self.sf is None:
+            self.sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
         return sf.header
+
+    def get_template(self):
+        if self.sf is None:
+            self.sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
+        return self.sf
 
 
 # NOTE: this will be deprecated

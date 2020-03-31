@@ -4,6 +4,7 @@ import itertools
 import warnings
 import traceback
 import os.path
+import pysam
 
 import HTSeq
 
@@ -31,9 +32,11 @@ def count_reads_in_features(sam_filenames, gff_filename,
                             supplementary_alignment_mode,
                             feature_type, id_attribute,
                             additional_attributes,
-                            quiet, minaqual, samouts):
+                            quiet, minaqual,
+                            samouts, samout_format,
+                            ):
 
-    def write_to_samout(r, assignment, samoutfile):
+    def write_to_samout(r, assignment, samoutfile, template=None):
         if samoutfile is None:
             return
         if not pe_mode:
@@ -41,21 +44,32 @@ def count_reads_in_features(sam_filenames, gff_filename,
         for read in r:
             if read is not None:
                 read.optional_fields.append(('XF', assignment))
-                samoutfile.write(read.get_sam_line() + "\n")
+                if samout_format i ('SAM', 'sam'):
+                    samoutfile.write(read.get_sam_line() + "\n")
+                else:
+                    samoutfile.write(read.to_pysam_AlignedSegment(template))
 
     if samouts != []:
         if len(samouts) != len(sam_filenames):
             raise ValueError(
                     'Select the same number of input and output files')
         # Try to open samout files early in case any of them has issues
-        for samout in samouts:
-            with open(samout, 'w'):
-                pass
+        if samout_format in ('SAM', 'sam'):
+            for samout in samouts:
+                with open(samout, 'w'):
+                    pass
+        else:
+            # We don't have a template if the input is stdin
+            if (len(sam_filenames) != 1) or (sam_filenames[0] != '-'):
+                for sam_filename, samout in zip(sam_filenames, samouts):
+                    with pysam.AlignmentFile(sam_filename, 'r') as sf:
+                        with pysam.AlignmentFile(samout, 'w', template=sf):
+                            pass
 
     # Try to open samfiles to fail early in case any of them is not there
     if (len(sam_filenames) != 1) or (sam_filenames[0] != '-'):
         for sam_filename in sam_filenames:
-            with open(sam_filename):
+            with pysam.AlignmentFile(sam_filename, 'r') as sf:
                 pass
 
     # CIGAR match characters (including alignment match, sequence match, and
@@ -111,16 +125,26 @@ def count_reads_in_features(sam_filenames, gff_filename,
     lowqual_all = []
     nonunique_all = []
     for isam, (sam_filename) in enumerate(sam_filenames):
-        if samouts != []:
-            samoutfile = open(samouts[isam], 'w')
-        else:
-            samoutfile = None
-
         try:
             if sam_filename == "-":
                 read_seq_file = HTSeq.BAM_Reader(sys.stdin)
             else:
                 read_seq_file = HTSeq.BAM_Reader(sam_filename)
+
+            # Get template for output BAM
+            if samouts == []:
+                samoutfile = None
+                template = None
+            elif samout_format in ('bam', 'BAM'):
+                template = read_seq_file.get_template()
+                samoutfile = pysam.AlignmentFile(
+                        samouts[isam], 'wb',
+                        template=template,
+                        )
+            else:
+                samoutfile = open(samouts[isam], 'w')
+                template = None
+
             read_seq_iter = iter(read_seq_file)
             # Catch empty BAM files
             try:
@@ -174,7 +198,9 @@ def count_reads_in_features(sam_filenames, gff_filename,
                 if not pe_mode:
                     if not r.aligned:
                         notaligned += 1
-                        write_to_samout(r, "__not_aligned", samoutfile)
+                        write_to_samout(
+                                r, "__not_aligned", samoutfile,
+                                template)
                         continue
                     if ((secondary_alignment_mode == 'ignore') and
                        r.not_primary_alignment):
@@ -188,14 +214,17 @@ def count_reads_in_features(sam_filenames, gff_filename,
                             write_to_samout(
                                     r,
                                     "__alignment_not_unique",
-                                    samoutfile)
+                                    samoutfile,
+                                    template)
                             if multimapped_mode == 'none':
                                 continue
                     except KeyError:
                         pass
                     if r.aQual < minaqual:
                         lowqual += 1
-                        write_to_samout(r, "__too_low_aQual", samoutfile)
+                        write_to_samout(
+                                r, "__too_low_aQual", samoutfile,
+                                template)
                         continue
                     if stranded != "reverse":
                         iv_seq = (co.ref_iv for co in r.cigar if co.type in com
@@ -227,7 +256,9 @@ def count_reads_in_features(sam_filenames, gff_filename,
                                      if co.type in com and co.size > 0))
                     else:
                         if (r[0] is None) or not (r[0].aligned):
-                            write_to_samout(r, "__not_aligned", samoutfile)
+                            write_to_samout(
+                                    r, "__not_aligned", samoutfile,
+                                    template)
                             notaligned += 1
                             continue
                     if secondary_alignment_mode == 'ignore':
@@ -244,7 +275,9 @@ def count_reads_in_features(sam_filenames, gff_filename,
                         if ((r[0] is not None and r[0].optional_field("NH") > 1) or
                            (r[1] is not None and r[1].optional_field("NH") > 1)):
                             nonunique += 1
-                            write_to_samout(r, "__alignment_not_unique", samoutfile)
+                            write_to_samout(
+                                    r, "__alignment_not_unique", samoutfile,
+                                    template)
                             if multimapped_mode == 'none':
                                 continue
                     except KeyError:
@@ -252,7 +285,9 @@ def count_reads_in_features(sam_filenames, gff_filename,
                     if ((r[0] and r[0].aQual < minaqual) or
                        (r[1] and r[1].aQual < minaqual)):
                         lowqual += 1
-                        write_to_samout(r, "__too_low_aQual", samoutfile)
+                        write_to_samout(
+                                r, "__too_low_aQual", samoutfile,
+                                template)
                         continue
 
                 try:
@@ -280,14 +315,20 @@ def count_reads_in_features(sam_filenames, gff_filename,
                         sys.exit("Illegal overlap mode.")
 
                     if fs is None or len(fs) == 0:
-                        write_to_samout(r, "__no_feature", samoutfile)
+                        write_to_samout(
+                                r, "__no_feature", samoutfile,
+                                template)
                         empty += 1
                     elif len(fs) > 1:
-                        write_to_samout(r, "__ambiguous[" + '+'.join(fs) + "]",
-                                        samoutfile)
+                        write_to_samout(
+                                r, "__ambiguous[" + '+'.join(fs) + "]",
+                                samoutfile,
+                                template)
                         ambiguous += 1
                     else:
-                        write_to_samout(r, list(fs)[0], samoutfile)
+                        write_to_samout(
+                                r, list(fs)[0], samoutfile,
+                                template)
 
                     if fs is not None and len(fs) > 0:
                         if multimapped_mode == 'none':
@@ -301,7 +342,9 @@ def count_reads_in_features(sam_filenames, gff_filename,
 
 
                 except UnknownChrom:
-                    write_to_samout(r, "__no_feature", samoutfile)
+                    write_to_samout(
+                            r, "__no_feature", samoutfile,
+                            template)
                     empty += 1
 
         except:
@@ -450,8 +493,15 @@ def main():
             action='append',
             default=[],
             help="Write out all SAM alignment records into " +
-            "SAM files (one per input file needed), annotating each line " +
-            "with its feature assignment (as an optional field with tag 'XF')")
+            "SAM/BAM files (one per input file needed), annotating each line " +
+            "with its feature assignment (as an optional field with tag 'XF')" +
+            ". See the -p option to use BAM instead of SAM.")
+
+    pa.add_argument(
+            "-p", '--samout-format', type=str, dest='samout_format',
+            choices=('SAM', 'BAM', 'sam', 'bam'), default='SAM',
+            help="Format to use with the --samout option."
+            )
 
     pa.add_argument(
             "-q", "--quiet", action="store_true", dest="quiet",
@@ -484,7 +534,9 @@ def main():
                 args.additional_attr,
                 args.quiet,
                 args.minaqual,
-                args.samouts)
+                args.samouts,
+                args.samout_format,
+                )
     except:
         sys.stderr.write("  %s\n" % str(sys.exc_info()[1]))
         sys.stderr.write("  [Exception type: %s, raised in %s:%d]\n" %
