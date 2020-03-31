@@ -79,8 +79,9 @@ and each describes one line of a GFF file. See Section :ref:`tour` for an exampl
    
    GFF_Reader will convert the coordinates from GFF standard (1-based, end
    maybe included) to HTSeq standard (0-base, end not included) by subtracting
-   1 from the start position, and, for ``end_included=True``, also subtract 1 from
-   the end position.
+   1 from the start position. This is also Python's indexing standard. If
+   ``end_included=False``, the end was one-after already in the GFF, so HTSeq
+   will also subtract 1 from the end position.
    
       .. attribute:: GFF_Reader.metadata
       
