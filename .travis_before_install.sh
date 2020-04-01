@@ -6,6 +6,16 @@ if [ $TRAVIS_OS_NAME == 'linux' ]; then
   sudo apt-get install -y swig3.0
 
 elif [ $TRAVIS_OS_NAME == 'osx' ]; then
+  echo "Find out OSX version"
+  osx_version=$(sw_vers -productVersion)
+  echo "OSX version: $osx_version"
+  osx_version1=$(echo $osx_version | cut -d. -f1)
+  osx_version2=$(echo $osx_version | cut -d. -f1)
+  if [ $osx_version1 == "10" ] && [ $osx_version2 -ge 14 ]; then
+    echo "Installing C headers for OSX Mojave and later"
+    open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+  fi
+
   echo "Installing deps for OSX"
   if [ $PYTHON_VERSION == "2.7" ]; then
     CONDA_VER='2'
