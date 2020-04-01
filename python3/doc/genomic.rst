@@ -369,7 +369,7 @@ Sometimes a negative index is useful for representing upstream elements. For ins
    >>> iv = HTSeq.GenomicInterval('chr1',-5,30,'+')
    >>> vct = HTSeq.StepVector.StepVector.create(length=60,start_index=-10)
    >>> vct[iv.start:iv.end] +=1
-   >>> list(vct)   
+   >>> list(vct[:10])
    [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 Notice that unlike :class:`StepVector`, :class:`GenomicArray` cannot be used with negative indices.
