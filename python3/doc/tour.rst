@@ -44,7 +44,7 @@ HTSeq with
 ::
 
    >>> import HTSeq
-   >>> fastq_file = HTSeq.FastqReader( "yeast_RNASeq_excerpt_sequence.txt", "solexa" )
+   >>> fastq_file = HTSeq.FastqReader("yeast_RNASeq_excerpt_sequence.txt", "solexa")
   
 The first argument is the file name. The optional second argument indicates 
 the encoding for the quality string. If you omit, the default ("phred") is used. The
@@ -66,7 +66,7 @@ reads.
 ::
 
    >>> import itertools
-   >>> for read in itertools.islice( fastq_file, 10 ):
+   >>> for read in itertools.islice(fastq_file, 10):
    ...    print(read)
    CTTACGTTTTCTGTATCAATACTCGATTTATCATCT
    AATTGGTTTCCCCGCCGAGACCGTACACTACCAGCC
@@ -107,9 +107,9 @@ from all reads and the dividing by the number of reads. We sum everything up in
 the variable ``qualsum``, a ``numpy`` array of integers::
 
    >>> import numpy
-   >>> len( read )
+   >>> len(read)
    36
-   >>> qualsum = numpy.zeros( len(read), numpy.int )
+   >>> qualsum = numpy.zeros(len(read), numpy.int)
 
 Then we loop through the fastq file, adding up the quality scores and
 counting the reads::
@@ -138,9 +138,9 @@ If you have `matplotlib`_ installed, you can plot these numbers.
 
 .. doctest::
 
-   >>> from matplotlib import pyplot      #doctest:+SKIP
-   >>> pyplot.plot( qualsum / nreads )    #doctest:+SKIP
-   >>> pyplot.show()                      #doctest:+SKIP 
+   >>> from matplotlib import pyplot    #doctest:+SKIP
+   >>> pyplot.plot(qualsum / nreads)    #doctest:+SKIP
+   >>> pyplot.show()                    #doctest:+SKIP 
 
 .. image:: qualplot.png
 
@@ -187,8 +187,8 @@ A simple example of the usage is given here:
 
 .. doctest::
    
-   >>> bam_reader = HTSeq.BAM_Reader( "SRR001432_head_sorted.bam" )
-   >>> for a in itertools.islice( bam_reader, 5 ):  # printing first 5 reads
+   >>> bam_reader = HTSeq.BAM_Reader("SRR001432_head_sorted.bam")
+   >>> for a in itertools.islice(bam_reader, 5):  # printing first 5 reads
    ...    print(a)
    <SAM_Alignment object: Read 'SRR001432.165255 USI-EAS21_0008_3445:8:4:718:439 length=25' aligned to 1:[29267,29292)/->
    <SAM_Alignment object: Read 'SRR001432.238475 USI-EAS21_0008_3445:8:6:888:446 length=25' aligned to 1:[62943,62968)/->
@@ -198,10 +198,10 @@ A simple example of the usage is given here:
     
 .. doctest::
     
-   >>> bam_writer = HTSeq.BAM_Writer.from_BAM_Reader( "region.bam", bam_reader ) #set-up BAM_Writer with same header as reader 
-   >>> for a in bam_reader.fetch( region = "1:249000000-249200000" ): #fetching reads in a region 
+   >>> bam_writer = HTSeq.BAM_Writer.from_BAM_Reader("region.bam", bam_reader) #set-up BAM_Writer with same header as reader 
+   >>> for a in bam_reader.fetch(region = "1:249000000-249200000"): #fetching reads in a region 
    ...    print("Writing Alignment", a, "to file", bam_writer.filename)
-   ...	  bam_writer.write( a )    #doctest:+ELLIPSIS
+   ...	  bam_writer.write(a)    #doctest:+ELLIPSIS
    Writing Alignment <SAM_Alignment object: Read 'SRR001432.104735 USI-EAS21_0008_3445:8:3:934:653 length=25' aligned to 1:[249085369,249085394)/-> to file region.bam
    Writing Alignment <SAM_Alignment object: Read 'SRR001432.280764 USI-EAS21_0008_3445:8:7:479:581 length=25' aligned to 1:[249105864,249105889)/-> to file region.bam
    ...
@@ -285,26 +285,26 @@ Assume you have a genome with three chromosomes with the following lengths (in b
 
 .. doctest::
 
-   >>> chromlens = { 'chr1': 3000, 'chr2': 2000, 'chr1': 1000 }
+   >>> chromlens = {'chr1': 3000, 'chr2': 2000, 'chr1': 1000}
 
 We wish to store integer data (typecode "i")
 
 .. doctest:: 
 
-   >>> ga = HTSeq.GenomicArray( chromlens, stranded=False, typecode="i" )
+   >>> ga = HTSeq.GenomicArray(chromlens, stranded=False, typecode="i")
 
 Now, we can assign the value 5 to an interval:
 
 .. doctest:: 
 
-   >>> iv = HTSeq.GenomicInterval( "chr1", 100, 120, "." )
+   >>> iv = HTSeq.GenomicInterval("chr1", 100, 120, ".")
    >>> ga[iv] = 5
    
 We may want to add the value 3 to an interval overlapping with the previous one:
 
 .. doctest:: 
 
-   >>> iv = HTSeq.GenomicInterval( "chr1", 110, 135, "." )
+   >>> iv = HTSeq.GenomicInterval("chr1", 110, 135, ".")
    >>> ga[iv] += 3
 
 To see the effect of this, we read out an interval encompassing the region that 
@@ -312,8 +312,8 @@ we changed. To display the data, we convert to a list:
    
 .. doctest:: 
    
-   >>> iv = HTSeq.GenomicInterval( "chr1", 90, 140, "." )
-   >>> list( ga[iv] )  #doctest: +NORMALIZE_WHITESPACE   
+   >>> iv = HTSeq.GenomicInterval("chr1", 90, 140, ".")
+   >>> list(ga[iv])  #doctest: +NORMALIZE_WHITESPACE   
    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 8, 8, 
     8, 8, 8, 8, 8, 8, 8, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 
     0, 0, 0, 0]
@@ -355,7 +355,7 @@ coverage vectors for all the chromosomes in a genome.
 
 Hence, we start by defining a :class:`GenomicArray`:
 
-   >>> cvg = HTSeq.GenomicArray( "auto", stranded=True, typecode="i" )
+   >>> cvg = HTSeq.GenomicArray("auto", stranded=True, typecode="i")
    
 Instead of listing all chromosomes, we instruct the GenomicArray to add chromosome
 vectors as needed, by specifiyng ``"auto"``. As we set ``stranded=True``, there are now two 
@@ -367,17 +367,17 @@ To build the coverage vectors, we now simply iterate
 through all the reads and add the value 1 at the interval to which each read was aligned
 to::
 
-   >>> alignment_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
-   >>> cvg = HTSeq.GenomicArray( "auto", stranded=True, typecode='i' )
+   >>> alignment_file = HTSeq.SAM_Reader("yeast_RNASeq_excerpt.sam")
+   >>> cvg = HTSeq.GenomicArray("auto", stranded=True, typecode='i')
    >>> for alngt in alignment_file:
    ...    if alngt.aligned:
-   ...       cvg[ alngt.iv ] += 1
+   ...       cvg[alngt.iv] += 1
 
 We can plot an excerpt of this with:   
 
 .. doctest::
 
-   >>> pyplot.plot( list( cvg[ HTSeq.GenomicInterval( "III", 200000, 500000, "+" ) ] ) )     #doctest:+SKIP
+   >>> pyplot.plot(list(cvg[HTSeq.GenomicInterval("III", 200000, 500000, "+")]))     #doctest:+SKIP
    
 However, a proper genome browser gives a better impression of the data. The following commands
 write two BedGraph (Wiggle) files, one for the plus and one for the minus strands::
@@ -408,7 +408,7 @@ illustrate this, we initialize a GenomicArrayOfSets and then store three feature
 
 .. doctest::
 
-   >>> gas = HTSeq.GenomicArrayOfSets( "auto", stranded=False )
+   >>> gas = HTSeq.GenomicArrayOfSets("auto", stranded=False)
    >>> gas[ HTSeq.GenomicInterval( "chr1", 100, 250 ) ] += "A"
    >>> gas[ HTSeq.GenomicInterval( "chr1", 360, 640 ) ] += "A"
    >>> gas[ HTSeq.GenomicInterval( "chr1", 510, 950 ) ] += "B"
@@ -425,13 +425,13 @@ Now consider a read that aligns to the following interval (represented in the fi
 
 .. doctest::
 
-   >>> read_iv = HTSeq.GenomicInterval( "chr1", 450, 800 )
+   >>> read_iv = HTSeq.GenomicInterval("chr1", 450, 800)
 
 We can query the GenomicArrayOfSets, as before:
 
 .. doctest::
 
-   >>> for iv, val in gas[ read_iv ].steps():
+   >>> for iv, val in gas[read_iv].steps():
    ...    print(iv, sorted(val))
    chr1:[450,510)/. ['A']
    chr1:[510,640)/. ['A', 'B']
@@ -446,7 +446,7 @@ form the set union of the three reported sets, using Python's set union operator
 .. doctest::
 
    >>> fset = set()
-   >>> for iv, val in gas[ read_iv ].steps():
+   >>> for iv, val in gas[read_iv].steps():
    ...    fset |= val
    >>> print(sorted(fset))
    ['A', 'B']
@@ -479,8 +479,9 @@ These file are in the `GTF format`_, a tightening of the `GFF format`_. HTSeq of
 .. _`GTF format`: http://mblab.wustl.edu/GTF22.html
 .. _`GFF format`: http://www.sanger.ac.uk/resources/software/gff/spec.html
 
-   >>> gtf_file = HTSeq.GFF_Reader( "Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz",
-   ...    end_included=True )
+   >>> gtf_file = HTSeq.GFF_Reader(
+   ...    "Saccharomyces_cerevisiae.SGD1.01.56.gtf.gz",
+   ...    end_included=True)
 
 The GFF format is, unfortunately, a not very well specified file format. Several
 standard documents exist, from different groups, which contradict each 
@@ -494,7 +495,7 @@ not included, if the division leaves a remainder of two, end is included.)
 
 We iterate through this file as follows:
 
-   >>> for feature in itertools.islice( gtf_file, 10 ):
+   >>> for feature in itertools.islice(gtf_file, 10):
    ...    print(feature)
    ... 
    <GenomicFeature: exon 'R0010W' at 2-micron: 251 -> 1523 (strand '+')>
@@ -522,7 +523,7 @@ it provides:
 
 .. doctest::
 
-   >>> dir( feature )   #doctest:+NORMALIZE_WHITESPACE,+ELLIPSIS
+   >>> dir(feature)   #doctest:+NORMALIZE_WHITESPACE,+ELLIPSIS
    ['__class__', ..., '__weakref__', 'attr', 'frame', 'get_gff_line', 
    'iv', 'name', 'score', 'source', 'type']
    
@@ -576,7 +577,7 @@ Nate that, we only store the gene name this time, as this will be more convenien
 
 Assume we have a read covering this interval::
 
-   >>> iv = HTSeq.GenomicInterval( "III", 23850, 23950, "." )
+   >>> iv = HTSeq.GenomicInterval("III", 23850, 23950, ".")
 
 Its left half covers two genes (YCL058C, YCL058W-A), but its right half only
 YCL058C because YCL058W-A end in the middle of the read::
@@ -599,7 +600,7 @@ coded as follows::
    ...    if iset is None:
    ...       iset = step_set.copy()
    ...    else:
-   ...       iset.intersection_update( step_set )
+   ...       iset.intersection_update(step_set)
    ... 
    >>> print(iset)
    {'YCL058C'}
@@ -621,28 +622,28 @@ counters, we use a dict, which we initialize with a zero for each gene name::
    >>> counts = {}
    >>> for feature in gtf_file:
    ...    if feature.type == "exon":
-   ...       counts[ feature.name ] = 0
+   ...       counts[feature.name] = 0
 
 Now, we can finally count::
 
-   >>> sam_file = HTSeq.SAM_Reader( "yeast_RNASeq_excerpt.sam" )
+   >>> sam_file = HTSeq.SAM_Reader("yeast_RNASeq_excerpt.sam")
    >>> for alnmt in sam_file:
    ...    if alnmt.aligned:
    ...       iset = None
-   ...       for iv2, step_set in exons[ alnmt.iv ].steps():
+   ...       for iv2, step_set in exons[alnmt.iv].steps():
    ...           if iset is None:
    ...              iset = step_set.copy()
    ...           else:
-   ...              iset.intersection_update( step_set )
-   ...       if len( iset ) == 1:
-   ...          counts[ list(iset)[0] ] += 1
+   ...              iset.intersection_update(step_set)
+   ...       if len(iset) == 1:
+   ...          counts[list(iset)[0]] += 1
 
 We can now conveniently print the result with:
 
 
 .. doctest::
 
-   >>> for name in sorted( counts.keys() ):  
+   >>> for name in sorted(counts.keys()):  
    ...    print(name, counts[name])   #doctest:+ELLIPSIS
    15S_rRNA 0
    21S_rRNA 0

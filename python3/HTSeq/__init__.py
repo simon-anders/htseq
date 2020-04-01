@@ -1137,7 +1137,7 @@ class BAM_Reader(object):
     def get_header_dict(self):
         if self.sf is None:
             self.sf = pysam.AlignmentFile(self.filename, "r", check_sq=self.check_sq)
-        return sf.header
+        return self.sf.header
 
     def get_template(self):
         if self.sf is None:
