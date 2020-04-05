@@ -125,6 +125,14 @@ def get_library_dirs(cpp=False):
     return library_dirs
 
 
+def get_extra_args_cpp(kind):
+    '''OSX 101.14 and later refuses to use libstdc++'''
+    if sys.platform == 'darwin':
+        return ['-stdlib=libc++']
+    else:
+        return []
+
+
 class Preprocess_command(Command):
     '''Cython and SWIG preprocessing'''
     description = "preprocess Cython and SWIG files for HTSeq"
@@ -235,7 +243,9 @@ setup(name='HTSeq',
              ['src/StepVector_wrap.cxx'],
              include_dirs=get_include_dirs(cpp=True),
              library_dirs=get_library_dirs(cpp=True),
-             extra_compile_args=['-w']),
+             extra_compile_args=['-w'] + get_extra_args_cpp(),
+             extra_link_args=get_extra_args_cpp(),
+             ),
       ],
       py_modules=[
          'HTSeq._HTSeq_internal',
