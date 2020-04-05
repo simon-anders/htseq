@@ -9,6 +9,13 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   echo "Find out OSX version"
   osx_version=$(sw_vers -productVersion)
   echo "OSX version: $osx_version"
+  osx_ver1=$(echo $osx_version | cut -d. -f1)
+  osx_ver2=$(echo $osx_version | cut -d. -f2)
+  if [ $osx_ver1 -lt 10 ] || [ $osx_ver2 -lt 14 ]; then
+    echo "OSX version not for deployment: $osx_version"
+  else
+    echo "OSX version for deployment: $osx_version"
+  fi
 
   echo "Installing deps for OSX"
   CONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"

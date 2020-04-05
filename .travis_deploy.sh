@@ -49,6 +49,17 @@ if [ $DOCKER_IMAGE ]; then
 elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   # OSX deployment
   echo "Deploying for OSX"
+
+  # Only deploy on 10.14 to ensure 10.9+ compatibility and Mojave header/linker changes
+  osx_version=$(sw_vers -productVersion)
+  echo "OSX version: $osx_version"
+  osx_ver1=$(echo $osx_version | cut -d. -f1)
+  osx_ver2=$(echo $osx_version | cut -d. -f2)
+  if [ $osx_ver1 -lt 10 ] || [ $osx_ver2 -lt 14 ]; then
+    echo "OSX version not for deployment: $osx_version"
+    exit 1
+  fi
+
   HTSEQ_VERSION=$(cat VERSION)
   echo "TWINE_REPOSITORY=$TWINE_REPOSITORY"
   echo "TWINE_USERNAME=$TWINE_USERNAME"
@@ -59,32 +70,24 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
 
   pip --version
   pip install twine
-  if [ $CONDA_PY == '2.7' ]; then
-    PYARCH='cp27-cp27m'
-  elif [ $CONDA_PY == '3.6' ]; then
-    PYARCH='cp36-cp36m'
-  elif [ $CONDA_PY == '3.7' ]; then
-    PYARCH='cp37-cp37m'
-  elif [ $CONDA_PY == '3.8' ]; then
-    PYARCH='cp38-cp38m'
-  else
-    echo "Python version not recognized"
-    exit 1
-  fi
+
+  # Figure out architecture string
+  PYVER=$(echo $CONDA_PY | sed 's/\.//')
+  PYARCH=cp${PYVER}-cp${PYVER}m
 
   echo "Contents of wheelhouse:"
   ls wheelhouse
   TWINE_WHEEL=$(ls wheelhouse/HTSeq-${HTSEQ_VERSION}-${PYARCH}*.whl)
   echo "TWINE_WHEEL=$TWINE_WHEEL"
-  # FIXME: no explicit register needed??
-  #twine register --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
-  #if [ $? != 0 ]; then
-  #    exit 1
-  #fi
+
+  echo "Uploading..."
   twine upload  --repository-url "${TWINE_REPOSITORY}" -u "${TWINE_USERNAME}" -p "${TWINE_PASSWORD}" "${TWINE_WHEEL}"
   if [ $? != 0 ]; then
-      exit 1
+    echo "Upload failed" 
+    exit 1
   fi
+  echo "Upload complete"
+
 else
   echo "No DOCKER_IMAGE and not OSX, we should not be here!"
   exit 1
