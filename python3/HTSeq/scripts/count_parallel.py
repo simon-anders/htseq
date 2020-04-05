@@ -4,6 +4,7 @@ import itertools
 import warnings
 import traceback
 import os.path
+import multiprocess
 import pysam
 
 import HTSeq
