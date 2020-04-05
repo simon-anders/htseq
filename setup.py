@@ -125,7 +125,7 @@ def get_library_dirs(cpp=False):
     return library_dirs
 
 
-def get_extra_args_cpp(kind):
+def get_extra_args_cpp():
     '''OSX 101.14 and later refuses to use libstdc++'''
     if sys.platform == 'darwin':
         return ['-stdlib=libc++']
