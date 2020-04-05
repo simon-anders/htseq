@@ -19,6 +19,8 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
     ls /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/
     echo "Result of scrun --show-sdk-path:"
     xcrun --show-sdk-path
+    echo "Check the C++ header path:"
+    ls /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1/
   fi
 
   echo "Installing deps for OSX"
