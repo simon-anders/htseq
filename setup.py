@@ -73,6 +73,32 @@ with open(py_fdn+'HTSeq/_version.py', 'wt') as fversion:
     fversion.write('__version__ = "'+version+'"')
 
 
+def get_include_dirs(cpp=False):
+    '''OSX 10.14 and later split the /usr/include contents everywhere'''
+    include_dirs = []
+    if sys.platform != 'darwin':
+        return include_dirs
+
+    paths = {
+        'C': [
+            '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/',
+        ],
+        'C++': [
+            '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1/',
+        ],
+    }
+
+    for path in paths['C']:
+        if os.path.isdir(path):
+            include_dirs.append(path)
+    if cpp:
+        for path in paths['C++']:
+            if os.path.isdir(path):
+                include_dirs.append(path)
+
+    return include_dirs
+
+
 class Preprocess_command(Command):
     '''Cython and SWIG preprocessing'''
     description = "preprocess Cython and SWIG files for HTSeq"
@@ -175,11 +201,12 @@ setup(name='HTSeq',
          Extension(
              'HTSeq._HTSeq',
              ['src/_HTSeq.c'],
-             include_dirs=[numpy_include_dir],
+             include_dirs=[numpy_include_dir]+get_include_dirs(),
              extra_compile_args=['-w']),
          Extension(
              'HTSeq._StepVector',
              ['src/StepVector_wrap.cxx'],
+             include_dirs=get_include_dirs(cpp=True),
              extra_compile_args=['-w']),
       ],
       py_modules=[
