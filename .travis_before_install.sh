@@ -13,7 +13,8 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   osx_version2=$(echo $osx_version | cut -d. -f2)
   if [ $osx_version1 == "10" ] && [ $osx_version2 -ge 14 ]; then
     echo "Installing C headers for OSX Mojave and later"
-    open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+    #open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
   fi
 
   echo "Installing deps for OSX"
