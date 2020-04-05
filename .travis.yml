@@ -12,42 +12,43 @@ env:
 
 matrix:
   include:
-    - env: DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
-      python: 3.6
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam'
-      python: 2.7
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam'
-      python: 3.5
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam'
-      python: 3.6
-      os: linux
-      dist: trusty
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam'
-      python: 3.7
-      os: linux
-      dist: bionic
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam'
-      python: 3.8
-      os: linux
-      dist: bionic
-      sudo: required
-    - env: CC=gcc PYSAM_VERSION='pysam>=0.13.0' PYTHON_VERSION='2.7'
-      language: generic
-      os: osx
-    - env: CC=gcc PYSAM_VERSION='pysam>=0.13.0' PYTHON_VERSION='3.6'
-      language: generic
-      os: osx
+   #    FIXME: focus on mojave
+   #    - env: DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
+   #      python: 3.6
+   #      os: linux
+   #      dist: trusty
+   #      sudo: required
+   #    - env: CC=gcc PYSAM_VERSION='pysam'
+   #      python: 2.7
+   #      os: linux
+   #      dist: trusty
+   #      sudo: required
+   #    - env: CC=gcc PYSAM_VERSION='pysam'
+   #      python: 3.5
+   #      os: linux
+   #      dist: trusty
+   #      sudo: required
+   #    - env: CC=gcc PYSAM_VERSION='pysam'
+   #      python: 3.6
+   #      os: linux
+   #      dist: trusty
+   #      sudo: required
+   #    - env: CC=gcc PYSAM_VERSION='pysam'
+   #      python: 3.7
+   #      os: linux
+   #      dist: bionic
+   #      sudo: required
+   #    - env: CC=gcc PYSAM_VERSION='pysam'
+   #      python: 3.8
+   #      os: linux
+   #      dist: bionic
+   #      sudo: required
+   #    - env: CC=gcc PYSAM_VERSION='pysam>=0.13.0' PYTHON_VERSION='2.7'
+   #      language: generic
+   #      os: osx
+   #    - env: CC=gcc PYSAM_VERSION='pysam>=0.13.0' PYTHON_VERSION='3.6'
+   #      language: generic
+   #      os: osx
     - env: CC=gcc PYSAM_VERSION='pysam>=0.13.0' PYTHON_VERSION='3.6'
       language: generic
       os: osx

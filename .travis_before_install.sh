@@ -12,9 +12,13 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   osx_version1=$(echo $osx_version | cut -d. -f1)
   osx_version2=$(echo $osx_version | cut -d. -f2)
   if [ $osx_version1 == "10" ] && [ $osx_version2 -ge 14 ]; then
-    echo "Installing C headers for OSX Mojave and later"
+    #echo "Installing C headers for OSX Mojave and later"
     #open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
-    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+    #sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_$osx_version1.$osx_version2.pkg -target /
+    echo "Find C headers for OSX Mojave and later"
+    ls /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/
+    echo "Result of scrun --show-sdk-path:"
+    xcrun --show-sdk-path
   fi
 
   echo "Installing deps for OSX"
@@ -29,7 +33,7 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
     CONDA_VER='3'
     CONDA_URL='https://repo.continuum.io/miniconda/Miniconda3-4.5.4-MacOSX-x86_64.sh'
   else
-    echo "Conda only supports 2.7 and 3.6"
+    echo "OSX install with conda currently supports 2.7, 3.6, and 3.7"
   fi
   curl "${CONDA_URL}" -o "miniconda.sh"
   bash "miniconda.sh" -b -p $HOME/miniconda
