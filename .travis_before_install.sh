@@ -19,7 +19,7 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   source $HOME/miniconda/bin/activate
 
   # Make conda environment and activate
-  conda create -n travis python=$CONDA_PY
+  conda create -y -n travis python=$CONDA_PY
   conda activate travis
 
   # Use pip from conda
