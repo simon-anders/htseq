@@ -15,6 +15,8 @@ else
   if [ $TRAVIS_OS_NAME == 'osx' ]; then
     export PATH="$HOME/miniconda/bin:$PATH"
     source $HOME/miniconda/bin/activate
+    conda activate travis
+
     # Somehow we need this to execute the setup.py at all...
     pip install numpy
     pip install $PYSAM_VERSION

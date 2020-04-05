@@ -55,12 +55,18 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   echo "TWINE_PASSWORD=$TWINE_PASSWORD"
   export PATH="$HOME/miniconda/bin:$PATH"
   source $HOME/miniconda/bin/activate
+  conda activate travis
+
   pip --version
   pip install twine
-  if [ $PYTHON_VERSION == '2.7' ]; then
+  if [ $CONDA_PY == '2.7' ]; then
     PYARCH='cp27-cp27m'
-  elif [ $PYTHON_VERSION == '3.6' ]; then
+  elif [ $CONDA_PY == '3.6' ]; then
     PYARCH='cp36-cp36m'
+  elif [ $CONDA_PY == '3.7' ]; then
+    PYARCH='cp37-cp37m'
+  elif [ $CONDA_PY == '3.8' ]; then
+    PYARCH='cp38-cp38m'
   else
     echo "Python version not recognized"
     exit 1

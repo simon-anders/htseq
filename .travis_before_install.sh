@@ -9,42 +9,19 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
   echo "Find out OSX version"
   osx_version=$(sw_vers -productVersion)
   echo "OSX version: $osx_version"
-  osx_version1=$(echo $osx_version | cut -d. -f1)
-  osx_version2=$(echo $osx_version | cut -d. -f2)
-  if [ $osx_version1 == "10" ] && [ $osx_version2 -ge 14 ]; then
-    #echo "Installing C headers for OSX Mojave and later"
-    #open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
-    #sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_$osx_version1.$osx_version2.pkg -target /
-    echo "Find C++ libraries:"
-    ls /usr/X11R6
-    ls /usr/X11R6/lib
-    echo "Find C headers for OSX Mojave and later"
-    ls /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/
-    echo "Result of scrun --show-sdk-path:"
-    xcrun --show-sdk-path
-    echo "Check the C++ header path:"
-    ls /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1/
-  fi
 
   echo "Installing deps for OSX"
-  if [ $PYTHON_VERSION == "2.7" ]; then
-    CONDA_VER='2'
-    CONDA_URL="https://repo.continuum.io/miniconda/Miniconda${CONDA_VER}-latest-MacOSX-x86_64.sh"
-  elif [ $PYTHON_VERSION == "3.7" ]; then
-    CONDA_VER='3'
-    CONDA_URL="https://repo.continuum.io/miniconda/Miniconda${CONDA_VER}-latest-MacOSX-x86_64.sh"
-  # NOTE: Miniconda stopped supporting 3.6, but pysam is late...
-  elif [ $PYTHON_VERSION == "3.6" ]; then
-    CONDA_VER='3'
-    CONDA_URL='https://repo.continuum.io/miniconda/Miniconda3-4.5.4-MacOSX-x86_64.sh'
-  else
-    echo "OSX install with conda currently supports 2.7, 3.6, and 3.7"
-  fi
+  CONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
   curl "${CONDA_URL}" -o "miniconda.sh"
   bash "miniconda.sh" -b -p $HOME/miniconda
   echo "$PATH"
   export PATH="$HOME/miniconda/bin:$PATH"
   source $HOME/miniconda/bin/activate
+
+  # Make conda environment and activate
+  conda create -n travis python=$CONDA_PY
+  conda activate travis
+
   # Use pip from conda
   conda install -y pip
   pip --version

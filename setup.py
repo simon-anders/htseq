@@ -106,23 +106,12 @@ def get_include_dirs(cpp=False):
     return include_dirs
 
 
-def get_library_dirs(cpp=False):
+def get_library_dirs_cpp():
     '''OSX 10.14 and later messed up C/C++ library locations'''
-    library_dirs = []
-    paths = {
-        'C': [],
-        'C++': ['/usr/X11R6/lib'],
-        }
-
-    for path in paths['C']:
-        if os.path.isdir(path):
-            library_dirs.append(path)
-    if cpp:
-        for path in paths['C++']:
-            if os.path.isdir(path):
-                library_dirs.append(path)
-
-    return library_dirs
+    if sys.platform == 'darwin':
+        return ['/usr/X11R6/lib']
+    else:
+        return []
 
 
 def get_extra_args_cpp():
@@ -207,7 +196,7 @@ class Build_with_preprocess(build_py):
 
 setup(name='HTSeq',
       version=version,
-      author='Simon Anders',
+      author='Simon Anders, Fabio Zanini',
       author_email='sanders@fs.tum.de',
       maintainer='Fabio Zanini',
       maintainer_email='fabio.zanini@stanford.edu',
@@ -236,13 +225,12 @@ setup(name='HTSeq',
              'HTSeq._HTSeq',
              ['src/_HTSeq.c'],
              include_dirs=[numpy_include_dir]+get_include_dirs(),
-             library_dirs=get_library_dirs(),
              extra_compile_args=['-w']),
          Extension(
              'HTSeq._StepVector',
              ['src/StepVector_wrap.cxx'],
              include_dirs=get_include_dirs(cpp=True),
-             library_dirs=get_library_dirs(cpp=True),
+             library_dirs=get_library_dirs_cpp(),
              extra_compile_args=['-w'] + get_extra_args_cpp(),
              extra_link_args=get_extra_args_cpp(),
              ),
