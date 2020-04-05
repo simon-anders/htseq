@@ -4,6 +4,7 @@ import sys
 import os
 from distutils.log import INFO as logINFO
 
+
 if ((sys.version_info[0] == 2 and sys.version_info[1] < 7) or
    (sys.version_info[0] == 3 and sys.version_info[1] < 5)):
     sys.stderr.write("Error in setup script for HTSeq:\n")
@@ -20,6 +21,14 @@ for fdn in ['src', 'HTSeq', 'doc', 'scripts', 'test']:
     os.symlink(py_fdn+fdn, fdn)
 
 
+# Update version from VERSION file into module
+with open('VERSION') as fversion:
+    version = fversion.readline().rstrip()
+with open(py_fdn+'HTSeq/_version.py', 'wt') as fversion:
+    fversion.write('__version__ = "'+version+'"')
+
+
+# Check OS-specific quirks
 try:
     from setuptools import setup, Extension
     from setuptools.command.build_py import build_py
@@ -63,14 +72,12 @@ except ImportError:
                      " HTSeq.\n")
     sys.exit(1)
 
-numpy_include_dir = os.path.join(os.path.dirname(numpy.__file__),
-                                 'core', 'include')
 
-# Update version from VERSION file into module
-with open('VERSION') as fversion:
-    version = fversion.readline().rstrip()
-with open(py_fdn+'HTSeq/_version.py', 'wt') as fversion:
-    fversion.write('__version__ = "'+version+'"')
+numpy_include_dir = os.path.join(
+        os.path.dirname(numpy.__file__),
+        'core',
+        'include',
+        )
 
 
 def get_include_dirs(cpp=False):
@@ -97,6 +104,25 @@ def get_include_dirs(cpp=False):
                 include_dirs.append(path)
 
     return include_dirs
+
+
+def get_library_dirs(cpp=False):
+    '''OSX 10.14 and later messed up C/C++ library locations'''
+    library_dirs = []
+    paths = {
+        'C': [],
+        'C++': ['/usr/X11R6/lib'],
+        }
+
+    for path in paths['C']:
+        if os.path.isdir(path):
+            library_dirs.append(path)
+    if cpp:
+        for path in paths['C++']:
+            if os.path.isdir(path):
+                library_dirs.append(path)
+
+    return library_dirs
 
 
 class Preprocess_command(Command):
@@ -202,11 +228,13 @@ setup(name='HTSeq',
              'HTSeq._HTSeq',
              ['src/_HTSeq.c'],
              include_dirs=[numpy_include_dir]+get_include_dirs(),
+             library_dirs=get_library_dirs(),
              extra_compile_args=['-w']),
          Extension(
              'HTSeq._StepVector',
              ['src/StepVector_wrap.cxx'],
              include_dirs=get_include_dirs(cpp=True),
+             library_dirs=get_library_dirs(cpp=True),
              extra_compile_args=['-w']),
       ],
       py_modules=[

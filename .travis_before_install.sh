@@ -15,6 +15,9 @@ elif [ $TRAVIS_OS_NAME == 'osx' ]; then
     #echo "Installing C headers for OSX Mojave and later"
     #open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
     #sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_$osx_version1.$osx_version2.pkg -target /
+    echo "Find C++ libraries:"
+    ls /usr/X11R6
+    ls /usr/X11R6/lib
     echo "Find C headers for OSX Mojave and later"
     ls /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/
     echo "Result of scrun --show-sdk-path:"
