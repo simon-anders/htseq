@@ -45,6 +45,7 @@ def count_reads_with_barcodes(
         minaqual,
         samout_format,
         samout_filename,
+        nprocesses,
         cb_tag,
         ub_tag,
         ):
@@ -67,7 +68,7 @@ def count_reads_with_barcodes(
         if not pe_mode:
             r = (r,)
         # cell, UMI
-        barcodes = (None, None)
+        barcodes = [None, None]
         nbar = 0
         for read in r:
             if read is not None:
@@ -385,7 +386,7 @@ def count_reads_in_features(
 
     features = HTSeq.GenomicArrayOfSets("auto", stranded != "no")
     gff = HTSeq.GFF_Reader(gff_filename)
-    counts = {}
+    feature_attr = set()
     attributes = {}
     i = 0
     try:
@@ -403,7 +404,7 @@ def count_reads_in_features(
                             "running htseq-count in stranded mode. Use '--stranded=no'." %
                             (f.name, f.iv))
                 features[f.iv] += feature_id
-                counts[f.attr[id_attribute]] = 0
+                feature_attr.add(f.attr[id_attribute])
                 attributes[f.attr[id_attribute]] = [
                         f.attr[attr] if attr in f.attr else ''
                         for attr in additional_attributes]
@@ -417,13 +418,13 @@ def count_reads_in_features(
             gff.get_line_number_string())
         raise
 
-    feature_attr = sorted(counts.keys())
+    feature_attr = sorted(feature_attr)
 
     if not quiet:
         sys.stderr.write("%d GFF lines processed.\n" % i)
         sys.stderr.flush()
 
-    if len(counts) == 0:
+    if len(feature_attr) == 0:
         sys.stderr.write(
             "Warning: No features of type '%s' found.\n" % feature_type)
 
@@ -466,9 +467,12 @@ def count_reads_in_features(
     # Header
     fields = [''] + pad + cbs
     line = output_delimiter.join(fields)
-    with open(output_filename, 'w') as f:
-        f.write(line)
-        f.write('\n')
+    if output_filename == '':
+        print(line)
+    else:
+        with open(output_filename, 'w') as f:
+            f.write(line)
+            f.write('\n')
 
     # Features
     for ifn, fn in enumerate(feature_attr):

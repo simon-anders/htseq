@@ -240,11 +240,13 @@ setup(name='HTSeq',
          'HTSeq.StepVector',
          'HTSeq._version',
          'HTSeq.scripts.qa',
-         'HTSeq.scripts.count'
+         'HTSeq.scripts.count',
+         'HTSeq.scripts.count_with_barcodes',
       ],
       scripts=[
          'scripts/htseq-qa',
          'scripts/htseq-count',
+         'scripts/htseq-count-barcodes',
       ],
       cmdclass={
           'preprocess': Preprocess_command,
