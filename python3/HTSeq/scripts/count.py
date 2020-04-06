@@ -448,9 +448,7 @@ def count_reads_in_features(
         ]
     pad = ['' for attr in additional_attributes]
     for ifn, fn in enumerate(feature_attr):
-        fields = [fn] + attributes[fn]
-        for isam in range(len(sam_filenames)):
-            fields.append(str(results[isam]['counts'][fn]))
+        fields = [fn] + attributes[fn] + [str(r[fn]) for r in results]
         line = output_delimiter.join(fields)
         if output_filename == '':
             print(line)
@@ -460,10 +458,8 @@ def count_reads_in_features(
                 f.write(line)
                 f.write('\n')
 
-    for title, key in other_features:
-        fields = [title] + pad
-        for isam in range(len(sam_filenames)):
-            fields.append(str(results[isam][key]))
+    for title, fn in other_features:
+        fields = [title] + pad + [str(r[fn]) for r in results]
         line = output_delimiter.join(fields)
         if output_filename == '':
             print(line)
