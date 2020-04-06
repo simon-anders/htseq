@@ -10,6 +10,19 @@ Version 0.11.5
 Numerous bugfixes, doc improvements, and a few new features:
 
 - Negative indices for ``StepVector`` (thanks to shouldsee for the original PR).
+- ``htseq-count`` has new option ``-n`` for multicore parallel processing
+- ``htseq-count`` has new option ``-d`` for separating output columns by arbitrary character
+  (defalt TAB, ``,`` is also common)
+- ``htseq-count`` has new option ``-c`` for output into a file instead of stdout
+- ``htseq-count`` has new option ``--append-output`` for output into a file by appending to
+  any existing test (e.g. a header with the feature attribute names and sample names)
+
+Testing improvements:
+
+- Extensive testing and installation changes for Mac OSX 10.14 and later versions
+- Testing Python 2.7, 3.6, 3.7, and 3.8 on OSX
+- Testing and deployment now uses conda environments
+
 
 Version 0.11.4
 ==============
