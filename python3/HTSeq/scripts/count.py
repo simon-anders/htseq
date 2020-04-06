@@ -484,7 +484,7 @@ def main():
         "http://htseq.readthedocs.io/en/master/count.html for details.",
         epilog="Written by Simon Anders (sanders@fs.tum.de), " +
         "European Molecular Biology Laboratory (EMBL) and Fabio Zanini " +
-        "(fabio.zanini@stanford.edu), Stanford University. (c) 2010-2019. " +
+        "(fabio.zanini@unsw.edu.au), UNSW Sydney. (c) 2010-2020. " +
         "Released under the terms of the GNU General Public License v3. " +
         "Part of the 'HTSeq' framework, version %s." % HTSeq.__version__)
 

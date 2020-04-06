@@ -1,5 +1,6 @@
 import sys
 import argparse
+from collections import Counter, defaultdict
 import operator
 import itertools
 import warnings
@@ -26,7 +27,7 @@ def invert_strand(iv):
     return iv2
 
 
-def count_reads_single_file(
+def count_reads_with_barcodes(
         sam_filename,
         features,
         feature_attr,
@@ -44,6 +45,8 @@ def count_reads_single_file(
         minaqual,
         samout_format,
         samout_filename,
+        cb_tag,
+        ub_tag,
         ):
 
     def write_to_samout(r, assignment, samoutfile, template=None):
@@ -58,6 +61,28 @@ def count_reads_single_file(
                     samoutfile.write(read.get_sam_line() + "\n")
                 else:
                     samoutfile.write(read.to_pysam_AlignedSegment(template))
+
+    def identify_barcodes(r):
+        '''Identify barcode from the read or pair (both must have the same)'''
+        if not pe_mode:
+            r = (r,)
+        # cell, UMI
+        barcodes = (None, None)
+        nbar = 0
+        for read in r:
+            if read is not None:
+                for tag, val in read.optional_fields:
+                    if tag == cb_tag:
+                        barcodes[0] = val
+                        nbar += 1
+                        if nbar == 2:
+                            return barcodes
+                    elif tag == ub_tag:
+                        barcodes[1] = val
+                        nbar += 1
+                        if nbar == 2:
+                            return barcodes
+        return barcodes
 
     try:
         if sam_filename == "-":
@@ -100,7 +125,6 @@ def count_reads_single_file(
     # CIGAR match characters (including alignment match, sequence match, and
     # sequence mismatch
     com = ('M', '=', 'X')
-    counts = {key: 0 for key in feature_attr}
 
     try:
         if pe_mode:
@@ -120,11 +144,9 @@ def count_reads_single_file(
                         primary_only=primary_only)
             else:
                 raise ValueError("Illegal order specified.")
-        empty = 0
-        ambiguous = 0
-        notaligned = 0
-        lowqual = 0
-        nonunique = 0
+
+        # The nesting is cell barcode, UMI, feature
+        counts = defaultdict(lambda: defaultdict(Counter))
         i = 0
         for r in read_seq:
             if i > 0 and i % 100000 == 0 and not quiet:
@@ -134,9 +156,12 @@ def count_reads_single_file(
                 sys.stderr.flush()
 
             i += 1
+
+            cb, ub = identify_barcodes(r)
+
             if not pe_mode:
                 if not r.aligned:
-                    notaligned += 1
+                    counts[cb][ub]['__not_aligned'] += 1
                     write_to_samout(
                             r, "__not_aligned", samoutfile,
                             template)
@@ -149,7 +174,7 @@ def count_reads_single_file(
                     continue
                 try:
                     if r.optional_field("NH") > 1:
-                        nonunique += 1
+                        counts[cb][ub]['__alignment_not_unique'] += 1
                         write_to_samout(
                                 r,
                                 "__alignment_not_unique",
@@ -160,7 +185,7 @@ def count_reads_single_file(
                 except KeyError:
                     pass
                 if r.aQual < minaqual:
-                    lowqual += 1
+                    counts[cb][ub]['__too_low_aQual'] += 1
                     write_to_samout(
                             r, "__too_low_aQual", samoutfile,
                             template)
@@ -198,7 +223,7 @@ def count_reads_single_file(
                         write_to_samout(
                                 r, "__not_aligned", samoutfile,
                                 template)
-                        notaligned += 1
+                        counts[cb][ub]['__not_aligned'] += 1
                         continue
                 if secondary_alignment_mode == 'ignore':
                     if (r[0] is not None) and r[0].not_primary_alignment:
@@ -213,20 +238,20 @@ def count_reads_single_file(
                 try:
                     if ((r[0] is not None and r[0].optional_field("NH") > 1) or
                        (r[1] is not None and r[1].optional_field("NH") > 1)):
-                        nonunique += 1
                         write_to_samout(
                                 r, "__alignment_not_unique", samoutfile,
                                 template)
+                        counts[cb][ub]['__alignment_not_unique'] += 1
                         if multimapped_mode == 'none':
                             continue
                 except KeyError:
                     pass
                 if ((r[0] and r[0].aQual < minaqual) or
                    (r[1] and r[1].aQual < minaqual)):
-                    lowqual += 1
                     write_to_samout(
                             r, "__too_low_aQual", samoutfile,
                             template)
+                    counts[cb][ub]['__too_low_aQual'] += 1
                     continue
 
             try:
@@ -257,13 +282,13 @@ def count_reads_single_file(
                     write_to_samout(
                             r, "__no_feature", samoutfile,
                             template)
-                    empty += 1
+                    counts[cb][ub]['__no_feature'] += 1
                 elif len(fs) > 1:
                     write_to_samout(
                             r, "__ambiguous[" + '+'.join(fs) + "]",
                             samoutfile,
                             template)
-                    ambiguous += 1
+                    counts[cb][ub]['__ambiguous'] += 1
                 else:
                     write_to_samout(
                             r, list(fs)[0], samoutfile,
@@ -272,10 +297,10 @@ def count_reads_single_file(
                 if fs is not None and len(fs) > 0:
                     if multimapped_mode == 'none':
                         if len(fs) == 1:
-                            counts[list(fs)[0]] += 1
+                            counts[cb][ub][list(fs)[0]] += 1
                     elif multimapped_mode == 'all':
                         for fsi in list(fs):
-                            counts[fsi] += 1
+                            counts[cb][ub][fsi] += 1
                     else:
                         sys.exit("Illegal multimap mode.")
 
@@ -284,7 +309,7 @@ def count_reads_single_file(
                 write_to_samout(
                         r, "__no_feature", samoutfile,
                         template)
-                empty += 1
+                counts[cb][ub]['__no_feature'] += 1
 
     except:
         sys.stderr.write(
@@ -301,14 +326,19 @@ def count_reads_single_file(
     if samoutfile is not None:
         samoutfile.close()
 
+    # Get rid of UMI by majority rule
+    cbs = sorted(counts.keys())
+    counts_noumi = {}
+    for cb in cbs:
+        counts_cell = Counter()
+        for ub, udic in counts.pop(cb).items():
+            counts_cell[udic.most_common(1)[0][0]] += 1
+        counts_noumi[cb] = counts_cell
+
     return {
-        'counts': counts,
-        'empty': empty,
-        'ambiguous': ambiguous,
-        'lowqual': lowqual,
-        'notaligned': notaligned,
-        'nonunique': nonunique,
-    }
+        'cell_barcodes': cbs,
+        'counts': counts_noumi,
+        }
 
 
 def count_reads_in_features(
@@ -330,8 +360,9 @@ def count_reads_in_features(
         samout_format,
         output_delimiter,
         output_filename,
-        output_append,
         nprocesses,
+        cb_tag,
+        ub_tag,
         ):
     '''Count reads in features, parallelizing by file'''
 
@@ -396,53 +427,63 @@ def count_reads_in_features(
         sys.stderr.write(
             "Warning: No features of type '%s' found.\n" % feature_type)
 
-    # Prepare arguments for counting function
-        args = (
-            sam_filename,
-            features,
-            feature_attr,
-            order,
-            max_buffer_size,
-            stranded,
-            overlap_mode,
-            multimapped_mode,
-            secondary_alignment_mode,
-            supplementary_alignment_mode,
-            feature_type,
-            id_attribute,
-            additional_attributes,
-            quiet,
-            minaqual,
-            samout_format,
-            samout,
-            nprocesses,
-            )
-
     # Count reads
-    results = count_reads_single_file(*args)
+    results = count_reads_with_barcodes(
+        sam_filename,
+        features,
+        feature_attr,
+        order,
+        max_buffer_size,
+        stranded,
+        overlap_mode,
+        multimapped_mode,
+        secondary_alignment_mode,
+        supplementary_alignment_mode,
+        feature_type,
+        id_attribute,
+        additional_attributes,
+        quiet,
+        minaqual,
+        samout_format,
+        samout,
+        nprocesses,
+        cb_tag,
+        ub_tag,
+        )
+    # Cell barcodes
+    cbs = results['cell_barcodes']
+    counts = results['counts']
 
     # Write output
     other_features = [
-        ('__no_feature', 'empty'),
-        ('__ambiguous', 'ambiguous'),
-        ('__too_low_aQual', 'lowqual'),
-        ('__not_aligned', 'notaligned'),
-        ('__alignment_not_unique', 'nonunique'),
+        '__no_feature',
+        '__ambiguous',
+        '__too_low_aQual',
+        '__not_aligned',
+        '__alignment_not_unique',
         ]
     pad = ['' for attr in additional_attributes]
+    # Header
+    fields = [''] + pad + cbs
+    line = output_delimiter.join(fields)
+    with open(output_filename, 'w') as f:
+        f.write(line)
+        f.write('\n')
+
+    # Features
     for ifn, fn in enumerate(feature_attr):
-        fields = [fn] + attributes[fn] + [str(r[fn]) for r in results]
+        fields = [fn] + attributes[fn] + [str(counts[cb][fn]) for cb in cbs]
         line = output_delimiter.join(fields)
         if output_filename == '':
             print(line)
         else:
-            omode = 'a' if output_append or (ifn > 0) else 'w'
-            with open(output_filename, omode) as f:
+            with open(output_filename, 'a') as f:
                 f.write(line)
                 f.write('\n')
 
-    for title, fn in other_features:
-        fields = [title] + pad + [str(r[fn]) for r in results]
+    # Other features
+    for fn in other_features:
+        fields = [fn] + pad + [str(counts[cb][fn]) for cb in cbs]
         line = output_delimiter.join(fields)
         if output_filename == '':
             print(line)
@@ -461,20 +502,20 @@ def main():
 
     pa = argparse.ArgumentParser(
         usage="%(prog)s [options] alignment_file gff_file",
-        description="This script takes one or more alignment files in SAM/BAM " +
+        description="This script takes one alignment file in SAM/BAM " +
         "format and a feature file in GFF format and calculates for each feature " +
-        "the number of reads mapping to it. See " +
+        "the number of reads mapping to it, accounting for barcodes. See " +
         "http://htseq.readthedocs.io/en/master/count.html for details.",
         epilog="Written by Simon Anders (sanders@fs.tum.de), " +
         "European Molecular Biology Laboratory (EMBL) and Fabio Zanini " +
-        "(fabio.zanini@stanford.edu), Stanford University. (c) 2010-2019. " +
+        "(fabio.zanini@unsw.edu.au), UNSW Sydney. (c) 2010-2020. " +
         "Released under the terms of the GNU General Public License v3. " +
         "Part of the 'HTSeq' framework, version %s." % HTSeq.__version__)
 
     pa.add_argument(
-            "samfilenames", nargs='+', type=str,
-            help="Path to the SAM/BAM files containing the mapped reads. " +
-            "If '-' is selected, read from standard input")
+            "samfilename", type=str,
+            help="Path to the SAM/BAM file containing the barcoded, mapped " +
+            "reads. If '-' is selected, read from standard input")
 
     pa.add_argument(
             "featuresfilename", type=str,
@@ -560,11 +601,10 @@ def main():
             help="Whether to score supplementary alignments (0x800 flag)")
 
     pa.add_argument(
-            "-o", "--samout", type=str, dest="samouts",
-            action='append',
-            default=[],
-            help="Write out all SAM alignment records into " +
-            "SAM/BAM files (one per input file needed), annotating each line " +
+            "-o", "--samout", type=str, dest="samout",
+            default=None,
+            help="Write out all SAM alignment records into a" +
+            "SAM/BAM file, annotating each line " +
             "with its feature assignment (as an optional field with tag 'XF')" +
             ". See the -p option to use BAM instead of SAM.")
 
@@ -586,17 +626,24 @@ def main():
             )
 
     pa.add_argument(
-            '--append-output', action='store_true', dest='output_append',
-            help='Append counts output. This option is useful if you have ' +
-            'already creates a TSV/CSV/similar file with a header for your ' +
-            'samples (with additional columns for the feature name and any ' +
-            'additionl attributes) and want to fill in the rest of the file.'
-            )
-
-    pa.add_argument(
             "-n", '--nprocesses', type=int, dest='nprocesses',
             default=1,
             help="Number of parallel CPU processes to use (default: 1)."
+            )
+
+    pa.add_argument(
+            '--cell-barcode', type=str, dest='cb_tag',
+            default='CB',
+            help='BAM tag used for the cell barcode (default compatible ' +
+            'with 10X Genomics Chromium is CB).',
+            )
+
+    pa.add_argument(
+            '--UMI', type=str, dest='ub_tag',
+            default='UB',
+            help='BAM tag used for the unique molecular identifier, also ' +
+            ' known as molecular barcode (default compatible ' +
+            'with 10X Genomics Chromium is UB).',
             )
 
     pa.add_argument(
@@ -616,7 +663,7 @@ def main():
     warnings.showwarning = my_showwarning
     try:
         count_reads_in_features(
-                args.samfilenames,
+                args.samfilename,
                 args.featuresfilename,
                 args.order,
                 args.max_buffer_size,
@@ -630,12 +677,13 @@ def main():
                 args.additional_attr,
                 args.quiet,
                 args.minaqual,
-                args.samouts,
+                args.samout,
                 args.samout_format,
                 args.output_delimiter,
                 args.output_filename,
-                args.output_append,
                 args.nprocesses,
+                args.cb_tag,
+                args.ub_tag,
                 )
     except:
         sys.stderr.write("  %s\n" % str(sys.exc_info()[1]))
