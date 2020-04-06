@@ -20,7 +20,7 @@ def ChromVector_steps(cv):
         start = cv.iv.start
         prev_val = None
         for i in range(cv.iv.start, cv.iv.end):
-            val = cv.array[ i - cv.offset ]
+            val = cv.array[i - cv.offset]
             if prev_val is None or val != prev_val:
                 if prev_val is not None:
                     yield (HTSeq.GenomicInterval(cv.iv.chrom, start, i, cv.iv.strand), prev_val)
