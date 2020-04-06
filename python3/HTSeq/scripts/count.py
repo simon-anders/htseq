@@ -1,5 +1,6 @@
 import sys
 import argparse
+import operator
 import itertools
 import warnings
 import traceback
@@ -330,6 +331,8 @@ def count_reads_in_features(
         samouts,
         samout_format,
         output_delimiter,
+        output_filename,
+        output_append,
         nprocesses,
         ):
     '''Count reads in features, parallelizing by file'''
@@ -393,7 +396,7 @@ def count_reads_in_features(
             gff.get_line_number_string())
         raise
 
-    feature_attr = [key for key in counts]
+    feature_attr = sorted(counts.keys())
 
     if not quiet:
         sys.stderr.write("%d GFF lines processed.\n" % i)
@@ -403,40 +406,39 @@ def count_reads_in_features(
         sys.stderr.write(
             "Warning: No features of type '%s' found.\n" % feature_type)
 
-    with multiprocessing.Pool(nprocesses) as pool:
-        args = []
-        for isam, (sam_filename, samout_filename) in enumerate(zip(sam_filenames, samouts)):
-            args.append((
-                isam,
-                sam_filename,
-                features,
-                feature_attr,
-                order,
-                max_buffer_size,
-                stranded,
-                overlap_mode,
-                multimapped_mode,
-                secondary_alignment_mode,
-                supplementary_alignment_mode,
-                feature_type,
-                id_attribute,
-                additional_attributes,
-                quiet,
-                minaqual,
-                samout_format,
-                samout_filename,
-                ))
+    # Prepare arguments for counting function
+    args = []
+    for isam, (sam_filename, samout_filename) in enumerate(zip(sam_filenames, samouts)):
+        args.append((
+            isam,
+            sam_filename,
+            features,
+            feature_attr,
+            order,
+            max_buffer_size,
+            stranded,
+            overlap_mode,
+            multimapped_mode,
+            secondary_alignment_mode,
+            supplementary_alignment_mode,
+            feature_type,
+            id_attribute,
+            additional_attributes,
+            quiet,
+            minaqual,
+            samout_format,
+            samout_filename,
+            ))
 
-        results = pool.starmap(count_reads_single_file, args)
-        results = {x['isam']: x for x in results}
+    # Count reads
+    if nprocesses > 1:
+        with multiprocessing.Pool(nprocesses) as pool:
+            results = pool.starmap(count_reads_single_file, args)
+        results.sort(key=operator.itemgetter('isam'))
+    else:
+        results = list(itertools.starmap(count_reads_single_file, args))
 
-    for fn in sorted(counts.keys()):
-        fields = [fn] + attributes[fn]
-        for isam in range(len(sam_filenames)):
-            fields.append(str(results[isam]['counts'][fn]))
-        line = output_delimiter.join(fields)
-        print(line)
-
+    # Write output
     other_features = [
         ('__no_feature', 'empty'),
         ('__ambiguous', 'ambiguous'),
@@ -445,12 +447,30 @@ def count_reads_in_features(
         ('__alignment_not_unique', 'nonunique'),
         ]
     pad = ['' for attr in additional_attributes]
+    for ifn, fn in enumerate(feature_attr):
+        fields = [fn] + attributes[fn]
+        for isam in range(len(sam_filenames)):
+            fields.append(str(results[isam]['counts'][fn]))
+        line = output_delimiter.join(fields)
+        if output_filename == '':
+            print(line)
+        else:
+            omode = 'a' if output_append or (ifn > 0) else 'w'
+            with open(output_filename, omode) as f:
+                f.write(line)
+                f.write('\n')
+
     for title, key in other_features:
         fields = [title] + pad
         for isam in range(len(sam_filenames)):
             fields.append(str(results[isam][key]))
         line = output_delimiter.join(fields)
-        print(line)
+        if output_filename == '':
+            print(line)
+        else:
+            with open(output_filename, 'a') as f:
+                f.write(line)
+                f.write('\n')
 
 
 def my_showwarning(message, category, filename, lineno=None, file=None,
@@ -580,6 +600,19 @@ def main():
             default='\t',
             help="Column delimiter in output (default: TAB)."
             )
+    pa.add_argument(
+            "-c", '--counts_output', type=str, dest='output_filename',
+            default='',
+            help="TSV/CSV filename to output the counts to instead of stdout."
+            )
+
+    pa.add_argument(
+            '--append-output', action='store_true', dest='output_append',
+            help='Append counts output. This option is useful if you have ' +
+            'already creates a TSV/CSV/similar file with a header for your ' +
+            'samples (with additional columns for the feature name and any ' +
+            'additionl attributes) and want to fill in the rest of the file.'
+            )
 
     pa.add_argument(
             "-n", '--nprocesses', type=int, dest='nprocesses',
@@ -621,6 +654,8 @@ def main():
                 args.samouts,
                 args.samout_format,
                 args.output_delimiter,
+                args.output_filename,
+                args.output_append,
                 args.nprocesses,
                 )
     except:
@@ -634,5 +669,4 @@ def main():
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
     main()

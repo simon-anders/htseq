@@ -1,8 +1,16 @@
+import os
 import subprocess as sp
 
 tests = [
     {'call': [
         'htseq-count',
+        'example_data/bamfile_no_qualities.sam',
+        'example_data/bamfile_no_qualities.gtf',
+        ],
+     'expected_fn': 'example_data/bamfile_no_qualities.tsv'},
+    {'call': [
+        'htseq-count',
+        '-c', 'test_output.tsv',
         'example_data/bamfile_no_qualities.sam',
         'example_data/bamfile_no_qualities.gtf',
         ],
@@ -89,6 +97,13 @@ for t in tests:
     print(' '.join(call))
     output = sp.check_output(call).decode()
 
+    if '-c' in call:
+        output_fn = call[call.index('-c') + 1]
+        with open(output_fn, 'r') as f:
+            output = f.read()
+    else:
+        output_fn = None
+
     with open(expected_fn, 'r') as f:
         expected = f.read()
 
@@ -101,3 +116,7 @@ for t in tests:
                 break
 
         raise
+    finally:
+        if output_fn is not None:
+            os.remove(output_fn)
+
