@@ -4,6 +4,7 @@ import itertools
 import warnings
 import traceback
 import os.path
+import multiprocessing
 import pysam
 
 import HTSeq
@@ -329,6 +330,7 @@ def count_reads_in_features(
         samouts,
         samout_format,
         output_delimiter,
+        nprocesses,
         ):
     '''Count reads in features, parallelizing by file'''
 
@@ -401,29 +403,32 @@ def count_reads_in_features(
         sys.stderr.write(
             "Warning: No features of type '%s' found.\n" % feature_type)
 
-    results = {}
-    for isam, (sam_filename, samout_filename) in enumerate(zip(sam_filenames, samouts)):
-        res_singlefile = count_reads_single_file(
-            isam,
-            sam_filename,
-            features,
-            feature_attr,
-            order,
-            max_buffer_size,
-            stranded,
-            overlap_mode,
-            multimapped_mode,
-            secondary_alignment_mode,
-            supplementary_alignment_mode,
-            feature_type,
-            id_attribute,
-            additional_attributes,
-            quiet,
-            minaqual,
-            samout_format,
-            samout_filename,
-            )
-        results[res_singlefile['isam']] = res_singlefile
+    with multiprocessing.Pool(nprocesses) as pool:
+        args = []
+        for isam, (sam_filename, samout_filename) in enumerate(zip(sam_filenames, samouts)):
+            args.append((
+                isam,
+                sam_filename,
+                features,
+                feature_attr,
+                order,
+                max_buffer_size,
+                stranded,
+                overlap_mode,
+                multimapped_mode,
+                secondary_alignment_mode,
+                supplementary_alignment_mode,
+                feature_type,
+                id_attribute,
+                additional_attributes,
+                quiet,
+                minaqual,
+                samout_format,
+                samout_filename,
+                ))
+
+        results = pool.starmap(count_reads_single_file, args)
+        results = {x['isam']: x for x in results}
 
     for fn in sorted(counts.keys()):
         fields = [fn] + attributes[fn]
@@ -577,6 +582,12 @@ def main():
             )
 
     pa.add_argument(
+            "-n", '--nprocesses', type=int, dest='nprocesses',
+            default=1,
+            help="Number of parallel CPU processes to use (default: 1)."
+            )
+
+    pa.add_argument(
             "-q", "--quiet", action="store_true", dest="quiet",
             help="Suppress progress report")  # and warnings" )
 
@@ -610,6 +621,7 @@ def main():
                 args.samouts,
                 args.samout_format,
                 args.output_delimiter,
+                args.nprocesses,
                 )
     except:
         sys.stderr.write("  %s\n" % str(sys.exc_info()[1]))
