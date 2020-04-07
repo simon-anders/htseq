@@ -7,6 +7,7 @@ import traceback
 import os.path
 import multiprocessing
 import pysam
+import random
 
 import HTSeq
 
@@ -277,6 +278,12 @@ def count_reads_single_file(
                     elif multimapped_mode == 'all':
                         for fsi in list(fs):
                             counts[fsi] += 1
+                    elif multimapped_mode == 'fraction':
+                        for fsi in list(fs):
+                            counts[fsi] += 1 / len(fs)
+                    elif multimapped_mode == 'random':
+                        fsi = random.choice(fs)
+                        counts[fsi] += 1
                     else:
                         sys.exit("Illegal multimap mode.")
 
