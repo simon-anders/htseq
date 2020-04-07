@@ -334,7 +334,11 @@ def count_reads_with_barcodes(
     for cb in cbs:
         counts_cell = Counter()
         for ub, udic in counts.pop(cb).items():
-            counts_cell[udic.most_common(1)[0][0]] += 1
+            # In case of a tie, do not increment either feature
+            top = udic.most_common(2)
+            if (len(top) == 2) and (top[0][1] == top[1][1]):
+                continue
+            counts_cell[top[0][0]] += 1
         counts_noumi[cb] = counts_cell
 
     return {
