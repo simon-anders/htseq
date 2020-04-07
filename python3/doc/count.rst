@@ -57,7 +57,7 @@ the ``--nonunique`` option:
   example, if the read overlaps with 3 features, it will be counted 1/3 to each of them.
 
 * ``--nonunique random``: the read (or read pair) is counted as ``ambiguous``
-  and is also counted uniformly at random to ``one of` the features to which it was 
+  and is also counted uniformly at random to ``one of`` the features to which it was 
   assigned.
 
 Notice that when using ``--nonunique all`` the sum of all counts will not
