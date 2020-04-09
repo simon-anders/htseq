@@ -45,7 +45,6 @@ def count_reads_with_barcodes(
         minaqual,
         samout_format,
         samout_filename,
-        nprocesses,
         cb_tag,
         ub_tag,
         ):
@@ -365,7 +364,6 @@ def count_reads_in_features(
         samout_format,
         output_delimiter,
         output_filename,
-        nprocesses,
         cb_tag,
         ub_tag,
         ):
@@ -451,7 +449,6 @@ def count_reads_in_features(
         minaqual,
         samout_format,
         samout,
-        nprocesses,
         cb_tag,
         ub_tag,
         )
@@ -634,12 +631,6 @@ def main():
             )
 
     pa.add_argument(
-            "-n", '--nprocesses', type=int, dest='nprocesses',
-            default=1,
-            help="Number of parallel CPU processes to use (default: 1)."
-            )
-
-    pa.add_argument(
             '--cell-barcode', type=str, dest='cb_tag',
             default='CB',
             help='BAM tag used for the cell barcode (default compatible ' +
@@ -689,7 +680,6 @@ def main():
                 args.samout_format,
                 args.output_delimiter,
                 args.output_filename,
-                args.nprocesses,
                 args.cb_tag,
                 args.ub_tag,
                 )

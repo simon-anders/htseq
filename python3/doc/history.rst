@@ -10,6 +10,9 @@ Version 0.11.5
 Numerous bugfixes, doc improvements, and a few new features:
 
 - Negative indices for ``StepVector`` (thanks to shouldsee for the original PR).
+- ``htseq-count-barcodes`` counts features in barcoded SAM/BAM files, e.g. 10X Genomics
+  single cell outputs. It supports cell barcodes, which result in different columns of
+  the output count table, and unique molecular identifiers.
 - ``htseq-count`` has new option ``-n`` for multicore parallel processing
 - ``htseq-count`` has new option ``-d`` for separating output columns by arbitrary character
   (defalt TAB, ``,`` is also common)
