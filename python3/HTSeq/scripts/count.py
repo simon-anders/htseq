@@ -280,7 +280,6 @@ def count_reads_single_file(
                     else:
                         sys.exit("Illegal multimap mode.")
 
-
             except UnknownChrom:
                 write_to_samout(
                         r, "__no_feature", samoutfile,
@@ -334,8 +333,27 @@ def count_reads_in_features(
         output_filename,
         output_append,
         nprocesses,
+        feature_query,
         ):
     '''Count reads in features, parallelizing by file'''
+
+    def parse_feature_query(feature_query):
+        if '"' not in feature_query:
+            raise ValueError('Invalid feature query')
+        if '==' not in feature_query:
+            raise ValueError('Invalid feature query')
+
+        idx_quote1 = feature_query.find('"')
+        idx_quote2 = feature_query.rfind('"')
+        attr_name = feature_query[idx_quote1+1: idx_quote2]
+
+        idx_equal = feature_query[:idx_quote1].find('==')
+        attr_cat = feature_query[:idx_equal].strip()
+
+        return {
+            'attr_cat': attr_cat,
+            'attr_name': attr_name,
+            }
 
     if samouts != []:
         if len(samouts) != len(sam_filenames):
@@ -362,9 +380,10 @@ def count_reads_in_features(
             with pysam.AlignmentFile(sam_filename, 'r') as sf:
                 pass
 
+    if feature_query is not None:
+        feature_qdic = parse_feature_query(feature_query)
     features = HTSeq.GenomicArrayOfSets("auto", stranded != "no")
     gff = HTSeq.GFF_Reader(gff_filename)
-    counts = {}
     attributes = {}
     i = 0
     try:
@@ -381,9 +400,18 @@ def count_reads_in_features(
                             "Feature %s at %s does not have strand information but you are "
                             "running htseq-count in stranded mode. Use '--stranded=no'." %
                             (f.name, f.iv))
+
+                if feature_query is not None:
+                    # Skip the features that don't even have the right attr
+                    if feature_qdic['attr_cat'] not in f.attr:
+                        continue
+                    # Skip the ones with an attribute with a different name
+                    # from the query (e.g. other genes)
+                    if f.attr[feature_qdic['attr_cat']] != feature_qdic['attr_name']:
+                        continue
+
                 features[f.iv] += feature_id
-                counts[f.attr[id_attribute]] = 0
-                attributes[f.attr[id_attribute]] = [
+                attributes[feature_id] = [
                         f.attr[attr] if attr in f.attr else ''
                         for attr in additional_attributes]
             i += 1
@@ -396,13 +424,13 @@ def count_reads_in_features(
             gff.get_line_number_string())
         raise
 
-    feature_attr = sorted(counts.keys())
+    feature_attr = sorted(attributes.keys())
 
     if not quiet:
         sys.stderr.write("%d GFF lines processed.\n" % i)
         sys.stderr.flush()
 
-    if len(counts) == 0:
+    if len(feature_attr) == 0:
         sys.stderr.write(
             "Warning: No features of type '%s' found.\n" % feature_type)
 
@@ -543,7 +571,11 @@ def main():
             "-i", "--idattr", type=str, dest="idattr",
             default="gene_id",
             help="GTF attribute to be used as feature ID (default, " +
-            "suitable for Ensembl GTF files: gene_id)")
+            "suitable for Ensembl GTF files: gene_id). All feature of the " +
+            "right type (see -t option) within the same GTF attribute will " +
+            "be added together. The typical way of using this option is to " +
+            "count all exonic reads from each gene and add the exons " +
+            "but other uses are possible as well.")
 
     pa.add_argument(
             "--additional-attr", type=str,
@@ -551,7 +583,9 @@ def main():
             default=[],
             help="Additional feature attributes (default: none, " +
             "suitable for Ensembl GTF files: gene_name). Use multiple times " +
-            "for each different attribute")
+            "for more than one additional attribute. These attributes are " +
+            "only used as annotations in the output, while the determination " +
+            "of how the counts are added together is done based on option -i.")
 
     pa.add_argument(
             "-m", "--mode", dest="mode",
@@ -599,7 +633,7 @@ def main():
     pa.add_argument(
             "-c", '--counts_output', type=str, dest='output_filename',
             default='',
-            help="TSV/CSV filename to output the counts to instead of stdout."
+            help="Filename to output the counts to instead of stdout."
             )
 
     pa.add_argument(
@@ -614,6 +648,18 @@ def main():
             "-n", '--nprocesses', type=int, dest='nprocesses',
             default=1,
             help="Number of parallel CPU processes to use (default: 1)."
+            )
+
+    pa.add_argument(
+            '--feature-query', type=str, dest='feature_query',
+            default=None,
+            help='Restrict to features descibed in this expression. Currently ' +
+            'supports a single kind of expression: attribute == "one attr" to ' +
+            'restrict the GFF to a single gene or transcript, e.g. ' +
+            '--feature-query \'gene_name == "ACTB"\' - notice the single ' +
+            'quotes around the argument of this option and the double ' +
+            'quotes around the gene name. Broader queries might become ' +
+            'available in the future.',
             )
 
     pa.add_argument(
@@ -653,6 +699,7 @@ def main():
                 args.output_filename,
                 args.output_append,
                 args.nprocesses,
+                args.feature_query,
                 )
     except:
         sys.stderr.write("  %s\n" % str(sys.exc_info()[1]))
