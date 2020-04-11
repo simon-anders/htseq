@@ -439,9 +439,10 @@ def main():
 
     pa.add_argument(
             "--nonunique", dest="nonunique", type=str,
-            choices=("none", "all"), default="none",
-            help="Whether to score reads that are not uniquely aligned " +
-            "or ambiguously assigned to features")
+            choices=("none", "all", "fraction", "random"), default="none",
+            help="Whether and how to score reads that are not uniquely aligned " +
+            "or ambiguously assigned to features " +
+            "(choices: none, all, fraction, random; default: none)")
 
     pa.add_argument(
             "--secondary-alignments", dest="secondary_alignments", type=str,
