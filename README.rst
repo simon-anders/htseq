@@ -21,24 +21,21 @@ To run the ``htseq-qa`` script, you will also need:
 
 -  ``matplotlib >=1.4``
 
-To **build** the package from source, you will **also** need:
+Both **Linux** and **OSX** are supported and binaries are provided on for many
+Linux and OSX versions. A source package which should not require ``Cython``
+nor ``SWIG`` is provided for all other cases. To **build** the package completely
+from source, you will **also** need:
 
 -  ``Cython >=0.29.5``
 -  ``SWIG >=3.0.8``
 
-The latter packages are not required if you have already built ``HTSeq``
-and are transferring the binaries onto another machine with a compatible
-environment (architechture, shared libraries). If you are not sure,
-chances are you need them.
-
-Both **Linux** and **OSX** are supported and binaries are provided for virtually
-all Linux and OSX versions. A source package which should not require ``Cython``
-nor ``SWIG`` is provided for all other cases.
+which are required for performance reasons.
 
 **Windows is not officially supported** as we don't have access to a Continuous
-Integration Windows machine that supports ``pysam``. However, if you have built
-``HTSeq`` for Windows, please open an issue and we'll try and include it in the
-release.
+Integration Windows machine that supports ``pysam``. Please do **not** open an
+issue asking to support Windows installers: we do not know how to do that and 
+do not have the bandwidth to learn. However, if you are interested in giving it
+a try yourself, we are happy to provide as much support as we can.
 
 Installation
 ~~~~~~~~~~~~
@@ -130,5 +127,5 @@ http://htseq.readthedocs.io
 Authors
 ~~~~~~~~~~~~~
 
+Since 2016: Fabio Zanini @ http://fabilab.org.
 2020-2015: Simon Anders, Wolfgang Huber
-2016 onwards: Fabio Zanini @ http://fabilab.org.
