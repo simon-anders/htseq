@@ -280,7 +280,7 @@ def count_reads_single_file(
                             counts[fsi] += 1
                     elif multimapped_mode == 'fraction':
                         for fsi in list(fs):
-                            counts[fsi] += 1 / len(fs)
+                            counts[fsi] += 1.0 / len(fs)
                     elif multimapped_mode == 'random':
                         fsi = random.choice(fs)
                         counts[fsi] += 1
