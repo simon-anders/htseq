@@ -4,6 +4,7 @@ import itertools
 import warnings
 import traceback
 import os.path
+import random
 
 import HTSeq
 
@@ -298,6 +299,12 @@ def count_reads_in_features(sam_filenames, gff_filename,
                         elif multimapped_mode == 'all':
                             for fsi in list(fs):
                                 counts[fsi] += 1
+                        elif multimapped_mode == 'fraction':
+                            for fsi in list(fs):
+                                counts[fsi] += 1.0 / len(fs)
+                        elif multimapped_mode == 'random':
+                            fsi = random.choice(fs)
+                            counts[fsi] += 1
                         else:
                             sys.exit("Illegal multimap mode.")
 
