@@ -1,5 +1,7 @@
 |Build Status| |Documentation Status|
 
+**2020-04-11: The new official repository is:** https://github.com/htseq/htseq.
+
 HTSeq
 =====
 
