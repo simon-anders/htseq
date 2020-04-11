@@ -7,6 +7,7 @@ import traceback
 import os.path
 import multiprocessing
 import pysam
+import random
 
 import HTSeq
 
@@ -277,6 +278,12 @@ def count_reads_single_file(
                     elif multimapped_mode == 'all':
                         for fsi in list(fs):
                             counts[fsi] += 1
+                    elif multimapped_mode == 'fraction':
+                        for fsi in list(fs):
+                            counts[fsi] += 1.0 / len(fs)
+                    elif multimapped_mode == 'random':
+                        fsi = random.choice(fs)
+                        counts[fsi] += 1
                     else:
                         sys.exit("Illegal multimap mode.")
 
@@ -596,9 +603,10 @@ def main():
 
     pa.add_argument(
             "--nonunique", dest="nonunique", type=str,
-            choices=("none", "all"), default="none",
-            help="Whether to score reads that are not uniquely aligned " +
-            "or ambiguously assigned to features")
+            choices=("none", "all", "fraction", "random"), default="none",
+            help="Whether and how to score reads that are not uniquely aligned " +
+            "or ambiguously assigned to features " +
+            "(choices: none, all, fraction, random; default: none)")
 
     pa.add_argument(
             "--secondary-alignments", dest="secondary_alignments", type=str,

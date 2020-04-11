@@ -52,9 +52,19 @@ the ``--nonunique`` option:
   read (or read pair) aligns to more than one location in the reference, it is
   scored as ``alignment_not_unique`` and also separately for each location.
 
+* ``--nonunique fraction``: the read (or read pair) is counted as ``ambiguous``
+  and is also counted fractionally in all features to which it was assigned. For 
+  example, if the read overlaps with 3 features, it will be counted 1/3 to each of them.
+
+* ``--nonunique random``: the read (or read pair) is counted as ``ambiguous``
+  and is also counted uniformly at random to ``one of`` the features to which it was 
+  assigned.
+
 Notice that when using ``--nonunique all`` the sum of all counts will not
 be equal to the number of reads (or read pairs), because those with multiple
-alignments or overlaps get scored multiple times.
+alignments or overlaps get scored multiple times. By contrast, with 
+``--nonunique fraction`` or ``--nonunique random``, the sum of all counts 
+will be equal to the number of reads (or read pairs).
 
 The following figure illustrates the effect of these three modes and the
 ``--nonunique`` option:
