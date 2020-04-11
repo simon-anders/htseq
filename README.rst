@@ -4,7 +4,9 @@ HTSeq
 =====
 
 HTSeq is a Python library to facilitate processing and analysis of data
-from high-throughput sequencing (HTS) experiments.
+from high-throughput sequencing (HTS) experiments. A popular use of ``HTSeq``
+is ``htseq-count``, a tool to quantify gene expression in RNA-Seq and similar
+experiments.
 
 Requirements
 ~~~~~~~~~~~~
@@ -30,9 +32,8 @@ environment (architechture, shared libraries). If you are not sure,
 chances are you need them.
 
 Both **Linux** and **OSX** are supported and binaries are provided for virtually
-all Linux versions and for some OSX versions (the latter only for Python 2.7
-and 3.6). A source package which should not require ``Cython`` nor ``SWIG``
-is provided for all other cases.
+all Linux and OSX versions. A source package which should not require ``Cython``
+nor ``SWIG`` is provided for all other cases.
 
 **Windows is not officially supported** as we don't have access to a Continuous
 Integration Windows machine that supports ``pysam``. However, if you have built
@@ -129,4 +130,5 @@ http://htseq.readthedocs.io
 Authors
 ~~~~~~~~~~~~~
 
-Simon Anders and Wolfgang Huber are the original authors. Since 2016, ``HTSeq`` is maintained by Fabio Zanini (http://fabilab.org).
+2020-2015: Simon Anders, Wolfgang Huber
+2016 onwards: Fabio Zanini @ http://fabilab.org.

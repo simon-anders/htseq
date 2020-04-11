@@ -40,7 +40,13 @@ HTSeq is currently developed by `Fabio Zanini`_ at University of New South Wales
 Citation
 ========
 
-HTSeq is described in the following publication:
+HTSeq is described in the following publications:
+
+  | Fabio Zanini et al.
+  | * HTSeq 2.0 -- Efficient manipulation of high-throughput sequencing data with long genomes
+  | in preparation (2020)
+
+and:
 
   | Simon Anders, Paul Theodor Pyl, Wolfgang Huber
   | *HTSeq --- A Python framework to work with high-throughput sequencing data*
