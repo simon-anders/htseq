@@ -19,6 +19,10 @@ Numerous bugfixes, doc improvements, and a few new features:
 - ``htseq-count`` has new option ``-c`` for output into a file instead of stdout
 - ``htseq-count`` has new option ``--append-output`` for output into a file by appending to
   any existing test (e.g. a header with the feature attribute names and sample names)
+- ``htseq-count`` has two new values for option ``--nonunique``, namely ``fraction``, which
+  will count an N-multimapper as 1/N for each feature, and ``random``, which will assign
+  the alignment to a random one of its N-multimapped features. This feature was added by
+  ewallace (thank you!).
 
 Testing improvements:
 
