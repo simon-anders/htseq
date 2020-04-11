@@ -670,7 +670,6 @@ def pair_SAM_alignments(
         yield; the other 3 alignments of read 2 are ignored.
         '''
 
-
         while len(almnt_list) > 0:
             a1 = almnt_list.pop(0)
             # Find its mate
@@ -709,9 +708,11 @@ def pair_SAM_alignments(
         if almnt.pe_which == "unknown":
             raise ValueError(
                 "Paired-end read found with 'unknown' 'pe_which' status.")
+
         # FIXME: almnt.not_primary_alignment currently means secondary
         if primary_only and (almnt.not_primary_alignment or almnt.supplementary):
             continue
+
         if almnt.read.name == current_name:
             almnt_list.append(almnt)
         else:

@@ -179,7 +179,7 @@ object you typically never call the constructor yourself.
       
 .. class:: SAM_Alignment( line )
 
-   ``BowtieAlignment`` objects contain all the attributes from :class:`Alignment` and 
+   ``SAM_Alignment`` objects contain all the attributes from :class:`Alignment` and 
    :class:`AlignmentWithSequenceReversal`, and, in addition, these:
    
    .. attribute:: SAM_Alignment.aQual

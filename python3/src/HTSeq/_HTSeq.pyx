@@ -1236,9 +1236,11 @@ cdef _parse_SAM_optional_field_value(str field):
     else:
         raise ValueError, "SAM optional field with illegal type letter '%s'" % field[2]
 
+
 cigar_operation_codes = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X']
 cigar_operation_code_dict = dict(
     [(x, i) for i, x in enumerate(cigar_operation_codes)])
+
 
 cdef class SAM_Alignment(AlignmentWithSequenceReversal):
 
